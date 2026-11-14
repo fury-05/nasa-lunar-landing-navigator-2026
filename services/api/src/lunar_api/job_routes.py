@@ -103,7 +103,7 @@ def start_job(
             lon,
             alt_m,
             client,
-            settings.data_dir.parent / "dem",
+            settings.dem_dir,
             settings.data_dir,
             CUSTOM_START,
             CUSTOM_DAYS,
@@ -117,8 +117,7 @@ def start_job(
 
 
 def get_client() -> HorizonsClient:
-    cache = Settings.from_env().data_dir.parent / "cache" / "horizons"
-    return HorizonsClient(cache_dir=cache)
+    return HorizonsClient(cache_dir=Settings.from_env().cache_dir / "horizons")
 
 
 def get_settings() -> Settings:

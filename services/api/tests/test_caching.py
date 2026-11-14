@@ -186,3 +186,22 @@ def test_settings_reads_limits_from_the_environment(monkeypatch: pytest.MonkeyPa
     monkeypatch.setenv("HEAVY_BURST", "3")
     s = Settings.from_env()
     assert (s.rate_per_s, s.rate_burst, s.heavy_burst) == (2.0, 10, 3)
+
+
+def test_data_directories_follow_the_vm_layout_and_can_be_overridden(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: object
+) -> None:
+    from pathlib import Path
+
+    from lunar_api.settings import Settings
+
+    for k in ("LUNAR_PRECOMPUTE_DIR", "LUNAR_DEM_DIR", "LUNAR_CACHE_DIR"):
+        monkeypatch.delenv(k, raising=False)
+    monkeypatch.setenv("LUNAR_DATA_DIR", "/var/lib/lunar/data")
+    monkeypatch.setenv("LUNAR_CACHE_DIR", "/var/lib/lunar/cache")
+    s = Settings.from_env()
+    assert s.data_dir == Path("/var/lib/lunar/data/precompute")
+    assert s.dem_dir == Path("/var/lib/lunar/data/dem")
+    assert s.cache_dir == Path("/var/lib/lunar/cache")  # the VM keeps the cache outside data/
+    monkeypatch.setenv("LUNAR_DEM_DIR", "/elsewhere/dem")
+    assert Settings.from_env().dem_dir == Path("/elsewhere/dem")

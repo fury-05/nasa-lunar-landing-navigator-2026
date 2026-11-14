@@ -34,7 +34,7 @@ async def custom_site(
     """Run one custom site job. State is written to Redis by RedisJobStore."""
     settings = Settings.from_env()
     store = RedisJobStore(ctx["sync_redis"])
-    client = HorizonsClient(cache_dir=settings.data_dir.parent / "cache" / "horizons")
+    client = HorizonsClient(cache_dir=settings.cache_dir / "horizons")
     run_custom_site(
         store,
         job_id,
@@ -42,7 +42,7 @@ async def custom_site(
         lon,
         alt_m,
         client,
-        settings.data_dir.parent / "dem",
+        settings.dem_dir,
         settings.data_dir,
         datetime.fromisoformat(start_iso).astimezone(UTC),
         days,
