@@ -18,3 +18,5 @@ data/dem/
 *.tsbuildinfo
 .playwright-mcp/
 .claude/shot-*.png
+test-results/
+playwright-report/
