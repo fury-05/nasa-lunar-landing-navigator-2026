@@ -13,6 +13,7 @@ from lunar_api.errors import install_error_handlers
 from lunar_api.job_routes import router as job_router
 from lunar_api.middleware import RequestIdMiddleware, configure_logging
 from lunar_api.routes import router
+from lunar_api.schemas import HealthOut, ReadyOut, VersionOut
 from lunar_api.settings import Settings
 
 DISCLAIMER = "Planning tool, not for flight operations."
@@ -31,12 +32,12 @@ app.include_router(router)
 app.include_router(job_router)
 
 
-@app.get("/api/v1/health")
+@app.get("/api/v1/health", response_model=HealthOut)
 def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.get("/api/v1/ready")
+@app.get("/api/v1/ready", response_model=ReadyOut, responses={503: {"model": ReadyOut}})
 def ready(response: Response) -> dict[str, Any]:
     cfg = Settings.from_env()
     db_ok, db_detail = check_db(cfg.database_url)
@@ -53,6 +54,6 @@ def ready(response: Response) -> dict[str, Any]:
     }
 
 
-@app.get("/api/v1/version")
+@app.get("/api/v1/version", response_model=VersionOut)
 def version() -> dict[str, str]:
     return {"api": API_VERSION, "engine": ENGINE_VERSION, "disclaimer": DISCLAIMER}

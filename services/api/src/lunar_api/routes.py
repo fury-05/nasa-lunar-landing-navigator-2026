@@ -22,10 +22,28 @@ from lunar_engine.sensitivity import PLACEHOLDER_CRITERIA, Assessment, Criteria
 from pydantic import BaseModel, Field, field_validator
 
 from lunar_api.errors import ApiError
+from lunar_api.schemas import (
+    AssessOut,
+    AttributionOut,
+    CompareOut,
+    Problem,
+    QuickmapOut,
+    RegistryRow,
+    SiteDetail,
+    SiteList,
+    SkylineOut,
+    SlipOut,
+    StateOut,
+    TimelineOut,
+)
 from lunar_api.settings import Settings
 from lunar_api.store import SiteStore
 
 router = APIRouter(prefix="/api/v1")
+ERRORS: dict[int | str, dict[str, Any]] = {
+    404: {"model": Problem, "description": "Not found"},
+    422: {"model": Problem, "description": "Invalid input"},
+}
 
 
 def get_settings() -> Settings:
@@ -218,7 +236,7 @@ def criteria_of(c: CriteriaIn | None) -> Criteria:
 # ---- sites ------------------------------------------------------------------------------------
 
 
-@router.get("/sites")
+@router.get("/sites", response_model=SiteList, responses=ERRORS)
 def list_sites(store: Annotated[SiteStore, Depends(get_store)]) -> dict[str, Any]:
     items = []
     for sid in store.ids():
@@ -243,13 +261,13 @@ def list_sites(store: Annotated[SiteStore, Depends(get_store)]) -> dict[str, Any
     )
 
 
-@router.get("/sites/{site_id}")
+@router.get("/sites/{site_id}", response_model=SiteDetail, responses=ERRORS)
 def get_site(site_id: str, store: Annotated[SiteStore, Depends(get_store)]) -> dict[str, Any]:
     _, meta = site_or_404(store, site_id)
     return clean({**meta, "quickmap": quickmap_link(meta["lat_deg"], meta["lon_east_deg"])})
 
 
-@router.get("/sites/{site_id}/skyline")
+@router.get("/sites/{site_id}/skyline", response_model=SkylineOut, responses=ERRORS)
 def get_skyline(
     site_id: str,
     store: Annotated[SiteStore, Depends(get_store)],
@@ -278,7 +296,7 @@ def get_skyline(
     )
 
 
-@router.get("/sites/{site_id}/assess")
+@router.get("/sites/{site_id}/assess", response_model=AssessOut, responses=ERRORS)
 def get_assess(
     request: Request,
     site_id: str,
@@ -301,7 +319,7 @@ def get_assess(
     )
 
 
-@router.get("/sites/{site_id}/timeline")
+@router.get("/sites/{site_id}/timeline", response_model=TimelineOut, responses=ERRORS)
 def get_timeline(
     site_id: str,
     start: str,
@@ -360,7 +378,7 @@ def get_timeline(
     )
 
 
-@router.get("/sites/{site_id}/state")
+@router.get("/sites/{site_id}/state", response_model=StateOut, responses=ERRORS)
 def get_state(
     site_id: str, t: str, store: Annotated[SiteStore, Depends(get_store)]
 ) -> dict[str, Any]:
@@ -432,7 +450,7 @@ class CompareIn(BaseModel):
         return v
 
 
-@router.post("/compare")
+@router.post("/compare", response_model=CompareOut, responses=ERRORS)
 def post_compare(
     body: CompareIn,
     store: Annotated[SiteStore, Depends(get_store)],
@@ -503,7 +521,7 @@ class SlipIn(BaseModel):
     criteria: CriteriaIn | None = None
 
 
-@router.post("/slip-matrix")
+@router.post("/slip-matrix", response_model=SlipOut, responses=ERRORS)
 def post_slip(
     body: SlipIn,
     store: Annotated[SiteStore, Depends(get_store)],
@@ -557,7 +575,7 @@ def post_slip(
     )
 
 
-@router.get("/links/quickmap")
+@router.get("/links/quickmap", response_model=QuickmapOut, responses=ERRORS)
 def get_quickmap(
     store: Annotated[SiteStore, Depends(get_store)],
     site: str,
@@ -588,11 +606,15 @@ def load_attribution() -> dict[str, Any]:
         if p.exists():
             doc: dict[str, Any] = json.loads(p.read_text(encoding="utf8"))
             return doc
-    raise ApiError(503, "Attribution unavailable", "The credits file is missing on this server.",
-                   "attribution-missing")
+    raise ApiError(
+        503,
+        "Attribution unavailable",
+        "The credits file is missing on this server.",
+        "attribution-missing",
+    )
 
 
-@router.get("/attribution")
+@router.get("/attribution", response_model=AttributionOut, responses=ERRORS)
 def get_attribution() -> dict[str, Any]:
     doc = load_attribution()
     credits = [
@@ -617,7 +639,7 @@ def get_attribution() -> dict[str, Any]:
     }
 
 
-@router.get("/attribution/{source_id}")
+@router.get("/attribution/{source_id}", response_model=RegistryRow, responses=ERRORS)
 def get_attribution_one(source_id: str) -> dict[str, Any]:
     for s in load_attribution()["sources"]:
         if s["id"] == source_id:

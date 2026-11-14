@@ -26,9 +26,14 @@ from lunar_api.jobs import (
     run_custom_site,
     validate_point,
 )
+from lunar_api.schemas import JobAccepted, JobOut, Problem
 from lunar_api.settings import Settings
 
 router = APIRouter(prefix="/api/v1")
+ERRORS: dict[int | str, dict[str, Any]] = {
+    404: {"model": Problem, "description": "Not found"},
+    422: {"model": Problem, "description": "Invalid input"},
+}
 
 _STORE: JobStore = MemoryJobStore()
 _RUNNING: dict[str, threading.Thread] = {}
@@ -126,7 +131,11 @@ class CustomSiteIn(BaseModel):
     alt_m: float = Field(default=0.0, description="metres above the 1737400 m reference sphere")
 
 
-@router.post("/sites/custom", status_code=202)
+@router.post(
+    "/sites/custom",
+    status_code=202,
+    responses={200: {"model": JobAccepted}, 202: {"model": JobAccepted}, 422: {"model": Problem}},
+)
 def create_custom(
     body: CustomSiteIn,
     request: Request,
@@ -182,7 +191,7 @@ def _accepted(s: JobState) -> dict[str, Any]:
     }
 
 
-@router.get("/jobs/{job_id}")
+@router.get("/jobs/{job_id}", response_model=JobOut, responses=ERRORS)
 def get_job(job_id: str, store: Annotated[JobStore, Depends(job_store)]) -> dict[str, Any]:
     s = store.get(job_id)
     if s is None:
@@ -227,7 +236,22 @@ async def _events(job_id: str, store: JobStore) -> AsyncIterator[str]:
             yield ": keepalive\n\n"
 
 
-@router.get("/jobs/{job_id}/events")
+@router.get(
+    "/jobs/{job_id}/events",
+    response_class=StreamingResponse,
+    responses={
+        200: {
+            "description": (
+                "Server sent events. `event: progress` carries JSON {status, progress, message, "
+                "reason} and is sent only when it changes. `event: end` carries {status} and "
+                "closes the stream. `event: timeout` closes it after 150 s. Lines starting with "
+                "a colon are keepalive comments."
+            ),
+            "content": {"text/event-stream": {"schema": {"type": "string"}}},
+        },
+        404: {"model": Problem},
+    },
+)
 async def job_events(
     job_id: str, store: Annotated[JobStore, Depends(job_store)]
 ) -> StreamingResponse:
