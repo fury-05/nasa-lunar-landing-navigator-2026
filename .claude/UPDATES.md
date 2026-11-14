@@ -19,3 +19,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-14T19:24:44Z | irfan | P2-03 + issues P2..P7 | skyline ray caster (380 ms for 16 km on a real tile), 54 issues created for phases 2 to 7 and assigned to owners | feat/engine-skyline
 2026-11-14T19:30:25Z | irfan | P2-04 | disc visibility integrator with analytic tests | feat/engine-visibility
 2026-11-14T19:35:10Z | irfan | P2-05 | interpolation, event detection, intervals, time remaining; matches Horizons RTS within 2 min | feat/engine-events
+2026-11-14T19:42:33Z | irfan | P2-06 | site metrics (sun, earth, power index, outages), event detection bug fixed | feat/engine-metrics

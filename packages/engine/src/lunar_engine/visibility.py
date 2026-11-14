@@ -112,3 +112,38 @@ def disc_visibility_series(
             for a, e, r in zip(az, el, rho, strict=True)
         ]
     )
+
+
+def disc_visibility_array(
+    skyline: Skyline,
+    azimuth_deg: npt.ArrayLike,
+    elevation_deg: npt.ArrayLike,
+    angular_radius_deg: npt.ArrayLike,
+    slices: int = 65,
+    skyline_offset_deg: float = 0.0,
+    chunk: int = 20_000,
+) -> npt.NDArray[np.float64]:
+    """Vectorised `disc_visibility` for many times at once (same maths, same strips)."""
+    if slices < MIN_SLICES or slices % 2 == 0:
+        raise ValueError(f"slices must be odd and at least {MIN_SLICES}")
+    az = np.atleast_1d(np.asarray(azimuth_deg, dtype=float))
+    el = np.atleast_1d(np.asarray(elevation_deg, dtype=float))
+    rho = np.broadcast_to(np.atleast_1d(np.asarray(angular_radius_deg, dtype=float)), az.shape)
+    if az.shape != el.shape:
+        raise ValueError("azimuth and elevation must have the same length")
+    dt = math.pi / slices
+    t = -math.pi / 2 + (np.arange(slices) + 0.5) * dt
+    sin_t, cos_t = np.sin(t)[None, :], np.cos(t)[None, :]
+    out = np.empty(az.shape, dtype=float)
+    for a in range(0, az.size, chunk):
+        b = min(a + chunk, az.size)
+        r = rho[a:b, None]
+        e = el[a:b, None]
+        x = r * sin_t
+        s = r * cos_t
+        cos_el = np.maximum(np.cos(np.radians(e)), 1e-6)
+        h = skyline.at_array(az[a:b, None] + x / cos_el) + skyline_offset_deg
+        vis = np.clip((e + s) - np.maximum(h, e - s), 0.0, 2 * s)
+        total = (vis * (s * dt)).sum(axis=1)
+        out[a:b] = np.clip(total / (math.pi * rho[a:b] ** 2), 0.0, 1.0)
+    return out

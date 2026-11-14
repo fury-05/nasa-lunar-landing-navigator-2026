@@ -84,6 +84,23 @@ class HermiteSeries:
     def at(self, t: datetime) -> float:
         return self.at_seconds((t - self.t0).total_seconds())
 
+    def at_array(self, s: npt.ArrayLike) -> F64:
+        """Vectorised interpolation at times given in seconds after the first sample."""
+        arr = np.asarray(s, dtype=float)
+        if arr.size and (arr.min() < self.x[0] - 1e-9 or arr.max() > self.x[-1] + 1e-9):
+            raise ValueError("time outside the series")
+        i = np.clip(np.searchsorted(self.x, arr, side="right") - 1, 0, len(self.x) - 2)
+        h = self.x[i + 1] - self.x[i]
+        u = (arr - self.x[i]) / h
+        h00 = 2 * u**3 - 3 * u**2 + 1
+        h10 = u**3 - 2 * u**2 + u
+        h01 = -2 * u**3 + 3 * u**2
+        h11 = u**3 - u**2
+        out: F64 = (
+            h00 * self.y[i] + h10 * h * self.m[i] + h01 * self.y[i + 1] + h11 * h * self.m[i + 1]
+        )
+        return out
+
 
 def find_events(
     series: HermiteSeries,
@@ -101,32 +118,34 @@ def find_events(
     lo_s, hi_s = float(series.x[0]), float(series.x[-1])
     n = max(int(np.ceil((hi_s - lo_s) / scan_step_s)), 1)
     grid = np.linspace(lo_s, hi_s, n + 1)
-    vals = np.array([series.at_seconds(float(s)) - level for s in grid])
+    vals = series.at_array(grid) - level
+    # State is "at or above the level". A change of state between two scan points brackets exactly
+    # one crossing, including the case where a scan point lands exactly on the level.
+    up = vals >= 0.0
     for i in range(n):
-        a, b = vals[i], vals[i + 1]
-        if a == 0.0 and i > 0:
-            continue  # already reported as the end of the previous bracket
-        if a < 0.0 <= b or a >= 0.0 > b:
-            if a == 0.0 and b >= 0.0:
-                continue
-            left, right = float(grid[i]), float(grid[i + 1])
-            f_left = a
-            while right - left > tolerance_s:
-                mid = 0.5 * (left + right)
-                f_mid = series.at_seconds(mid) - level
-                if (f_mid < 0.0) == (f_left < 0.0):
-                    left, f_left = mid, f_mid
-                else:
-                    right = mid
-            t = series.t0 + timedelta(seconds=0.5 * (left + right))
-            out.append(Event(t, "rise" if b > a else "set", level))
+        if up[i] == up[i + 1]:
+            continue
+        left, right = float(grid[i]), float(grid[i + 1])
+        left_up = bool(up[i])
+        while right - left > tolerance_s:
+            mid = 0.5 * (left + right)
+            if (series.at_seconds(mid) - level >= 0.0) == left_up:
+                left = mid
+            else:
+                right = mid
+        t = series.t0 + timedelta(seconds=0.5 * (left + right))
+        out.append(Event(t, "set" if left_up else "rise", level))
     return out
 
 
 def intervals_above(
     series: HermiteSeries, level: float, tolerance_s: float = 1.0
 ) -> list[Interval]:
-    """Maximal spans where the series is above `level`, with open ends flagged."""
+    """Maximal spans where the series is above `level`, with open ends flagged.
+
+    Spans shorter than `tolerance_s` are dropped: they are the result of a series that ends or
+    starts exactly on the level, not a real period.
+    """
     events = find_events(series, level, tolerance_s)
     # Decide the starting state just after the first sample, so a series that begins exactly on the
     # level and moves up counts as already above (it has no rise event to open the span).
@@ -143,7 +162,7 @@ def intervals_above(
             current = None
     if current is not None:
         spans.append(Interval(current, series.end, open_start, True))
-    return spans
+    return [sp for sp in spans if sp.duration_s >= tolerance_s]
 
 
 def intervals_below(
