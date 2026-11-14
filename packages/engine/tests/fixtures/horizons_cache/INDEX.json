@@ -1,0 +1,37 @@
+[
+  {
+    "name": "earth_lon30E_lat0",
+    "sha256": "fccb4a3ef832eba14016d7ce04d0e73742cc7d8bef7dff4df937f387c7a1a4ff",
+    "rows": 7,
+    "api_version": "1.2",
+    "retrieved_at_utc": "2026-11-14T17:49:02Z"
+  },
+  {
+    "name": "earth_lon30W_lat0",
+    "sha256": "31b7da73c59b108632060d50c7ee5f1b0737b9bfca5cbf61f4d5e817639805b8",
+    "rows": 7,
+    "api_version": "1.2",
+    "retrieved_at_utc": "2026-11-14T17:49:03Z"
+  },
+  {
+    "name": "earth_lon0_lat0",
+    "sha256": "5ad882a11e05d9a8d3c80cc76bf3e62d60b9f35a9758457b53e0b129fd55cd04",
+    "rows": 7,
+    "api_version": "1.2",
+    "retrieved_at_utc": "2026-11-14T17:49:04Z"
+  },
+  {
+    "name": "sun_lat_m89p9_month",
+    "sha256": "da8aaec49ecf87820027427a26f453fd063e79e8d98727601498d4554cbf8d76",
+    "rows": 121,
+    "api_version": "1.2",
+    "retrieved_at_utc": "2026-11-14T17:49:05Z"
+  },
+  {
+    "name": "sun_lat_p89p9_month",
+    "sha256": "af58a4c80e41bf511d452435d39018e0f23853148c325d5de55cf5266290875e",
+    "rows": 121,
+    "api_version": "1.2",
+    "retrieved_at_utc": "2026-11-14T17:49:06Z"
+  }
+]

@@ -759,11 +759,17 @@ name = "lunar-engine"
 version = "0.0.1"
 source = { editable = "packages/engine" }
 dependencies = [
+    { name = "httpx" },
     { name = "numpy" },
+    { name = "tenacity" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "numpy" }]
+requires-dist = [
+    { name = "httpx" },
+    { name = "numpy" },
+    { name = "tenacity" },
+]
 
 [[package]]
 name = "lunar-navigator"

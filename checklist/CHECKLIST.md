@@ -3,7 +3,7 @@
 | Phase | Done | Pending | Postponed | Total |
 |---|---|---|---|---|
 | P0 | 12 | 0 | 0 | 12 |
-| P1 | 0 | 11 | 0 | 11 |
+| P1 | 2 | 9 | 0 | 11 |
 | P2 | 0 | 12 | 0 | 12 |
 | P3 | 0 | 9 | 0 | 9 |
 | P4 | 0 | 11 | 0 | 11 |
@@ -25,8 +25,8 @@
 | P0-10 | Design tokens and glass component skeleton deployed | afreen | DONE | tokens, Glass, Chip, Shell built; deployed at https://13-52-97-105.sslip.io/ with API online chip, screenshot checked, 0 console errors; issue #10 |
 | P0-11 | Tag v0.0.1, update todo, checklist and UPDATES | irfan | DONE | todo, checklist, UPDATES current; tag v0.0.1 pushed after this PR; issue #11 |
 | P0-12 | Onboard member 3 when the username is known (docs/07): team.env, CODEOWNERS, invite, consent | irfan | DONE | nluz4105-ai onboarded: team.env email from gh api id 315888816, CODEOWNERS enabled, invite accepted; assigned #12 and #16; issue #12 |
-| P1-01 | Horizons client: encoding, JSON, version check, SOE parser, error detection, retry, concurrency limit, cache | irfan | PENDING |  |
-| P1-02 | Record real Horizons fixtures and pass convention tests (east longitude, Earth near zenith, frame header captured, ADR-0004) | irfan | PENDING |  |
+| P1-01 | Horizons client: encoding, JSON, version check, SOE parser, error detection, retry, concurrency limit, cache | irfan | DONE | lunar_engine.ephemeris: client (cache by sha256, retry 500/503, 2 concurrent, 1 req/s, UA, version check 1.2, error in HTTP 200, URL length limit), SOE parser by header name; 16 tests pass; issue #24 |
+| P1-02 | Record real Horizons fixtures and pass convention tests (east longitude, Earth near zenith, frame header captured, ADR-0004) | irfan | DONE | 5 real Horizons responses recorded (horizons_cache/INDEX.json, retrieved 2026-11-14T17:49Z); 8 convention tests pass offline: 30E Earth az 273-274, 30W az 87-88, Earth elev 83 at 0N 0E, Sun at -89.9 lat 1.04..1.49 deg; frame header MEAN_ME captured; ADR-0004; issue #25 |
 | P1-03 | Horizons RTS cross-check helper with RAD mode and fixtures | irfan | PENDING |  |
 | P1-04 | Trek discovery: GetCapabilities for EQ, NP, SP, layer catalogue, CORS check, raw elevation availability (ADR-0002, docs/data/trek-layers.md) | member3 | PENDING |  |
 | P1-05 | Trek layer selection and attribution strings (WAC mosaic, polar relief) | member3 | PENDING |  |
