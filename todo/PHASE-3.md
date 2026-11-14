@@ -6,7 +6,7 @@ Window: +8 to +15h. Statuses: DONE, PENDING, POSTPONED. Update this table in the
 |---|---|---|---|---|
 | P3-01 | FastAPI skeleton: config, logging, request ids, RFC 7807 errors | irfan | DONE | lunar_api.errors (RFC 7807 problem documents for ApiError, validation 422, HTTP errors, unhandled 500 without leaking internals), lunar_api.middleware (request ids accepted if well formed else generated, echoed on every response including 500, JSON access log), Settings with data dir and limits; 7 API tests; bug found by test: 500 responses lacked the request id header, fixed; issue #57 |
 | P3-02 | Database schema and Alembic migrations | irfan | PENDING | issue #58 |
-| P3-03 | Routes: sites, skyline, timeline, state, compare, slip-matrix | irfan | PENDING | issue #59 |
+| P3-03 | Routes: sites, skyline, timeline, state, compare, slip-matrix | irfan | DONE | lunar_api.routes + store: GET /sites, /sites/{id}, /skyline, /assess, /timeline, /state; POST /compare, /slip-matrix; GET /links/quickmap; every response has a provenance block, NaN becomes null, windows capped at 400 days, 8 sites, 422 and 404 problem documents, path-traversal ids rejected; 19 route tests against a real precomputed bundle built with a fake Horizons; /state computes seconds to sunset and Earthset with the definitions spelled out; issue #59 |
 | P3-04 | Job queue (arq) with SSE progress and timeouts | irfan | PENDING | issue #60 |
 | P3-05 | Provenance and attribution endpoints | irfan | PENDING | issue #61 |
 | P3-06 | OpenAPI export, generated TS client, contract tests | afreen | PENDING | issue #62 |

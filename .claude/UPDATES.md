@@ -24,3 +24,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-14T19:58:21Z | irfan | P2-08,#104 | compare and slip matrix; skip link e2e flake fixed | feat/engine-analysis
 2026-11-14T20:04:31Z | irfan | P2-09 | precompute pipeline, first real run on pgda-site04 (Earth never clears the skyline there) | feat/engine-precompute
 2026-11-14T20:12:03Z | irfan | P3-01 | API skeleton: problem+json errors, request ids, access log | feat/api-skeleton
+2026-11-14T20:20:20Z | irfan | P3-03 | read-only API routes backed by precomputed bundles | feat/api-routes

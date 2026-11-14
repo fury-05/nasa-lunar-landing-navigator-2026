@@ -32,10 +32,17 @@ class RequestIdMiddleware(BaseHTTPMiddleware):
             response = await call_next(request)
             status = response.status_code
         finally:
-            log.info(json.dumps({
-                "request_id": rid, "method": request.method, "path": request.url.path,
-                "status": status, "ms": round(1000 * (time.perf_counter() - start), 1),
-            }))
+            log.info(
+                json.dumps(
+                    {
+                        "request_id": rid,
+                        "method": request.method,
+                        "path": request.url.path,
+                        "status": status,
+                        "ms": round(1000 * (time.perf_counter() - start), 1),
+                    }
+                )
+            )
         response.headers["X-Request-ID"] = rid
         return response
 

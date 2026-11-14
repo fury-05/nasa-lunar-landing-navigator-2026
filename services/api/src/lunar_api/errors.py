@@ -19,7 +19,11 @@ class ApiError(Exception):
     """Raise anywhere in a route to return a problem document."""
 
     def __init__(
-        self, status: int, title: str, detail: str, code: str = "error",
+        self,
+        status: int,
+        title: str,
+        detail: str,
+        code: str = "error",
         errors: list[dict[str, Any]] | None = None,
     ) -> None:
         super().__init__(detail)
@@ -28,7 +32,11 @@ class ApiError(Exception):
 
 
 def problem(
-    request: Request, status: int, title: str, detail: str, code: str,
+    request: Request,
+    status: int,
+    title: str,
+    detail: str,
+    code: str,
     errors: list[dict[str, Any]] | None = None,
 ) -> JSONResponse:
     body: dict[str, Any] = {
@@ -64,8 +72,9 @@ def install_error_handlers(app: FastAPI) -> None:
             }
             for e in exc.errors()
         ]
-        return problem(request, 422, "Invalid input", "One or more fields are invalid.",
-                       "validation", errors)
+        return problem(
+            request, 422, "Invalid input", "One or more fields are invalid.", "validation", errors
+        )
 
     @app.exception_handler(StarletteHTTPException)
     async def _http(request: Request, exc: StarletteHTTPException) -> JSONResponse:
@@ -78,5 +87,6 @@ def install_error_handlers(app: FastAPI) -> None:
         # Never leak internals. The request id lets an operator find the traceback in the logs.
         rid = getattr(request.state, "request_id", None)
         log.exception("unhandled error request_id=%s", rid)
-        return problem(request, 500, "Internal error", "The server could not complete the request.",
-                       "internal")
+        return problem(
+            request, 500, "Internal error", "The server could not complete the request.", "internal"
+        )
