@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import math
 import re
+import threading
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Annotated, Any
@@ -51,8 +52,20 @@ def get_settings() -> Settings:
     return Settings.from_env()
 
 
+_STORES: dict[Path, SiteStore] = {}
+_STORES_LOCK = threading.Lock()
+
+
 def get_store(settings: Annotated[Settings, Depends(get_settings)]) -> SiteStore:
-    return SiteStore(settings.data_dir)
+    """One store per data directory for the life of the process, so its caches persist.
+
+    A new store per request would reload every bundle and rebuild every derived series each time.
+    """
+    with _STORES_LOCK:
+        store = _STORES.get(settings.data_dir)
+        if store is None:
+            store = _STORES[settings.data_dir] = SiteStore(settings.data_dir)
+        return store
 
 
 # ---- helpers ----------------------------------------------------------------------------------
