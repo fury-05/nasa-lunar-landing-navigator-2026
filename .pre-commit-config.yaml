@@ -1,0 +1,19 @@
+repos:
+  - repo: local
+    hooks:
+      - id: lint-dashes
+        name: no em dashes
+        entry: bash scripts/lint-dashes.sh
+        language: system
+        pass_filenames: false
+      - id: checklist
+        name: checklist is current
+        entry: python scripts/checklist.py --check
+        language: system
+        pass_filenames: false
+      - id: ruff
+        name: ruff
+        entry: uv run ruff check .
+        language: system
+        pass_filenames: false
+        types: [python]
