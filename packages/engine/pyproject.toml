@@ -4,7 +4,7 @@ version = "0.0.1"
 description = "Pure Python compute for the Lunar Landing Site Navigator: ephemeris, terrain, visibility, metrics."
 requires-python = ">=3.12"
 license = { text = "Apache-2.0" }
-dependencies = ["numpy"]
+dependencies = ["numpy", "httpx", "tenacity"]
 
 [build-system]
 requires = ["hatchling"]

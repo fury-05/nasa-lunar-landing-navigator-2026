@@ -32,9 +32,10 @@ select = ["E", "F", "I", "B", "UP", "S", "C4"]
 [tool.mypy]
 strict = true
 python_version = "3.12"
-mypy_path = ["packages/engine/src", "services/api/src"]
+mypy_path = ["packages/engine/src", "services/api/src", "packages/engine/tests"]
 explicit_package_bases = true
 
 [tool.pytest.ini_options]
+pythonpath = ["packages/engine/tests"]
 testpaths = ["packages", "services"]
 addopts = "-q"
