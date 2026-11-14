@@ -1,0 +1,19 @@
+[Unit]
+Description=Lunar Navigator job worker
+After=network.target postgresql.service redis-server.service
+
+[Service]
+User=lunar
+WorkingDirectory=/opt/lunar/current
+EnvironmentFile=/etc/lunar/lunar.env
+ExecStart=/opt/lunar/current/.venv/bin/arq lunar_api.worker.WorkerSettings
+Restart=always
+RestartSec=2
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/lunar
+
+[Install]
+WantedBy=multi-user.target

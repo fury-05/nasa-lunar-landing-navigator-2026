@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+f="$1"; first=$(head -1 "$f")
+case "$first" in Merge\ *|Revert\ *) exit 0;; esac
+re='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9-]+\))?!?: .{1,72}$'
+echo "$first" | grep -Eq "$re" || { echo "Commit title must match Conventional Commits: type(scope): summary (max 72 chars)"; exit 1; }
+if LC_ALL=C grep -q $'\xe2\x80\x94' "$f"; then echo "Em dash not allowed"; exit 1; fi
+root="$(git rev-parse --show-toplevel)"; . "$root/team.env"
+[ -z "${SI_TRAILER:-}" ] || git interpret-trailers --in-place --if-exists addIfDifferent --trailer "$SI_TRAILER" "$f"

@@ -1,0 +1,11 @@
+* @fury-05 @Stella-10
+/packages/engine/ @fury-05
+/services/api/ @fury-05
+/infra/ @fury-05
+/scripts/ @fury-05
+/apps/web/ @Stella-10
+/docs/06-frontend-spec.md @Stella-10
+# Member 3 (enable when the username is known, replace <login>):
+# /apps/web/src/visuals/ @<login>
+# /apps/web/src/public/ @<login>
+# /docs/validation/ @<login>

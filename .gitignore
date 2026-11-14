@@ -1,0 +1,16 @@
+node_modules/
+.venv/
+dist/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+coverage/
+playwright-report/
+.env
+.env.local
+*.pem
+*.key
+data/raw/
+data/dem/
+.DS_Store

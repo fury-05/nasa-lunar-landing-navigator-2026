@@ -1,0 +1,12 @@
+name: Task
+description: A planned task from a todo table
+labels: [feat]
+body:
+  - type: input
+    id: row
+    attributes: { label: Todo row id (for example P2-03), placeholder: P2-03 }
+    validations: { required: true }
+  - type: textarea
+    id: acceptance
+    attributes: { label: Acceptance criteria and evidence required }
+    validations: { required: true }

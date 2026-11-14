@@ -1,0 +1,20 @@
+__DOMAIN__ {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		Permissions-Policy "geolocation=(), camera=(), microphone=()"
+		Content-Security-Policy "default-src 'self'; img-src 'self' data: blob: https://trek.nasa.gov; connect-src 'self' https://trek.nasa.gov; style-src 'self' 'unsafe-inline'; script-src 'self'; worker-src 'self' blob:; font-src 'self'; frame-ancestors 'none'"
+	}
+	handle /api/* {
+		reverse_proxy 127.0.0.1:8000
+	}
+	handle {
+		root * /opt/lunar/current/apps/web/dist
+		try_files {path} /index.html
+		file_server
+	}
+	@assets path /assets/*
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+}

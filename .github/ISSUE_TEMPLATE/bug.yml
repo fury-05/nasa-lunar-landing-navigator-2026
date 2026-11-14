@@ -1,0 +1,17 @@
+name: Bug or failed sub-point
+description: Something failed or is wrong
+labels: [bug]
+body:
+  - type: input
+    id: row
+    attributes: { label: Related todo row id }
+  - type: textarea
+    id: observed
+    attributes: { label: Exact error or observed behaviour }
+    validations: { required: true }
+  - type: textarea
+    id: tried
+    attributes: { label: What was tried }
+  - type: textarea
+    id: cause
+    attributes: { label: Suspected cause and proposed fix }
