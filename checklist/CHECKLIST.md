@@ -4,7 +4,7 @@
 |---|---|---|---|---|
 | P0 | 12 | 0 | 0 | 12 |
 | P1 | 9 | 2 | 0 | 11 |
-| P2 | 3 | 9 | 0 | 12 |
+| P2 | 4 | 8 | 0 | 12 |
 | P3 | 0 | 9 | 0 | 9 |
 | P4 | 0 | 11 | 0 | 11 |
 | P5 | 0 | 7 | 0 | 7 |
@@ -40,7 +40,7 @@
 | P2-02 | DEM window reader (pyproj polar stereographic, rasterio, bilinear) with multi-tier merge | irfan | PENDING | issue #46 |
 | P2-03 | Skyline ray caster (numba), coverage flags, benchmark meets targets | irfan | DONE | lunar_engine.skyline.cast_skyline (numba, parallel azimuths, 0.25 deg, curvature-aware, sphere-dip floor, per-azimuth reach for coverage flags); 14 tests on synthetic terrain (flat ground = dip, disc at known distance/height/azimuth, eye height monotonic, NaN hole, tile edge); real Shackleton-rim tile: 1440 azimuths to 16 km in 380 ms (target under 3 s cold); NOT yet validated against QuickMap or Trek, see P2-10 and P2-11; mid and far tiers missing (approval A2); issue #47 |
 | P2-04 | Disc visibility integrator with analytic tests | irfan | DONE | lunar_engine.visibility: visible_fraction (sine-spaced strips, odd slices >= 33), disc_visibility with skyline offset for the sensitivity band, series helper; 20 tests: fully above = 1, fully below = 0, horizon through centre = 0.5 exactly, circular segment formula at 6 heights, vertical wall segment, tangent cases, ridge test, north wrap, hypothesis monotonic properties; bug found by tests: equal-width strips gave 0.5003, fixed; issue #48 |
-| P2-05 | Interpolation, event detection and time remaining | irfan | PENDING | issue #49 |
+| P2-05 | Interpolation, event detection and time remaining | irfan | DONE | lunar_engine.events: Hermite (Catmull-Rom) interpolation, find_events bisected to 1 s, intervals above and below with open-end flags, combine, complement, time_remaining; 10 tests: sine crossings within 1.5 s, level crossings, exact span lists, real Horizons Sun day: our limb set matches the Horizons RTS set within 2 minutes and noon-to-sunset is 8.0 to 8.8 h; bug found by tests: series starting on the level had no open start, fixed; issue #49 |
 | P2-06 | Metrics: sunlight, dark, power index modes, Earth windows and outages | irfan | PENDING | issue #50 |
 | P2-07 | Sensitivity band and robust or fragile verdicts | irfan | PENDING | issue #51 |
 | P2-08 | Compare and slip matrix computation (vectorised) | irfan | PENDING | issue #52 |
