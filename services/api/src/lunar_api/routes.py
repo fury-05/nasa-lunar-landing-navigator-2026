@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Annotated, Any
@@ -21,7 +22,7 @@ from lunar_engine.metrics import sun_fraction_series
 from lunar_engine.sensitivity import PLACEHOLDER_CRITERIA, Assessment, Criteria
 from pydantic import BaseModel, Field, field_validator
 
-from lunar_api.errors import ApiError
+from lunar_api.errors import ApiError, safe_echo
 from lunar_api.schemas import (
     AssessOut,
     AttributionOut,
@@ -76,7 +77,15 @@ def clean(x: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+TIME_CHARS = re.compile(r"^[0-9T:.+\-Z ]{10,40}$")
+
+
 def parse_utc(text: str, field: str) -> datetime:
+    if not TIME_CHARS.fullmatch(text):
+        raise ApiError(
+            422, "Invalid input", f"{field} is not an ISO 8601 time.", "validation",
+            [{"field": field, "message": "expected e.g. 2026-12-01T00:00:00Z"}],
+        )
     try:
         t = datetime.fromisoformat(text.replace("Z", "+00:00"))
     except ValueError as exc:
@@ -133,7 +142,7 @@ def site_or_404(store: SiteStore, site_id: str) -> tuple[SiteSky, dict[str, Any]
         return store.get(site_id)
     except KeyError as exc:
         raise ApiError(
-            404, "Site not found", f"No precomputed site '{site_id}'.", "site-not-found"
+            404, "Site not found", f"No precomputed site '{safe_echo(site_id)}'.", "site-not-found"
         ) from exc
 
 
@@ -645,5 +654,8 @@ def get_attribution_one(source_id: str) -> dict[str, Any]:
         if s["id"] == source_id:
             return dict(s)
     raise ApiError(
-        404, "Source not found", f"No attribution entry '{source_id}'.", "source-not-found"
+        404,
+        "Source not found",
+        f"No attribution entry '{safe_echo(source_id)}'.",
+        "source-not-found",
     )

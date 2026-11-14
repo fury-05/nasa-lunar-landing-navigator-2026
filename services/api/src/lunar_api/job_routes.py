@@ -12,9 +12,9 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from lunar_engine.ephemeris import HorizonsClient
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
-from lunar_api.errors import ApiError
+from lunar_api.errors import ApiError, safe_echo
 from lunar_api.jobs import (
     TERMINAL,
     JobError,
@@ -126,6 +126,8 @@ def get_settings() -> Settings:
 
 
 class CustomSiteIn(BaseModel):
+    model_config = ConfigDict(strict=True)
+
     lat: float = Field(description="degrees, -90 to 90")
     lon: float = Field(description="degrees east, -180 to 180")
     alt_m: float = Field(default=0.0, description="metres above the 1737400 m reference sphere")
@@ -196,7 +198,10 @@ def get_job(job_id: str, store: Annotated[JobStore, Depends(job_store)]) -> dict
     s = store.get(job_id)
     if s is None:
         raise ApiError(
-            404, "Job not found", f"No job '{job_id}'. Jobs expire after one day.", "job-not-found"
+            404,
+            "Job not found",
+            f"No job '{safe_echo(job_id)}'. Jobs expire after one day.",
+            "job-not-found",
         )
     out = s.public()
     if s.status == "done":
@@ -256,7 +261,7 @@ async def job_events(
     job_id: str, store: Annotated[JobStore, Depends(job_store)]
 ) -> StreamingResponse:
     if store.get(job_id) is None:
-        raise ApiError(404, "Job not found", f"No job '{job_id}'.", "job-not-found")
+        raise ApiError(404, "Job not found", f"No job '{safe_echo(job_id)}'.", "job-not-found")
     return StreamingResponse(
         _events(job_id, store),
         media_type="text/event-stream",

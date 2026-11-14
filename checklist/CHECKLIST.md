@@ -5,7 +5,7 @@
 | P0 | 12 | 0 | 0 | 12 |
 | P1 | 10 | 1 | 0 | 11 |
 | P2 | 8 | 4 | 0 | 12 |
-| P3 | 6 | 3 | 0 | 9 |
+| P3 | 7 | 2 | 0 | 9 |
 | P4 | 0 | 11 | 0 | 11 |
 | P5 | 0 | 7 | 0 | 7 |
 | P6 | 0 | 6 | 0 | 6 |
@@ -56,7 +56,7 @@
 | P3-06 | OpenAPI export, generated TS client, contract tests | afreen | DONE | packages/contracts/openapi.json exported from the code by scripts/export_openapi.py (17 routes, every JSON route has a typed response model and 404/422 are documented as RFC 7807 Problem, SSE route documents its events); typed TS schema generated into apps/web/src/api/schema.d.ts with openapi-typescript in packages/contracts (own TypeScript 5 because the tool does not support 6); typed client apps/web/src/api/client.ts; CI fails if the spec or generated types drift; mutation checks: a changed verdict enum breaks the web typecheck, and editing code without re-exporting fails the contract test; 5 contract tests + 5 web tests; issue #62 |
 | P3-07 | Rate limiting, caching headers, ETag | irfan | DONE | lunar_api.caching: per-client token bucket (reads 5/s burst 60, POSTs 0.5/s burst 6, env configurable, health and ready exempt), 429 as a problem document with Retry-After, X-Forwarded-For trusted only from a loopback peer (a remote caller cannot spoof it, tested), ETag + Cache-Control public max-age 300 + 304 on If-None-Match for /sites, /attribution, /links; jobs, POSTs, probes, errors and SSE never cached; production app checked in a fresh process (60 pass then 429, POST 429 after 6); 11 tests; limits are in memory per process group, a courtesy shield and not a security boundary; issue #63 |
 | P3-08 | Deploy to VM, smoke tests, load test results recorded | irfan | PENDING | issue #64 |
-| P3-09 | Input validation and security review of the API | irfan | PENDING | issue #65 |
+| P3-09 | Input validation and security review of the API | irfan | DONE | 62 hostile-input tests (traversal, encoded traversal, injection strings, malformed and huge JSON, bad numbers and times, size abuse, method and header abuse, CORS, header injection); 6 findings fixed (raw echo of caller text, site id alphabet and case aliasing, loose time parsing, booleans accepted as numbers, third party CDN on the docs page, no security headers on the API itself); mutation check shows each fix is guarded; written review with an explicit NOT covered list in docs/validation/api-security-review.md; developer review only, no penetration test; issue #65 |
 | P4-01 | Design system complete: tokens, glass components, motion, contrast checks | afreen | PENDING | issue #66 |
 | P4-02 | App shell, routes, URL state, mock API from OpenAPI | afreen | PENDING | issue #67 |
 | P4-03 | Site picker with search, filters, custom coordinates, validation | afreen | PENDING | issue #68 |

@@ -12,7 +12,18 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 log = logging.getLogger("lunar_api")
 PROBLEM_JSON = "application/problem+json"
+MAX_ECHO = 64
 TYPE_BASE = "https://lunar-navigator.invalid/problems/"  # not dereferenceable; stable identifiers
+
+
+def safe_echo(value: str, limit: int = MAX_ECHO) -> str:
+    """Caller text made safe to put in an error message: printable ASCII only, short.
+
+    Anything else (control characters, markup, long strings, unicode tricks) becomes '?' so an
+    attacker cannot shape the response text, and logs cannot be flooded through error details.
+    """
+    cleaned = "".join(ch if 32 <= ord(ch) < 127 and ch not in "<>\"'`\\" else "?" for ch in value)
+    return cleaned[:limit] + ("..." if len(cleaned) > limit else "")
 
 
 class ApiError(Exception):
@@ -44,7 +55,7 @@ def problem(
         "title": title,
         "status": status,
         "detail": detail,
-        "instance": str(request.url.path),
+        "instance": safe_echo(str(request.url.path), 200),
         "request_id": getattr(request.state, "request_id", None),
         "errors": errors or [],
     }
@@ -80,7 +91,13 @@ def install_error_handlers(app: FastAPI) -> None:
     async def _http(request: Request, exc: StarletteHTTPException) -> JSONResponse:
         titles = {404: "Not found", 405: "Method not allowed", 429: "Too many requests"}
         title = titles.get(exc.status_code, "Request failed")
-        return problem(request, exc.status_code, title, str(exc.detail), f"http-{exc.status_code}")
+        return problem(
+            request,
+            exc.status_code,
+            title,
+            safe_echo(str(exc.detail), 200),
+            f"http-{exc.status_code}",
+        )
 
     @app.exception_handler(Exception)
     async def _unhandled(request: Request, exc: Exception) -> JSONResponse:

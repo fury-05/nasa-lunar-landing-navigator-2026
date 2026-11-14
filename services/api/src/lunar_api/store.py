@@ -3,12 +3,21 @@
 from __future__ import annotations
 
 import json
+import re
 import threading
 from pathlib import Path
 from typing import Any
 
 from lunar_engine.compare import SiteSky
 from lunar_engine.precompute import load_site
+
+# Lowercase letters, digits, dash and underscore only. A fixed alphabet keeps ids out of the
+# file system's own rules (case folding, dots, separators, reserved names) and gives one cache key.
+SITE_ID = re.compile(r"^[a-z0-9][a-z0-9_-]{0,63}$")
+
+
+def valid_site_id(site_id: str) -> bool:
+    return bool(SITE_ID.fullmatch(site_id))
 
 
 class SiteStore:
@@ -26,7 +35,7 @@ class SiteStore:
         return self.get(site_id)[1]
 
     def get(self, site_id: str) -> tuple[SiteSky, dict[str, Any]]:
-        if "/" in site_id or "\\" in site_id or site_id.startswith("."):
+        if not valid_site_id(site_id):
             raise KeyError(site_id)
         with self._lock:
             hit = self._cache.get(site_id)
