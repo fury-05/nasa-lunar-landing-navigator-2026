@@ -15,3 +15,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-14T20:10:00Z | member3+irfan | P1-05 | Trek layers chosen with verbatim credits from FGDC metadata, tile helper | feat/data-trek-layers
 2026-11-14T20:30:00Z | member3+irfan | P1-10 | CSA content set: 6 paraphrased blurbs with credit, terms read | feat/content-csa
 2026-11-14T19:09:18Z | irfan | P1-08,P2-01 | COG near tier built on VM (10 tiles, pixels identical), DEM sampler, geometry primitives | feat/engine-terrain-io
+2026-11-14T19:11:49Z | irfan | fix-#42 | CORRECTION: entries from 2026-11-14T16:50Z to 20:30Z carry round-number times typed by hand, ten of them later than the commit that holds them. The commit time in git is authoritative. Also corrected: csa.json retrieved_at (now 18:58:03Z from the page file time) and the Horizons probe meta (now 17:42:31Z from the response header). From now on entries use date -u | fix/issue-42-timestamps
