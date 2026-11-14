@@ -4,3 +4,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-14T16:25:00Z | irfan+afreen | P0-05,P0-06,P0-08,P0-10 | python workspace, API health, React shell with tokens, attribution seed | feat/repo-scaffold
 2026-11-14T16:50:00Z | irfan | P0-09,P0-10,P0-12 | VM bootstrapped, first deploy ok at 13-52-97-105.sslip.io, deploy script bug fixed (#18), Luz onboarded in CODEOWNERS | 44fc2a9
 2026-11-14T17:10:00Z | afreen+irfan | P0-06,P0-07 | playwright smoke (6 tests), prettier check, npm and python licence checks in CI, main protected | ci/p0-playwright-licences
+2026-11-14T17:20:00Z | irfan | P0-03,P0-07,P0-11 | phase 0 complete, 12 of 12 rows DONE, deployed at 13-52-97-105.sslip.io, tagging v0.0.1 | ci/p0-playwright-licences
