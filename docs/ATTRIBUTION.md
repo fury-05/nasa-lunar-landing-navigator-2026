@@ -8,7 +8,7 @@ One row per source. Add the row before merging code that uses it. Fields: id, na
 | trek-moon | Moon Trek WMTS | NASA/JPL Solar System Treks | https://trek.nasa.gov/moon/ | 2026-11-14T16:19:25Z (reachability only, HTTP 200) | pending-source | pending-source (terms not yet read, see issue #16) | fill per layer | web.map2d, web.globe3d, web.surface3d |
 | quickmap | LROC QuickMap | LROC team (ASU), hosted by Intuitive Machines | https://quickmap.lroc.im-ldi.com/ | 2026-11-14T16:19:25Z (reachability only, HTTP 200) | n/a | pending-source (terms not yet read, see issue #16) | pending-source | validation, deep links |
 | csa-moon | Moon exploration | Canadian Space Agency | https://www.asc-csa.gc.ca/eng/astronomy/moon-exploration/ | pending-source (no response from this workstation at 2026-11-14T16:19:25Z) | n/a | pending-source (notices page not yet read, see issue #16) | pending-source | content.public |
-| lola-dem | LOLA DEM (only if ADR-0003 approves) | NASA GSFC PGDA / PDS | pending-source | fill | pending-source | NASA public data | pending-source | engine.terrain |
+| lola-dem | High-Resolution LOLA Topography for Lunar South Pole Sites (5 m/px GeoTIFF) | NASA GSFC PGDA (M. K. Barker, LRO-LOLA) | https://pgda.gsfc.nasa.gov/products/78 | 2026-11-14 (README and headers only, no data downloaded yet) | README at /data/LOLA_5mpp/README, frame MOON_ME DE421 | pending-source (NASA public product, terms page not yet read by a human) | Barker et al., 2021, Planetary and Space Science 203, 105119, https://doi.org/10.1016/j.pss.2020.105119 | engine.terrain |
 
 ## Software and fonts
 Generated into THIRD_PARTY_LICENSES by CI (pip-licenses, license-checker). Review for GPL or AGPL and remove.
