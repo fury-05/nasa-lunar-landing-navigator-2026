@@ -38,4 +38,17 @@ def client(bundle: Path, monkeypatch: pytest.MonkeyPatch):  # type: ignore[no-un
     from lunar_api.main import app
 
     monkeypatch.setenv("LUNAR_PRECOMPUTE_DIR", str(bundle))
+    _open_limits(app)
     return TestClient(app, raise_server_exceptions=False)
+
+
+def _open_limits(app) -> None:  # type: ignore[no-untyped-def]
+    """Route tests exercise behaviour, not the limiter (test_caching covers that)."""
+    from lunar_api.caching import RateLimitMiddleware, TokenBucket
+
+    node = app.middleware_stack
+    while node is not None:
+        if isinstance(node, RateLimitMiddleware):
+            node.light = TokenBucket(1e6, 1_000_000)
+            node.heavy = TokenBucket(1e6, 1_000_000)
+        node = getattr(node, "app", None)
