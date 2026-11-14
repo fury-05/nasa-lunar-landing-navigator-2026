@@ -806,11 +806,6 @@ dependencies = [
     { name = "uvicorn", extra = ["standard"] },
 ]
 
-[package.dev-dependencies]
-dev = [
-    { name = "fakeredis" },
-]
-
 [package.metadata]
 requires-dist = [
     { name = "alembic" },
@@ -827,9 +822,6 @@ requires-dist = [
     { name = "tenacity" },
     { name = "uvicorn", extras = ["standard"] },
 ]
-
-[package.metadata.requires-dev]
-dev = [{ name = "fakeredis", specifier = ">=2.40.0" }]
 
 [[package]]
 name = "lunar-engine"
@@ -865,6 +857,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "fakeredis" },
     { name = "httpx" },
     { name = "hypothesis" },
     { name = "mypy" },
@@ -882,6 +875,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "fakeredis", specifier = ">=2.40" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "hypothesis", specifier = ">=6" },
     { name = "mypy", specifier = ">=1.11" },

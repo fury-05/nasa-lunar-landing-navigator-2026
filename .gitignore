@@ -21,3 +21,4 @@ data/dem/
 test-results/
 playwright-report/
 .tmp/
+.venv_ci/
