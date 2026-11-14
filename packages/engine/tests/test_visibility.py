@@ -142,3 +142,23 @@ def test_property_a_higher_skyline_never_shows_more_of_the_disc(el: float, h: fl
     assert visible_fraction(el, RHO, flat(h + 0.1), slices=33) <= visible_fraction(
         el, RHO, flat(h), slices=33
     ) + 1e-12
+
+
+def test_vectorised_version_matches_the_scalar_version_everywhere() -> None:
+    from lunar_engine.visibility import disc_visibility_array
+
+    rng = np.random.default_rng(3)
+    profile = np.cumsum(rng.normal(0, 0.05, 1440))
+    profile -= profile.mean()
+    sky = _sky(profile)
+    az = rng.uniform(0, 360, 300)
+    el = rng.uniform(-1.5, 3.0, 300)
+    rho = rng.uniform(0.2, 0.6, 300)
+    vec = disc_visibility_array(sky, az, el, rho)
+    one = np.array([disc_visibility(sky, a, e, r) for a, e, r in zip(az, el, rho, strict=True)])
+    assert np.allclose(vec, one, atol=1e-12)
+    chunked = disc_visibility_array(sky, az, el, rho, chunk=17)
+    assert np.allclose(vec, chunked, atol=0)
+    flat_sky = _sky(np.zeros(1440))
+    assert disc_visibility_array(flat_sky, [10.0], [0.0], 0.27)[0] == pytest.approx(0.5, abs=1e-9)
+    assert disc_visibility_array(flat_sky, [10.0], [0.5], 0.27)[0] == pytest.approx(1.0, abs=1e-9)

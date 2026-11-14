@@ -154,3 +154,19 @@ def test_real_sun_day_sunset_matches_horizons_rts_within_two_minutes() -> None:
     # and sunset is before the end of the day, so time remaining from noon is about 8.4 hours
     left = time_remaining(datetime(2026, 12, 1, 12, tzinfo=UTC), find_events(s, -radius), "set")
     assert left is not None and 8.0 * 3600 < left.total_seconds() < 8.8 * 3600
+
+
+def test_crossing_exactly_on_a_scan_point_is_not_lost() -> None:
+    # Regression: Earth margin 10 sin(wt) - 5 is exactly 0 at 2 h, 10 h, 26 h, 34 h ... which are
+    # scan points. An earlier version dropped the downward crossing and extended the link by hours.
+    s = _sine(amp=10.0, offset=-5.0)
+    ev = find_events(s, 0.0)
+    hours = [(e.time_utc - T0).total_seconds() / 3600 for e in ev]
+    assert hours == pytest.approx([2.0, 10.0, 26.0, 34.0, 50.0, 58.0], abs=1e-3)
+    assert [e.kind for e in ev] == ["rise", "set"] * 3
+
+
+def test_level_touching_a_sample_and_staying_above_is_not_an_event() -> None:
+    ts = [T0 + timedelta(minutes=10 * i) for i in range(7)]
+    s = HermiteSeries(ts, [2.0, 1.0, 0.0, 1.0, 2.0, 3.0, 4.0])
+    assert [e for e in find_events(s, 0.0) if e.kind == "set"] == []

@@ -114,6 +114,13 @@ class Skyline:
     def min_reach_m(self) -> float:
         return float(np.min(self.reach_m))
 
+    def at_array(self, azimuth_deg: npt.ArrayLike) -> F64:
+        """Vectorised skyline elevation at many azimuths (wraps at 360)."""
+        az = np.append(self.azimuth_deg, 360.0)
+        el = np.append(self.elevation_deg, self.elevation_deg[0])
+        out: F64 = np.interp(np.asarray(azimuth_deg, dtype=float) % 360.0, az, el)
+        return out
+
     def at(self, azimuth_deg: float) -> float:
         """Skyline elevation at any azimuth by linear interpolation (wraps at 360)."""
         az = np.append(self.azimuth_deg, 360.0)
