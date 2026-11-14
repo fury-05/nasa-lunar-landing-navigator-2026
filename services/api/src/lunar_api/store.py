@@ -102,3 +102,22 @@ class SiteStore:
         with self._lock:
             self._derived[site_id] = (stamp, built)
         return built
+
+    def warm(self) -> dict[str, float]:
+        """Load every bundle and build its derived series and events. Returns seconds per site.
+
+        Run at startup in a background thread so the first visitor never waits for it.
+        """
+        import time
+
+        out: dict[str, float] = {}
+        for sid in self.ids():
+            t = time.perf_counter()
+            try:
+                d = self.derived(sid)
+                _ = d.sun_events, d.earth_events
+            except Exception:  # noqa: BLE001 - one bad bundle must not stop the others
+                out[sid] = -1.0
+                continue
+            out[sid] = round(time.perf_counter() - t, 3)
+        return out

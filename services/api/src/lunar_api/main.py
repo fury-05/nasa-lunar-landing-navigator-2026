@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import html
+import threading
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from typing import Any
 
 from fastapi import FastAPI, Response
@@ -15,11 +18,32 @@ from lunar_api.checks import check_db, check_redis
 from lunar_api.errors import install_error_handlers
 from lunar_api.job_routes import router as job_router
 from lunar_api.middleware import RequestIdMiddleware, SecurityHeadersMiddleware, configure_logging
-from lunar_api.routes import router
+from lunar_api.routes import get_store, router
 from lunar_api.schemas import HealthOut, ReadyOut, VersionOut
 from lunar_api.settings import Settings
 
 DISCLAIMER = "Planning tool, not for flight operations."
+
+WARM: dict[str, Any] = {"state": "idle", "sites": {}}
+
+
+def _warm_in_background() -> None:
+    WARM["state"] = "running"
+    try:
+        store = get_store(Settings.from_env())
+        WARM["sites"] = store.warm()
+        WARM["state"] = "done"
+    except Exception as exc:  # noqa: BLE001 - startup must never fail because of warming
+        WARM["state"] = f"failed: {type(exc).__name__}"
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    """Warm the caches in the background so the first visitor never waits for them."""
+    if Settings.from_env().data_dir.exists():
+        threading.Thread(target=_warm_in_background, name="warm", daemon=True).start()
+    yield
+
 
 app = FastAPI(
     title="Lunar Landing Site Navigator API",
@@ -27,6 +51,7 @@ app = FastAPI(
     description=DISCLAIMER,
     docs_url=None,  # the stock page loads Swagger UI from a third party CDN; see /api/v1/docs below
     openapi_url="/api/v1/openapi.json",
+    lifespan=lifespan,
 )
 configure_logging(Settings.from_env().log_level)
 app.add_middleware(EtagMiddleware)
