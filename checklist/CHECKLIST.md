@@ -3,7 +3,7 @@
 | Phase | Done | Pending | Postponed | Total |
 |---|---|---|---|---|
 | P0 | 12 | 0 | 0 | 12 |
-| P1 | 8 | 3 | 0 | 11 |
+| P1 | 9 | 2 | 0 | 11 |
 | P2 | 0 | 12 | 0 | 12 |
 | P3 | 0 | 9 | 0 | 9 |
 | P4 | 0 | 11 | 0 | 11 |
@@ -34,7 +34,7 @@
 | P1-07 | Site catalogue v1 with source url and retrieval time per record (Apollo, CLPS, Artemis regions, other agencies); unsourced rows stay pending-source | afreen | DONE | data/sites.json: 36 records (6 Apollo from NSSDC table, 27 PGDA tile centres derived from GeoTIFF headers and cross-checked to Trek bbox, 3 CLPS missions with coordinates pending-source); every record has source url and retrieval time; 104 python tests pass; scripts/build_site_catalogue.py; issue #30 |
 | P1-08 | DEM decision ADR-0003 and acquisition script with checksums; build COG pyramid (near, mid, far) | irfan | PENDING | ADR-0003; scripts/fetch_dem.py; 10 PGDA 5 m tiles (610 MB) downloaded on the VM, sha256 re-verified against data/MANIFEST.json (10 of 10); COG pyramid NOT built yet and far tiers are pending-source; issue #31 |
 | P1-09 | data/MANIFEST.json and ATTRIBUTION rows for every dataset | irfan | DONE | data/MANIFEST.json lists 10 files with url, size, sha256, retrieval time, licence status (pending-source) and citation; ATTRIBUTION rows: horizons, trek-moon, quickmap, csa-moon, lola-dem, nssdc-apollo, nasa-clps; tests check the manifest; issue #32 |
-| P1-10 | CSA content set for Public View: links and short paraphrased blurbs with attribution | member3 | PENDING |  |
+| P1-10 | CSA content set for Public View: links and short paraphrased blurbs with attribution | member3 | DONE | data/content/csa.json: 6 paraphrased blurbs, each linked to its CSA page with credit and a no-endorsement line; facts checked against the retrieved page text; CSA terms read and summarised (non-commercial use with acknowledgement); 3 tests; whether our use fits the terms is human item A1; issue #33 |
 | P1-11 | Start 3 year precompute of curated sites in the background on the VM | irfan | PENDING |  |
 | P2-01 | Geometry primitives and curvature-aware elevation formula with tests | irfan | PENDING |  |
 | P2-02 | DEM window reader (pyproj polar stereographic, rasterio, bilinear) with multi-tier merge | irfan | PENDING |  |
