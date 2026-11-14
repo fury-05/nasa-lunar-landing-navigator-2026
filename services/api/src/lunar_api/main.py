@@ -10,6 +10,7 @@ from lunar_engine import ENGINE_VERSION
 from lunar_api import API_VERSION
 from lunar_api.checks import check_db, check_redis
 from lunar_api.errors import install_error_handlers
+from lunar_api.job_routes import router as job_router
 from lunar_api.middleware import RequestIdMiddleware, configure_logging
 from lunar_api.routes import router
 from lunar_api.settings import Settings
@@ -27,6 +28,7 @@ configure_logging(Settings.from_env().log_level)
 app.add_middleware(RequestIdMiddleware)
 install_error_handlers(app)
 app.include_router(router)
+app.include_router(job_router)
 
 
 @app.get("/api/v1/health")
