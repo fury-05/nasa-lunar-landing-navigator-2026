@@ -37,7 +37,8 @@ body {
   background: var(--color-void);
   color: var(--color-ink);
   font-family: var(--font-display);
-  background-image: radial-gradient(1200px 600px at 70% -10%, rgb(29 78 216 / 0.28), transparent),
+  background-image:
+    radial-gradient(1200px 600px at 70% -10%, rgb(29 78 216 / 0.28), transparent),
     radial-gradient(900px 500px at 0% 100%, rgb(94 162 255 / 0.1), transparent);
   background-attachment: fixed;
 }

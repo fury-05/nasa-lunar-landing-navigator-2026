@@ -12,7 +12,9 @@ export function ApiStatus() {
   useEffect(() => {
     const ctl = new AbortController();
     fetch("/api/v1/version", { signal: ctl.signal })
-      .then((r) => (r.ok ? (r.json() as Promise<Version>) : Promise.reject(new Error(String(r.status)))))
+      .then((r) =>
+        r.ok ? (r.json() as Promise<Version>) : Promise.reject(new Error(String(r.status))),
+      )
       .then((v) => setState({ kind: "ok", v }))
       .catch((e: unknown) => {
         if (!(e instanceof DOMException && e.name === "AbortError")) setState({ kind: "down" });

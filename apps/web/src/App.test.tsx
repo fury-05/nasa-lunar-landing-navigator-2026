@@ -6,7 +6,10 @@ import { App } from "./App";
 afterEach(() => vi.unstubAllGlobals());
 
 function renderAt(path: string) {
-  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ api: "0.0.1", engine: "0.0.1" }) }));
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue({ ok: true, json: async () => ({ api: "0.0.1", engine: "0.0.1" }) }),
+  );
   return render(
     <MemoryRouter initialEntries={[path]}>
       <App />
@@ -17,7 +20,9 @@ function renderAt(path: string) {
 describe("App shell", () => {
   it("shows the title and the planning-tool disclaimer on home", async () => {
     renderAt("/");
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Lunar Landing Site Navigator");
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      "Lunar Landing Site Navigator",
+    );
     expect(screen.getAllByText(/not for flight operations/i).length).toBeGreaterThan(0);
     expect(await screen.findByText("API online")).toBeInTheDocument();
   });
