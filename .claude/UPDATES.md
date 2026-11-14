@@ -14,3 +14,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-14T19:30:00Z | member3+irfan | P1-06 | QuickMap south polar proj 27 found and verified against QuickMap hover readouts, link builder + tests | feat/data-quickmap-links
 2026-11-14T20:10:00Z | member3+irfan | P1-05 | Trek layers chosen with verbatim credits from FGDC metadata, tile helper | feat/data-trek-layers
 2026-11-14T20:30:00Z | member3+irfan | P1-10 | CSA content set: 6 paraphrased blurbs with credit, terms read | feat/content-csa
+2026-11-14T19:09:18Z | irfan | P1-08,P2-01 | COG near tier built on VM (10 tiles, pixels identical), DEM sampler, geometry primitives | feat/engine-terrain-io

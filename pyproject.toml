@@ -39,3 +39,7 @@ explicit_package_bases = true
 pythonpath = ["packages/engine/tests"]
 testpaths = ["packages", "services"]
 addopts = "-q"
+
+[[tool.mypy.overrides]]
+module = ["rasterio", "rasterio.*"]
+ignore_missing_imports = true

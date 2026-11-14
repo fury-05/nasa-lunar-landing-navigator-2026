@@ -1,0 +1,139 @@
+{
+  "schema": 1,
+  "built_at_utc": "2026-11-14T19:06:02Z",
+  "tool": "rasterio COG driver, DEFLATE, predictor 3, blocksize 512",
+  "files": [
+    {
+      "source_file": "DM2_final_adj_5mpp_surf.tif",
+      "source_sha256": "d88677c21633683061117db0a577f0510e0948fe9db315d13be28782407ff604",
+      "cog_file": "DM2_final_adj_5mpp_surf.cog.tif",
+      "cog_sha256": "466ff0cc6a2db8a44b6acfe1c254ca8601931f01b1fb3bdbc961bcd7572cc4e2",
+      "cog_bytes": 41428917,
+      "overviews": [
+        2,
+        4,
+        8
+      ],
+      "pixels_identical": true
+    },
+    {
+      "source_file": "Haworth_final_adj_5mpp_surf.tif",
+      "source_sha256": "387fd6e99bca266f4982f7256c4c185921105313882b4c2eee5b5ff1ef75016b",
+      "cog_file": "Haworth_final_adj_5mpp_surf.cog.tif",
+      "cog_sha256": "e88195600cb8b497dadc0151d989b8c50d7e22053e5cc699915315dc8744571b",
+      "cog_bytes": 98283416,
+      "overviews": [
+        2,
+        4,
+        8,
+        16
+      ],
+      "pixels_identical": true
+    },
+    {
+      "source_file": "Shoemaker_final_adj_5mpp_surf.tif",
+      "source_sha256": "75329262a6dbe37e4370adcf23ec3854396c9d3e911a682d76c170178a0b8290",
+      "cog_file": "Shoemaker_final_adj_5mpp_surf.cog.tif",
+      "cog_sha256": "08d8983a29861c9e02177a7ece78c20a34f295bf8178e005a255de5e3a1e971d",
+      "cog_bytes": 48509899,
+      "overviews": [
+        2,
+        4,
+        8
+      ],
+      "pixels_identical": true
+    },
+    {
+      "source_file": "Site01_final_adj_5mpp_surf.tif",
+      "source_sha256": "3ba7b97cb00a2bcf21189c3aeb535f65afc21207154ab9f0d43c5bdc1f7e747e",
+      "cog_file": "Site01_final_adj_5mpp_surf.cog.tif",
+      "cog_sha256": "666337db4686703d176d6f62b0ab5203fc59948a97e067c3720f6d97f9ffe737",
+      "cog_bytes": 28014210,
+      "overviews": [
+        2,
+        4,
+        8
+      ],
+      "pixels_identical": true
+    },
+    {
+      "source_file": "Site04_final_adj_5mpp_surf.tif",
+      "source_sha256": "38ff70dbdf2f066c2cfa94a646c3a59d653ce7f6b4528b15fc1b43ee397ce758",
+      "cog_file": "Site04_final_adj_5mpp_surf.cog.tif",
+      "cog_sha256": "8d3f2cfc1898ab40527d89f9f35994d05500fb25ce20b8053d169c9aa38c47df",
+      "cog_bytes": 29173660,
+      "overviews": [
+        2,
+        4,
+        8
+      ],
+      "pixels_identical": true
+    },
+    {
+      "source_file": "Site06_final_adj_5mpp_surf.tif",
+      "source_sha256": "cca17e8067601dd659b583f889204db6bce685bc30c60a9e62427a8bce36b03d",
+      "cog_file": "Site06_final_adj_5mpp_surf.cog.tif",
+      "cog_sha256": "d26fdfd7ae10101a0eb9a03ae6e130b6cb4f7f2161b4210105dd21be18cbcf83",
+      "cog_bytes": 35712003,
+      "overviews": [
+        2,
+        4,
+        8
+      ],
+      "pixels_identical": true
+    },
+    {
+      "source_file": "Site07_final_adj_5mpp_surf.tif",
+      "source_sha256": "38aaee10bb4da4d63e7427aa1ca25c79bdbc649d212079a04990e135462091f8",
+      "cog_file": "Site07_final_adj_5mpp_surf.cog.tif",
+      "cog_sha256": "294b89fc3f0c35e667c255c0ed0da08f73a2e754a1cb262db40fcf8815d7432e",
+      "cog_bytes": 28748630,
+      "overviews": [
+        2,
+        4,
+        8
+      ],
+      "pixels_identical": true
+    },
+    {
+      "source_file": "Site11_final_adj_5mpp_surf.tif",
+      "source_sha256": "58f3372c35bbd6baf38ffd5633c1c96b59bd89dbd252150581d12893a43136e5",
+      "cog_file": "Site11_final_adj_5mpp_surf.cog.tif",
+      "cog_sha256": "fb3827389108e3fef987aa67d3660b7802a2de567653d1f0954ca3b39b77d40b",
+      "cog_bytes": 29605533,
+      "overviews": [
+        2,
+        4,
+        8
+      ],
+      "pixels_identical": true
+    },
+    {
+      "source_file": "Site20_final_adj_5mpp_surf.tif",
+      "source_sha256": "e51451f3629ba7cd5cfc1b32c8c0ee3c5c454607488b00ea00cd06a9e301a892",
+      "cog_file": "Site20_final_adj_5mpp_surf.cog.tif",
+      "cog_sha256": "100e75ba239508b596367abc21cbe7a5a536c6e83960d07d25474a8f29c420fd",
+      "cog_bytes": 22436861,
+      "overviews": [
+        2,
+        4,
+        8
+      ],
+      "pixels_identical": true
+    },
+    {
+      "source_file": "Site23_final_adj_5mpp_surf.tif",
+      "source_sha256": "12d280a59cd7580415f6bada638d0abe025ce6727541fddf68d5dc371a6c94cf",
+      "cog_file": "Site23_final_adj_5mpp_surf.cog.tif",
+      "cog_sha256": "bdc4a35dafea2fcd53e90ccfc592b96cacc5a7334de007134344891f67f966f6",
+      "cog_bytes": 42490402,
+      "overviews": [
+        2,
+        4,
+        8,
+        16
+      ],
+      "pixels_identical": true
+    }
+  ]
+}
