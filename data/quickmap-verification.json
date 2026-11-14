@@ -1,0 +1,734 @@
+{
+  "checked_at_utc": "2026-11-14T18:41:11Z",
+  "rows": [
+    {
+      "id": "pgda-site04",
+      "projection": "south polar stereographic (proj 27)",
+      "catalogue": [
+        -89.7668,
+        -171.8699
+      ],
+      "view_centre_lat_lon": [
+        -89.7668,
+        -171.86989
+      ],
+      "m_per_px": 2.5,
+      "hover_checks": [
+        {
+          "at": [
+            0.5,
+            0.5
+          ],
+          "expected": [
+            -89.7668,
+            -171.86989
+          ],
+          "quickmap": [
+            -89.7668,
+            -171.86989
+          ],
+          "offset_m": 0,
+          "offset_px": 0
+        },
+        {
+          "at": [
+            0.3,
+            0.35
+          ],
+          "expected": [
+            -89.77218,
+            -165.90771
+          ],
+          "quickmap": [
+            -89.77218,
+            -165.90772
+          ],
+          "offset_m": 0,
+          "offset_px": 0.01
+        },
+        {
+          "at": [
+            0.7,
+            0.4
+          ],
+          "expected": [
+            -89.77549,
+            -177.32224
+          ],
+          "quickmap": [
+            -89.77549,
+            -177.32224
+          ],
+          "offset_m": 0.1,
+          "offset_px": 0.05
+        },
+        {
+          "at": [
+            0.4,
+            0.7
+          ],
+          "expected": [
+            -89.75198,
+            -169.72863
+          ],
+          "quickmap": [
+            -89.75198,
+            -169.72863
+          ],
+          "offset_m": 0.1,
+          "offset_px": 0.02
+        }
+      ],
+      "worst_offset_px": 0.05,
+      "link": "https://quickmap.lroc.im-ldi.com/?proj=27&prjExtent=-2000.05%2C-8000.34%2C-0.05%2C-6000.34"
+    },
+    {
+      "id": "pgda-site23",
+      "projection": "south polar stereographic (proj 27)",
+      "catalogue": [
+        -85.9948,
+        -0.2358
+      ],
+      "view_centre_lat_lon": [
+        -85.9948,
+        -0.2358
+      ],
+      "m_per_px": 2.5,
+      "hover_checks": [
+        {
+          "at": [
+            0.5,
+            0.5
+          ],
+          "expected": [
+            -85.9948,
+            -0.2358
+          ],
+          "quickmap": [
+            -85.9948,
+            -0.2358
+          ],
+          "offset_m": 0,
+          "offset_px": 0
+        },
+        {
+          "at": [
+            0.3,
+            0.35
+          ],
+          "expected": [
+            -85.98476,
+            -0.55602
+          ],
+          "quickmap": [
+            -85.98476,
+            -0.55602
+          ],
+          "offset_m": 0.1,
+          "offset_px": 0.05
+        },
+        {
+          "at": [
+            0.7,
+            0.4
+          ],
+          "expected": [
+            -85.98824,
+            0.08567
+          ],
+          "quickmap": [
+            -85.98824,
+            0.08567
+          ],
+          "offset_m": 0.1,
+          "offset_px": 0.03
+        },
+        {
+          "at": [
+            0.4,
+            0.7
+          ],
+          "expected": [
+            -86.00791,
+            -0.39791
+          ],
+          "quickmap": [
+            -86.00791,
+            -0.39791
+          ],
+          "offset_m": 0.1,
+          "offset_px": 0.04
+        }
+      ],
+      "worst_offset_px": 0.05,
+      "link": "https://quickmap.lroc.im-ldi.com/?proj=27&prjExtent=-1500.03%2C120499.53%2C499.97%2C122499.53"
+    },
+    {
+      "id": "pgda-haworth",
+      "projection": "south polar stereographic (proj 27)",
+      "catalogue": [
+        -86.7639,
+        -22.777
+      ],
+      "view_centre_lat_lon": [
+        -86.7639,
+        -22.777
+      ],
+      "m_per_px": 2.5,
+      "hover_checks": [
+        {
+          "at": [
+            0.5,
+            0.5
+          ],
+          "expected": [
+            -86.7639,
+            -22.777
+          ],
+          "quickmap": [
+            -86.7639,
+            -22.777
+          ],
+          "offset_m": 0,
+          "offset_px": 0
+        },
+        {
+          "at": [
+            0.3,
+            0.35
+          ],
+          "expected": [
+            -86.74604,
+            -23.07462
+          ],
+          "quickmap": [
+            -86.74604,
+            -23.07462
+          ],
+          "offset_m": 0,
+          "offset_px": 0.02
+        },
+        {
+          "at": [
+            0.7,
+            0.4
+          ],
+          "expected": [
+            -86.76644,
+            -22.36442
+          ],
+          "quickmap": [
+            -86.76644,
+            -22.36442
+          ],
+          "offset_m": 0,
+          "offset_px": 0
+        },
+        {
+          "at": [
+            0.4,
+            0.7
+          ],
+          "expected": [
+            -86.77167,
+            -23.05159
+          ],
+          "quickmap": [
+            -86.77167,
+            -23.05159
+          ],
+          "offset_m": 0.1,
+          "offset_px": 0.05
+        }
+      ],
+      "worst_offset_px": 0.05,
+      "link": "https://quickmap.lroc.im-ldi.com/?proj=27&prjExtent=-39000.46%2C89501.19%2C-37000.46%2C91501.19"
+    },
+    {
+      "id": "pgda-shoemaker",
+      "projection": "south polar stereographic (proj 27)",
+      "catalogue": [
+        -87.1835,
+        62.835
+      ],
+      "view_centre_lat_lon": [
+        -87.1835,
+        62.835
+      ],
+      "m_per_px": 2.5,
+      "hover_checks": [
+        {
+          "at": [
+            0.5,
+            0.5
+          ],
+          "expected": [
+            -87.1835,
+            62.835
+          ],
+          "quickmap": [
+            -87.1835,
+            62.835
+          ],
+          "offset_m": 0,
+          "offset_px": 0
+        },
+        {
+          "at": [
+            0.3,
+            0.35
+          ],
+          "expected": [
+            -87.19892,
+            62.44499
+          ],
+          "quickmap": [
+            -87.19892,
+            62.44499
+          ],
+          "offset_m": 0,
+          "offset_px": 0.01
+        },
+        {
+          "at": [
+            0.7,
+            0.4
+          ],
+          "expected": [
+            -87.16049,
+            62.92377
+          ],
+          "quickmap": [
+            -87.16049,
+            62.92377
+          ],
+          "offset_m": 0,
+          "offset_px": 0.01
+        },
+        {
+          "at": [
+            0.4,
+            0.7
+          ],
+          "expected": [
+            -87.19951,
+            62.97004
+          ],
+          "quickmap": [
+            -87.19951,
+            62.97004
+          ],
+          "offset_m": 0,
+          "offset_px": 0
+        }
+      ],
+      "worst_offset_px": 0.01,
+      "link": "https://quickmap.lroc.im-ldi.com/?proj=27&prjExtent=75000.38%2C38000.22%2C77000.38%2C40000.22"
+    },
+    {
+      "id": "pgda-site01",
+      "projection": "south polar stereographic (proj 27)",
+      "catalogue": [
+        -89.4632,
+        -137.4896
+      ],
+      "view_centre_lat_lon": [
+        -89.4632,
+        -137.4896
+      ],
+      "m_per_px": 2.5,
+      "hover_checks": [
+        {
+          "at": [
+            0.5,
+            0.5
+          ],
+          "expected": [
+            -89.4632,
+            -137.4896
+          ],
+          "quickmap": [
+            -89.4632,
+            -137.4896
+          ],
+          "offset_m": 0,
+          "offset_px": 0
+        },
+        {
+          "at": [
+            0.3,
+            0.35
+          ],
+          "expected": [
+            -89.4548,
+            -135.04399
+          ],
+          "quickmap": [
+            -89.4548,
+            -135.04399
+          ],
+          "offset_m": 0,
+          "offset_px": 0.01
+        },
+        {
+          "at": [
+            0.7,
+            0.4
+          ],
+          "expected": [
+            -89.48312,
+            -138.83348
+          ],
+          "quickmap": [
+            -89.48312,
+            -138.83348
+          ],
+          "offset_m": 0.1,
+          "offset_px": 0.04
+        },
+        {
+          "at": [
+            0.4,
+            0.7
+          ],
+          "expected": [
+            -89.44588,
+            -137.55411
+          ],
+          "quickmap": [
+            -89.44588,
+            -137.55411
+          ],
+          "offset_m": 0.1,
+          "offset_px": 0.03
+        }
+      ],
+      "worst_offset_px": 0.04,
+      "link": "https://quickmap.lroc.im-ldi.com/?proj=27&prjExtent=-11999.23%2C-12999.18%2C-9999.23%2C-10999.18"
+    },
+    {
+      "id": "pgda-site20",
+      "projection": "south polar stereographic (proj 27)",
+      "catalogue": [
+        -85.4266,
+        31.7428
+      ],
+      "view_centre_lat_lon": [
+        -85.4266,
+        31.7428
+      ],
+      "m_per_px": 2.5,
+      "hover_checks": [
+        {
+          "at": [
+            0.5,
+            0.5
+          ],
+          "expected": [
+            -85.4266,
+            31.7428
+          ],
+          "quickmap": [
+            -85.4266,
+            31.7428
+          ],
+          "offset_m": 0,
+          "offset_px": 0
+        },
+        {
+          "at": [
+            0.3,
+            0.35
+          ],
+          "expected": [
+            -85.42995,
+            31.43791
+          ],
+          "quickmap": [
+            -85.42995,
+            31.43791
+          ],
+          "offset_m": 0,
+          "offset_px": 0.01
+        },
+        {
+          "at": [
+            0.7,
+            0.4
+          ],
+          "expected": [
+            -85.40916,
+            31.9381
+          ],
+          "quickmap": [
+            -85.40916,
+            31.9381
+          ],
+          "offset_m": 0,
+          "offset_px": 0
+        },
+        {
+          "at": [
+            0.4,
+            0.7
+          ],
+          "expected": [
+            -85.44371,
+            31.70983
+          ],
+          "quickmap": [
+            -85.44371,
+            31.70983
+          ],
+          "offset_m": 0.1,
+          "offset_px": 0.04
+        }
+      ],
+      "worst_offset_px": 0.04,
+      "link": "https://quickmap.lroc.im-ldi.com/?proj=27&prjExtent=71999.72%2C116999.36%2C73999.72%2C118999.36"
+    },
+    {
+      "id": "apollo-11",
+      "projection": "equidistant cylindrical (proj 16)",
+      "catalogue": [
+        0.674,
+        23.473
+      ],
+      "view_centre_lat_lon": [
+        0.674,
+        23.473
+      ],
+      "m_per_px": 2.5,
+      "hover_checks": [
+        {
+          "at": [
+            0.5,
+            0.5
+          ],
+          "expected": [
+            0.674,
+            23.473
+          ],
+          "quickmap": [
+            0.674,
+            23.473
+          ],
+          "offset_m": 0,
+          "offset_px": 0
+        },
+        {
+          "at": [
+            0.3,
+            0.35
+          ],
+          "expected": [
+            0.68389,
+            23.45051
+          ],
+          "quickmap": [
+            0.68389,
+            23.45051
+          ],
+          "offset_m": 0.1,
+          "offset_px": 0.04
+        },
+        {
+          "at": [
+            0.7,
+            0.4
+          ],
+          "expected": [
+            0.6806,
+            23.49549
+          ],
+          "quickmap": [
+            0.6806,
+            23.49549
+          ],
+          "offset_m": 0.1,
+          "offset_px": 0.05
+        },
+        {
+          "at": [
+            0.4,
+            0.7
+          ],
+          "expected": [
+            0.66081,
+            23.46175
+          ],
+          "quickmap": [
+            0.66081,
+            23.46175
+          ],
+          "offset_m": 0.1,
+          "offset_px": 0.05
+        }
+      ],
+      "worst_offset_px": 0.05,
+      "link": "https://quickmap.lroc.im-ldi.com/?proj=16&prjExtent=710780.00%2C19437.94%2C712780.00%2C21437.94"
+    },
+    {
+      "id": "apollo-12",
+      "projection": "equidistant cylindrical (proj 16)",
+      "catalogue": [
+        -3.013,
+        -23.422
+      ],
+      "view_centre_lat_lon": [
+        -3.013,
+        -23.422
+      ],
+      "m_per_px": 2.5,
+      "hover_checks": [
+        {
+          "at": [
+            0.5,
+            0.5
+          ],
+          "expected": [
+            -3.013,
+            -23.422
+          ],
+          "quickmap": [
+            -3.013,
+            -23.422
+          ],
+          "offset_m": 0,
+          "offset_px": 0
+        },
+        {
+          "at": [
+            0.3,
+            0.35
+          ],
+          "expected": [
+            -3.00311,
+            -23.44449
+          ],
+          "quickmap": [
+            -3.00311,
+            -23.44449
+          ],
+          "offset_m": 0.1,
+          "offset_px": 0.04
+        },
+        {
+          "at": [
+            0.7,
+            0.4
+          ],
+          "expected": [
+            -3.0064,
+            -23.39951
+          ],
+          "quickmap": [
+            -3.0064,
+            -23.39951
+          ],
+          "offset_m": 0.1,
+          "offset_px": 0.05
+        },
+        {
+          "at": [
+            0.4,
+            0.7
+          ],
+          "expected": [
+            -3.02619,
+            -23.43325
+          ],
+          "quickmap": [
+            -3.02619,
+            -23.43325
+          ],
+          "offset_m": 0.1,
+          "offset_px": 0.06
+        }
+      ],
+      "worst_offset_px": 0.06,
+      "link": "https://quickmap.lroc.im-ldi.com/?proj=16&prjExtent=-711233.51%2C-92364.25%2C-709233.51%2C-90364.25"
+    },
+    {
+      "id": "apollo-17",
+      "projection": "equidistant cylindrical (proj 16)",
+      "catalogue": [
+        20.191,
+        30.772
+      ],
+      "view_centre_lat_lon": [
+        20.191,
+        30.772
+      ],
+      "m_per_px": 2.5,
+      "hover_checks": [
+        {
+          "at": [
+            0.5,
+            0.5
+          ],
+          "expected": [
+            20.191,
+            30.772
+          ],
+          "quickmap": [
+            20.191,
+            30.772
+          ],
+          "offset_m": 0,
+          "offset_px": 0
+        },
+        {
+          "at": [
+            0.3,
+            0.35
+          ],
+          "expected": [
+            20.20089,
+            30.74951
+          ],
+          "quickmap": [
+            20.20089,
+            30.74951
+          ],
+          "offset_m": 0.1,
+          "offset_px": 0.04
+        },
+        {
+          "at": [
+            0.7,
+            0.4
+          ],
+          "expected": [
+            20.1976,
+            30.79449
+          ],
+          "quickmap": [
+            20.1976,
+            30.79449
+          ],
+          "offset_m": 0.1,
+          "offset_px": 0.05
+        },
+        {
+          "at": [
+            0.4,
+            0.7
+          ],
+          "expected": [
+            20.17781,
+            30.76075
+          ],
+          "quickmap": [
+            20.17781,
+            30.76075
+          ],
+          "offset_m": 0.1,
+          "offset_px": 0.06
+        }
+      ],
+      "worst_offset_px": 0.06,
+      "link": "https://quickmap.lroc.im-ldi.com/?proj=16&prjExtent=932110.14%2C611258.77%2C934110.14%2C613258.77"
+    }
+  ]
+}
