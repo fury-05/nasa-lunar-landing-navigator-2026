@@ -4,7 +4,7 @@
 |---|---|---|---|---|
 | P0 | 12 | 0 | 0 | 12 |
 | P1 | 9 | 2 | 0 | 11 |
-| P2 | 6 | 6 | 0 | 12 |
+| P2 | 7 | 5 | 0 | 12 |
 | P3 | 0 | 9 | 0 | 9 |
 | P4 | 0 | 11 | 0 | 11 |
 | P5 | 0 | 7 | 0 | 7 |
@@ -43,7 +43,7 @@
 | P2-05 | Interpolation, event detection and time remaining | irfan | DONE | lunar_engine.events: Hermite (Catmull-Rom) interpolation, find_events bisected to 1 s, intervals above and below with open-end flags, combine, complement, time_remaining; 10 tests: sine crossings within 1.5 s, level crossings, exact span lists, real Horizons Sun day: our limb set matches the Horizons RTS set within 2 minutes and noon-to-sunset is 8.0 to 8.8 h; bug found by tests: series starting on the level had no open start, fixed; issue #49 |
 | P2-06 | Metrics: sunlight, dark, power index modes, Earth windows and outages | irfan | DONE | lunar_engine.metrics: sun_metrics (visible share, sunlight hours, longest dark with open-end flag, elevation min/mean/max, power index horizontal and tracking scaled by 1/distance^2), earth_metrics (windows, outages, longest outage, mask angle), both_up, neither; vectorised disc visibility; 15 tests incl. analytic sine skies, inverse-square scaling, offset equals raised skyline, mask angle, real Horizons Sun day (19 to 20.5 h of light); bug found by tests and fixed in lunar_engine.events: a crossing exactly on a scan point was dropped (a 2 h Earth link error); power index is relative W/m2 on the array plane, not a lander budget; issue #50 |
 | P2-07 | Sensitivity band and robust or fragile verdicts | irfan | DONE | lunar_engine.sensitivity: assess() runs every metric at skyline +delta, 0, -delta (delta = max(0.1, sqrt(skyline^2 + frame^2)) with assumed 0.2 and 0.03 deg, labelled not yet measured), Band for each metric, robust only if all three verdicts agree; 8 tests: ordering pessimistic <= nominal <= optimistic, zero delta collapses the band, band edges equal independent runs, robust far from thresholds, fragile when the error straddles a threshold; viability criteria are NOT defined by any source so PLACEHOLDER_CRITERIA is marked pending-source and approval item A8 asks a human; issue #51 |
-| P2-08 | Compare and slip matrix computation (vectorised) | irfan | PENDING | issue #52 |
+| P2-08 | Compare and slip matrix computation (vectorised) | irfan | DONE | lunar_engine.compare: SiteSky bundle, slice_series, assess_window, compare (site x window matrix), deltas with better side, slip_matrix (viable/marginal/not viable, glyph, robust flag), best_start, shift_sensitivity; 8 tests incl. a drifting Sun where later starts lose sunlight and a one-day period that must not change under a one-day slip; mutation check: flipping the better side and ignoring the offset were both caught by tests; whole-matrix speed 4.9 s for the test suite (precompute handles scale); issue #52 |
 | P2-09 | Precompute pipeline and storage layout for catalogue sites | irfan | PENDING | issue #53 |
 | P2-10 | Validation suite items 1 to 8 automated where possible, human QuickMap checklist prepared | afreen | PENDING | issue #54 |
 | P2-11 | Run human QuickMap and Trek spot checks; record permalinks and screenshots | member3 | PENDING | issue #55 |
