@@ -17,17 +17,23 @@ Tiles: `https://trek.nasa.gov/tiles/Moon/SP/<layerId>/1.0.0/default/default028mm
 ## Raw elevation: answer
 No height layer is offered as raw values. The Topography layers marked raw are LOLA shot counts (confidence). Height-like layers are 8-bit grayscale or colour hillshade. See ADR-0002 and ADR-0003.
 
-## Candidate layers for the map (not yet chosen, P1-05)
-| layerId | what | resolution | type |
-|---|---|---|---|
-| LRO_LOLA_Gray_SPole875_5mp_v04 | LOLA DEM south pole 87.5 deg, grayscale | 5 m/px | 8-bit gray |
-| LRO_LOLA_Gray_SPole75_30mp_v04 | LOLA DEM south pole 75 deg, grayscale | 30 m/px | 8-bit gray |
-| LRO_LOLA_Gray_SPole45_100mp_v04 | LOLA DEM south pole 45 deg, grayscale | 100 m/px | 8-bit gray |
-| CE2_Hillshade_20m_SP | Chang'e 2 hillshade (not NASA data; do not use without an ADR) | 20 m/px | 8-bit gray |
+## Chosen layers for the map and 3D drape (P1-05)
+All four share the tile matrix set `default028mm` (256 px tiles, top-left corner -1095930, 1095930, scale denominator 3.0578404e7 / 2^z, so 8561.95 m/px at level 0), image/png, CORS header `Access-Control-Allow-Origin: *` (seen on a tile response). Credit text is the `Credit` field of each layer's FGDC metadata, copied exactly; `Use_Constraints` and `Access_Constraints` both read "None" in that metadata. That is the metadata's wording, not a legal opinion; the Trek terms page is still a human check (todo/APPROVALS.md A1).
 
-Layer credit strings: pending-source until read from the layer metadata (P1-05).
+| layerId | role | max zoom | finest m/px | data half-extent | Credit (verbatim) |
+|---|---|---|---|---|---|
+| LRO_WAC_Mosaic_SPole60_100m_v02 | regional context image, 60 S to the pole | 5 | 267.56 | 1095.7 km | The LROC Team |
+| LRO_NAC_Mosaic_SPole85.5_1mp | close-up image near the pole | 11 | 4.18 | 136.5 km | The Lunar Mapping and Modeling Project (LMMP) Team |
+| LRO_LOLA_Gray_SPole875_5mp_v04 | terrain shading, 8-bit (not elevation) | 9 | 16.72 | 75.8 km | LOLA Instrument Team from Goddard Space Flight Center, NASA |
+| LRO_LOLA_Gray_SPole75_30mp_v04 | terrain shading, 8-bit (not elevation) | 6 | 133.78 | 457.4 km | LOLA Instrument Team from Goddard Space Flight Center, NASA |
 
-## Still to verify by a human (Luz)
-1. Open https://trek.nasa.gov/moon/ and confirm the three layers above render in the south pole view.
-2. Record the credit text Trek shows for each.
-3. Confirm browser CORS access to a tile from a page on another origin (not yet tested).
+Notes on what was measured:
+* The "5 m" and "30 m" in the LOLA names are the source resolution; the tile pyramid stops at 16.72 m/px and 133.78 m/px. Level 6 of the WAC layer returned HTTP 404; level 5 returned 200.
+* Tiles at z=3 rows/cols 3/3, 4/3 and 4/4 returned 200 with 60 to 65 KB of PNG.
+* The Chang'e 2 hillshade and CE-2 ortho mosaic layers are not NASA data and are not used.
+* A 5 m LOLA grayscale tile is 8-bit shading, so it is for looks only. Elevation numbers come from the PGDA GeoTIFFs (ADR-0003).
+* Code: `packages/engine/src/lunar_engine/trek.py` (tile maths, URLs, attribution strings) with tests in `test_trek.py`.
+
+## Still to verify by a human (Luz), also in todo/APPROVALS.md
+1. Open https://trek.nasa.gov/moon/ and confirm the layers render in the south pole view and that the credit shown on screen matches the strings above.
+2. Confirm the Trek usage terms page for the licence cell in docs/ATTRIBUTION.md.

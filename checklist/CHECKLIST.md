@@ -3,7 +3,7 @@
 | Phase | Done | Pending | Postponed | Total |
 |---|---|---|---|---|
 | P0 | 12 | 0 | 0 | 12 |
-| P1 | 7 | 4 | 0 | 11 |
+| P1 | 8 | 3 | 0 | 11 |
 | P2 | 0 | 12 | 0 | 12 |
 | P3 | 0 | 9 | 0 | 9 |
 | P4 | 0 | 11 | 0 | 11 |
@@ -29,7 +29,7 @@
 | P1-02 | Record real Horizons fixtures and pass convention tests (east longitude, Earth near zenith, frame header captured, ADR-0004) | irfan | DONE | 5 real Horizons responses recorded (horizons_cache/INDEX.json, retrieved 2026-11-14T17:49Z); 8 convention tests pass offline: 30E Earth az 273-274, 30W az 87-88, Earth elev 83 at 0N 0E, Sun at -89.9 lat 1.04..1.49 deg; frame header MEAN_ME captured; ADR-0004; issue #25 |
 | P1-03 | Horizons RTS cross-check helper with RAD mode and fixtures | irfan | DONE | lunar_engine.ephemeris.rts (rts_events, events_from_table, crossing_times); 2 new real fixtures; 5 tests pass: Horizons reports 1 sunset 2026-12-01T20:24:00Z at lon 0 lat 0, our upper-limb crossing agrees within 2 minutes; finding: Horizons RTS flags the upper limb (elevation -0.27 deg), the disc centre sets about 32 minutes earlier; issue #26 |
 | P1-04 | Trek discovery: GetCapabilities for EQ, NP, SP, layer catalogue, CORS check, raw elevation availability (ADR-0002, docs/data/trek-layers.md) | member3 | DONE | Trek layer list (347 south pole layers) and per-layer WMTS capabilities checked; no raw elevation endpoint; ADR-0002, ADR-0003, docs/data/trek-layers.md, scripts/trek_discover.py; CORS check not done, listed for Luz; work done by Claude with Luz as task owner; issue #27 |
-| P1-05 | Trek layer selection and attribution strings (WAC mosaic, polar relief) | member3 | PENDING |  |
+| P1-05 | Trek layer selection and attribution strings (WAC mosaic, polar relief) | member3 | DONE | 4 layers chosen (WAC 100 m, NAC 1 m, two LOLA shading layers) with verbatim FGDC Credit text, tile matrix, max zoom and extent read from each layer capabilities; lunar_engine.trek (tile maths, URLs, attribution_line) + 5 tests; CORS header seen; the Trek terms page and on-screen credit check are human items A1 and A4; issue #28 |
 | P1-06 | QuickMap deep link builder verified against the live permalink format (docs/data/quickmap-links.md) | member3 | DONE | south polar proj id 27 read from QuickMap Projection menu; prjExtent maths verified: 9 sites x 4 hover checks, worst 0.06 px, max 0.1 m (data/quickmap-verification.json); time= parameter confirmed; shadow layer 4072 decoded; lunar_engine.links.quickmap_link + 8 tests; docs/data/quickmap-links.md; shadow-layer validation is a human check for Luz; issue #29 |
 | P1-07 | Site catalogue v1 with source url and retrieval time per record (Apollo, CLPS, Artemis regions, other agencies); unsourced rows stay pending-source | afreen | DONE | data/sites.json: 36 records (6 Apollo from NSSDC table, 27 PGDA tile centres derived from GeoTIFF headers and cross-checked to Trek bbox, 3 CLPS missions with coordinates pending-source); every record has source url and retrieval time; 104 python tests pass; scripts/build_site_catalogue.py; issue #30 |
 | P1-08 | DEM decision ADR-0003 and acquisition script with checksums; build COG pyramid (near, mid, far) | irfan | PENDING | ADR-0003; scripts/fetch_dem.py; 10 PGDA 5 m tiles (610 MB) downloaded on the VM, sha256 re-verified against data/MANIFEST.json (10 of 10); COG pyramid NOT built yet and far tiers are pending-source; issue #31 |
