@@ -2,7 +2,7 @@
 
 | Phase | Done | Pending | Postponed | Total |
 |---|---|---|---|---|
-| P0 | 0 | 12 | 0 | 12 |
+| P0 | 2 | 10 | 0 | 12 |
 | P1 | 0 | 11 | 0 | 11 |
 | P2 | 0 | 12 | 0 | 12 |
 | P3 | 0 | 9 | 0 | 9 |
@@ -13,10 +13,10 @@
 
 | ID | Task | Owner | Status | Evidence / Notes |
 |---|---|---|---|---|
-| P0-01 | Run start gate, record start (scripts/start-gate.sh, record-start.sh) | irfan | PENDING |  |
-| P0-02 | Confirm identity mapping, noreply emails and consent for each teammate; operator gh login as fury-05 | irfan | PENDING |  |
-| P0-03 | Create GitHub repo after start (Apache-2.0), invite collaborators, protect main (PR and CI required, no required approvals), labels, milestones P0 to P7 | irfan | PENDING |  |
-| P0-04 | First commit: add instruction pack; tag v0.0.0-start | irfan | PENDING |  |
+| P0-01 | Run start gate, record start (scripts/start-gate.sh, record-start.sh) | irfan | DONE | start-gate.sh passed 2026-11-14T15:17:30Z (start 15:17:20Z); record-start.sh output in docs/START_LOG.md; issue #1 |
+| P0-02 | Confirm identity mapping, noreply emails and consent for each teammate; operator gh login as fury-05 | irfan | PENDING | emails filled from gh api ids; COMMIT_MODE=coauthor; teammate consent for Co-authored-by credit not yet confirmed; issue #2 |
+| P0-03 | Create GitHub repo after start (Apache-2.0), invite collaborators, protect main (PR and CI required, no required approvals), labels, milestones P0 to P7 | irfan | PENDING | repo public Apache-2.0 created 2026-11-14T15:22:40Z, invites sent to Stella-10 and nluz4105-ai (pending acceptance), labels and milestones P0-P7 done; main protection pending CI; issue #3 |
+| P0-04 | First commit: add instruction pack; tag v0.0.0-start | irfan | DONE | commit eec0a35 pushed, tag v0.0.0-start pushed; issue #4 |
 | P0-05 | Scaffold monorepo (apps/web, services/api, packages/engine, packages/contracts, data, infra) | irfan | PENDING |  |
 | P0-06 | Tooling: ruff, mypy, pytest, eslint, prettier, vitest, playwright, commit hook, pre-commit | afreen | PENDING |  |
 | P0-07 | CI workflow green on main (dashes, checklist, python, web, secrets, licences) | irfan | PENDING |  |
