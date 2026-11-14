@@ -8,6 +8,7 @@ slice of those series, so a slip of N days is the same series read N days later,
 
 from __future__ import annotations
 
+import bisect
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
@@ -34,10 +35,10 @@ def slice_series(series: BodySeries, start: datetime, end: datetime) -> BodySeri
         raise ValueError("window is outside the series coverage")
     if end <= start:
         raise ValueError("window must have positive length")
-    idx = [i for i, t in enumerate(series.times) if start <= t <= end]
-    if len(idx) < 2:
+    a = bisect.bisect_left(series.times, start)
+    b = bisect.bisect_right(series.times, end)
+    if b - a < 2:
         raise ValueError("window holds fewer than two samples")
-    a, b = idx[0], idx[-1] + 1
     return BodySeries(
         series.times[a:b], series.azimuth_deg[a:b], series.elevation_deg[a:b],
         series.distance_km[a:b],
