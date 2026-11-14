@@ -108,7 +108,12 @@ class Skyline:
     sphere_dip_deg: float
 
     def covered_fraction(self) -> float:
-        """Share of azimuths whose ray reached the requested range (full coverage)."""
+        """Share of azimuths whose ray reached the requested range (full coverage).
+
+        A skyline built without any terrain (max_range_m of 0) has no coverage at all.
+        """
+        if self.max_range_m <= 0.0:
+            return 0.0
         return float(np.mean(self.reach_m >= self.max_range_m - 1e-6))
 
     def min_reach_m(self) -> float:

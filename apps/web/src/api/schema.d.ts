@@ -639,6 +639,8 @@ export interface components {
             uncertainty: {
                 [key: string]: unknown;
             };
+            /** Warnings */
+            warnings: string[];
         };
         /** QuickmapOut */
         QuickmapOut: {

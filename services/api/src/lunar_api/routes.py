@@ -115,6 +115,26 @@ def parse_utc(text: str, field: str) -> datetime:
     return t.replace(tzinfo=UTC) if t.tzinfo is None else t.astimezone(UTC)
 
 
+def terrain_warnings(meta: dict[str, Any]) -> list[str]:
+    """Plain-language caveats that must travel with every number from this site."""
+    out: list[str] = []
+    if meta.get("terrain_unavailable"):
+        out.append(
+            "No terrain data covers this site. The horizon is a bare sphere, so sunlight and "
+            "Earth visibility can only be overstated. Do not use for site selection."
+        )
+        return out
+    sky = meta.get("skyline", {})
+    if sky.get("covered_fraction", 1.0) < 1.0:
+        out.append(
+            f"Terrain data ends {sky.get('min_reach_m', 0) / 1000:.0f} to "
+            f"{sky.get('max_reach_m', 0) / 1000:.0f} km from the site, before the requested "
+            f"{sky.get('max_range_m', 0) / 1000:.0f} km. Distant terrain is missing, so the real "
+            "skyline can only be higher and the real sunlight and Earth visibility lower."
+        )
+    return out
+
+
 def provenance(
     meta: dict[str, Any], inputs: dict[str, Any], assumptions: list[str]
 ) -> dict[str, Any]:
@@ -137,6 +157,7 @@ def provenance(
         "frame_note": "Horizons MEAN_ME frame and PGDA MOON_ME DEM treated as equal; "
         "up to about 0.03 degrees of orientation uncertainty is assumed.",
         "assumptions": list(meta.get("assumptions", [])) + assumptions,
+        "warnings": terrain_warnings(meta),
         "uncertainty": {
             "skyline_deg": 0.2,
             "frame_deg": 0.03,

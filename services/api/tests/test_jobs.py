@@ -307,3 +307,28 @@ def test_sse_sends_keepalive_comments_and_stops_at_its_time_limit(http, monkeypa
     assert text.count("event: progress") == 1  # unchanged state is not repeated
     assert ": keepalive" in text and "event: timeout" in text and "event: end" not in text
     assert "\n\n\n\n" not in text  # no empty frames
+
+
+def test_a_no_terrain_site_says_so_in_every_response_it_serves(http) -> None:  # type: ignore[no-untyped-def]
+    client, _store, _root = http
+    far = {"lat": -85.0, "lon": 150.0}  # far from the test tile
+    r = client.post("/api/v1/sites/custom", json=far)
+    assert r.status_code == 202
+    done = _wait_done(client, r.json()["job_id"])
+    assert done["status"] == "done" and done["result"]["terrain_unavailable"] is True
+    sid = done["result"]["site_id"]
+    win = {"start": "2026-12-03T00:00:00Z", "end": "2026-12-06T00:00:00Z"}
+    detail = client.get(f"/api/v1/sites/{sid}").json()
+    assert detail["terrain_unavailable"] is True and detail["sources"] == ["horizons"]
+    sky = client.get(f"/api/v1/sites/{sid}/skyline").json()
+    assert sky["covered_fraction"] == 0.0 and max(sky["reach_m"]) == 0
+    for url, params in (
+        (f"/api/v1/sites/{sid}/assess", win),
+        (f"/api/v1/sites/{sid}/skyline", None),
+        (f"/api/v1/sites/{sid}/state", {"t": "2026-12-03T06:00:00Z"}),
+    ):
+        body = client.get(url, params=params).json()
+        warnings = body["provenance"]["warnings"]
+        assert len(warnings) == 1 and "Do not use for site selection" in warnings[0], url
+    listing = {s["id"]: s for s in client.get("/api/v1/sites").json()["sites"]}
+    assert listing[sid]["terrain_coverage"]["covered_fraction"] == 0.0
