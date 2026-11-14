@@ -21,3 +21,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-14T19:35:10Z | irfan | P2-05 | interpolation, event detection, intervals, time remaining; matches Horizons RTS within 2 min | feat/engine-events
 2026-11-14T19:42:33Z | irfan | P2-06 | site metrics (sun, earth, power index, outages), event detection bug fixed | feat/engine-metrics
 2026-11-14T19:46:57Z | irfan | P2-07 | sensitivity band and robust or fragile verdicts; criteria are placeholders pending approval A8 | feat/engine-sensitivity
+2026-11-14T19:58:21Z | irfan | P2-08,#104 | compare and slip matrix; skip link e2e flake fixed | feat/engine-analysis
