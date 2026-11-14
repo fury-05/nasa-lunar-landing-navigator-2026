@@ -9,3 +9,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-14T18:05:00Z | irfan | P1-01,P1-02 | Horizons client, parser, real fixtures, convention tests (28 python tests pass), ADR-0004 | feat/engine-horizons-client
 2026-11-14T18:25:00Z | member3+irfan | P1-04 | Trek discovery: no raw elevation endpoint, ADR-0002 and ADR-0003 (PGDA 5 m LOLA tiles, 16 km), trek_discover.py | docs/p1-trek-discovery
 2026-11-14T18:50:00Z | afreen+irfan | P1-07 | site catalogue v1: 36 sourced or pending-source records, never invented | feat/data-site-catalogue
+2026-11-14T19:15:00Z | irfan+member3 | P1-03,P1-06 | RTS cross-check (limb vs centre finding), QuickMap URL parameters recorded, polar proj id unverified | feat/data-dem-acquisition
