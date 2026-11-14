@@ -31,3 +31,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-14T20:53:25Z | afreen+irfan | P3-06 | OpenAPI export, typed TS client, contract tests, CI drift checks | feat/api-contract
 2026-11-14T21:00:58Z | irfan | P3-07 | rate limits, ETags and cache headers | feat/api-caching
 2026-11-14T21:12:18Z | irfan | P3-09 | API security review: 62 tests, 6 findings fixed, limits stated | feat/api-security
+2026-11-14T21:23:05Z | irfan | P3-02 | database models and migration 0001 proven on real Postgres 16 | feat/api-database

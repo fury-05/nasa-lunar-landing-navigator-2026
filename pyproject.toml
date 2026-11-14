@@ -21,7 +21,7 @@ lunar-engine = { workspace = true }
 lunar-api = { workspace = true }
 
 [tool.ruff]
-extend-exclude = ["scripts"]
+extend-exclude = ["scripts", "services/api/migrations/versions"]
 line-length = 100
 target-version = "py312"
 [tool.ruff.lint]

@@ -1,9 +1,10 @@
 import os
 
 from alembic import context
+from lunar_api.models import Base
 from sqlalchemy import create_engine
 
-target_metadata = None
+target_metadata = Base.metadata
 
 
 def run() -> None:
