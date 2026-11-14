@@ -43,3 +43,11 @@ addopts = "-q"
 [[tool.mypy.overrides]]
 module = ["rasterio", "rasterio.*"]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["numba", "numba.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["lunar_engine.skyline"]
+disallow_untyped_decorators = false

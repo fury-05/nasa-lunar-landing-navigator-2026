@@ -4,7 +4,7 @@
 |---|---|---|---|---|
 | P0 | 12 | 0 | 0 | 12 |
 | P1 | 9 | 2 | 0 | 11 |
-| P2 | 1 | 11 | 0 | 12 |
+| P2 | 2 | 10 | 0 | 12 |
 | P3 | 0 | 9 | 0 | 9 |
 | P4 | 0 | 11 | 0 | 11 |
 | P5 | 0 | 7 | 0 | 7 |
@@ -36,57 +36,57 @@
 | P1-09 | data/MANIFEST.json and ATTRIBUTION rows for every dataset | irfan | DONE | data/MANIFEST.json lists 10 files with url, size, sha256, retrieval time, licence status (pending-source) and citation; ATTRIBUTION rows: horizons, trek-moon, quickmap, csa-moon, lola-dem, nssdc-apollo, nasa-clps; tests check the manifest; issue #32 |
 | P1-10 | CSA content set for Public View: links and short paraphrased blurbs with attribution | member3 | DONE | data/content/csa.json: 6 paraphrased blurbs, each linked to its CSA page with credit and a no-endorsement line; facts checked against the retrieved page text; CSA terms read and summarised (non-commercial use with acknowledgement); 3 tests; whether our use fits the terms is human item A1; issue #33 |
 | P1-11 | Start 3 year precompute of curated sites in the background on the VM | irfan | PENDING |  |
-| P2-01 | Geometry primitives and curvature-aware elevation formula with tests | irfan | DONE | lunar_engine.geometry: elevation formula, sphere dip, horizon distance, great-circle helpers, azimuth unwrap; 17 tests incl. independent vector derivation and hypothesis properties; finding: docs/04 says 0.07 deg at 100 km and 3 km, exact value is 0.0669 deg (rounds to 0.07); issue pending |
-| P2-02 | DEM window reader (pyproj polar stereographic, rasterio, bilinear) with multi-tier merge | irfan | PENDING |  |
-| P2-03 | Skyline ray caster (numba), coverage flags, benchmark meets targets | irfan | PENDING |  |
-| P2-04 | Disc visibility integrator with analytic tests | irfan | PENDING |  |
-| P2-05 | Interpolation, event detection and time remaining | irfan | PENDING |  |
-| P2-06 | Metrics: sunlight, dark, power index modes, Earth windows and outages | irfan | PENDING |  |
-| P2-07 | Sensitivity band and robust or fragile verdicts | irfan | PENDING |  |
-| P2-08 | Compare and slip matrix computation (vectorised) | irfan | PENDING |  |
-| P2-09 | Precompute pipeline and storage layout for catalogue sites | irfan | PENDING |  |
-| P2-10 | Validation suite items 1 to 8 automated where possible, human QuickMap checklist prepared | afreen | PENDING |  |
-| P2-11 | Run human QuickMap and Trek spot checks; record permalinks and screenshots | member3 | PENDING |  |
-| P2-12 | docs/validation/REPORT.md with measured error budget | irfan | PENDING |  |
-| P3-01 | FastAPI skeleton: config, logging, request ids, RFC 7807 errors | irfan | PENDING |  |
-| P3-02 | Database schema and Alembic migrations | irfan | PENDING |  |
-| P3-03 | Routes: sites, skyline, timeline, state, compare, slip-matrix | irfan | PENDING |  |
-| P3-04 | Job queue (arq) with SSE progress and timeouts | irfan | PENDING |  |
-| P3-05 | Provenance and attribution endpoints | irfan | PENDING |  |
-| P3-06 | OpenAPI export, generated TS client, contract tests | afreen | PENDING |  |
-| P3-07 | Rate limiting, caching headers, ETag | irfan | PENDING |  |
-| P3-08 | Deploy to VM, smoke tests, load test results recorded | irfan | PENDING |  |
-| P3-09 | Input validation and security review of the API | irfan | PENDING |  |
-| P4-01 | Design system complete: tokens, glass components, motion, contrast checks | afreen | PENDING |  |
-| P4-02 | App shell, routes, URL state, mock API from OpenAPI | afreen | PENDING |  |
-| P4-03 | Site picker with search, filters, custom coordinates, validation | afreen | PENDING |  |
-| P4-04 | Date control with lunar-day jumps and range presets | afreen | PENDING |  |
-| P4-05 | Sky view: polar plot and horizon strip with real skyline and discs | afreen | PENDING |  |
-| P4-06 | Metrics panel and countdown chips with sensitivity band | afreen | PENDING |  |
-| P4-07 | Timeline strips with zoom and event markers | afreen | PENDING |  |
-| P4-08 | Compare board and flip mode | afreen | PENDING |  |
-| P4-09 | Slip matrix and what-changes-if panel | afreen | PENDING |  |
-| P4-10 | Export CSV, PNG, permalink, scenario summary | afreen | PENDING |  |
-| P4-11 | Loading, error and degraded states; keyboard and screen reader pass | afreen | PENDING |  |
-| P5-01 | Terrain tile endpoint (heightfield) and slope layer in the API | irfan | PENDING |  |
-| P5-02 | 2D polar map with OpenLayers, proj4 and Trek SP tiles, site markers | afreen | PENDING |  |
-| P5-03 | Moon globe with Trek equirectangular tiles and real Sun and Earth directions | member3 | PENDING |  |
-| P5-04 | Local 3D terrain with draped imagery, Sun light, shadows, exaggeration control | afreen | PENDING |  |
-| P5-05 | Sky dome first-person view with skyline and discs | member3 | PENDING |  |
-| P5-06 | Shared mission clock and animation controls across all views | afreen | PENDING |  |
-| P5-07 | 3D performance, LOD, tile cache, reduced-motion and low-power fallback | member3 | PENDING |  |
-| P6-01 | Lander profile model: arrays, battery, loads, slope and thermal limits | irfan | PENDING |  |
-| P6-02 | Suitability engine and /lander/assess with tests | irfan | PENDING |  |
-| P6-03 | Spacecraft Dashboard UI | afreen | PENDING |  |
-| P6-04 | Public View guided story, glossary, simple and detailed modes, CSA and NASA links with attribution | member3 | PENDING |  |
-| P6-05 | Mission objective presets (science versus engineering constraints) | member3 | PENDING |  |
-| P6-06 | Saved scenarios and brief export (permalink, PNG, summary text) | irfan | PENDING |  |
-| P7-01 | Accessibility audit and fixes (axe, keyboard, contrast, reduced motion) | afreen | PENDING |  |
-| P7-02 | Performance audit and fixes (Lighthouse, bundle, 3D) | afreen | PENDING |  |
-| P7-03 | Security hardening, dependency audit, secret scan, headers | irfan | PENDING |  |
-| P7-04 | Resilience drills: Horizons outage, backup restore, service kill, rollback | irfan | PENDING |  |
-| P7-05 | Attribution audit, in-app Credits page, third-party licence report, NOTICE | member3 | PENDING |  |
-| P7-06 | Docs: README, user guide, architecture, validation report, SI_USAGE final | member3 | PENDING |  |
-| P7-07 | Demo assets: 3 minute script, screenshots, submission text draft | member3 | PENDING |  |
-| P7-08 | Final deploy, uptime check, tag v1.0.0, release notes, START_PROOF export | irfan | PENDING |  |
-| P7-09 | Feature freeze and final gate: checklist all DONE (--require-complete) | irfan | PENDING |  |
+| P2-01 | Geometry primitives and curvature-aware elevation formula with tests | irfan | DONE | lunar_engine.geometry: elevation formula, sphere dip, horizon distance, great-circle helpers, azimuth unwrap; 17 tests incl. independent vector derivation and hypothesis properties; finding: docs/04 says 0.07 deg at 100 km and 3 km, exact value is 0.0669 deg (rounds to 0.07); issue #45 |
+| P2-02 | DEM window reader (pyproj polar stereographic, rasterio, bilinear) with multi-tier merge | irfan | PENDING | issue #46 |
+| P2-03 | Skyline ray caster (numba), coverage flags, benchmark meets targets | irfan | DONE | lunar_engine.skyline.cast_skyline (numba, parallel azimuths, 0.25 deg, curvature-aware, sphere-dip floor, per-azimuth reach for coverage flags); 14 tests on synthetic terrain (flat ground = dip, disc at known distance/height/azimuth, eye height monotonic, NaN hole, tile edge); real Shackleton-rim tile: 1440 azimuths to 16 km in 380 ms (target under 3 s cold); NOT yet validated against QuickMap or Trek, see P2-10 and P2-11; mid and far tiers missing (approval A2); issue #47 |
+| P2-04 | Disc visibility integrator with analytic tests | irfan | PENDING | issue #48 |
+| P2-05 | Interpolation, event detection and time remaining | irfan | PENDING | issue #49 |
+| P2-06 | Metrics: sunlight, dark, power index modes, Earth windows and outages | irfan | PENDING | issue #50 |
+| P2-07 | Sensitivity band and robust or fragile verdicts | irfan | PENDING | issue #51 |
+| P2-08 | Compare and slip matrix computation (vectorised) | irfan | PENDING | issue #52 |
+| P2-09 | Precompute pipeline and storage layout for catalogue sites | irfan | PENDING | issue #53 |
+| P2-10 | Validation suite items 1 to 8 automated where possible, human QuickMap checklist prepared | afreen | PENDING | issue #54 |
+| P2-11 | Run human QuickMap and Trek spot checks; record permalinks and screenshots | member3 | PENDING | issue #55 |
+| P2-12 | docs/validation/REPORT.md with measured error budget | irfan | PENDING | issue #56 |
+| P3-01 | FastAPI skeleton: config, logging, request ids, RFC 7807 errors | irfan | PENDING | issue #57 |
+| P3-02 | Database schema and Alembic migrations | irfan | PENDING | issue #58 |
+| P3-03 | Routes: sites, skyline, timeline, state, compare, slip-matrix | irfan | PENDING | issue #59 |
+| P3-04 | Job queue (arq) with SSE progress and timeouts | irfan | PENDING | issue #60 |
+| P3-05 | Provenance and attribution endpoints | irfan | PENDING | issue #61 |
+| P3-06 | OpenAPI export, generated TS client, contract tests | afreen | PENDING | issue #62 |
+| P3-07 | Rate limiting, caching headers, ETag | irfan | PENDING | issue #63 |
+| P3-08 | Deploy to VM, smoke tests, load test results recorded | irfan | PENDING | issue #64 |
+| P3-09 | Input validation and security review of the API | irfan | PENDING | issue #65 |
+| P4-01 | Design system complete: tokens, glass components, motion, contrast checks | afreen | PENDING | issue #66 |
+| P4-02 | App shell, routes, URL state, mock API from OpenAPI | afreen | PENDING | issue #67 |
+| P4-03 | Site picker with search, filters, custom coordinates, validation | afreen | PENDING | issue #68 |
+| P4-04 | Date control with lunar-day jumps and range presets | afreen | PENDING | issue #69 |
+| P4-05 | Sky view: polar plot and horizon strip with real skyline and discs | afreen | PENDING | issue #70 |
+| P4-06 | Metrics panel and countdown chips with sensitivity band | afreen | PENDING | issue #71 |
+| P4-07 | Timeline strips with zoom and event markers | afreen | PENDING | issue #72 |
+| P4-08 | Compare board and flip mode | afreen | PENDING | issue #73 |
+| P4-09 | Slip matrix and what-changes-if panel | afreen | PENDING | issue #74 |
+| P4-10 | Export CSV, PNG, permalink, scenario summary | afreen | PENDING | issue #75 |
+| P4-11 | Loading, error and degraded states; keyboard and screen reader pass | afreen | PENDING | issue #76 |
+| P5-01 | Terrain tile endpoint (heightfield) and slope layer in the API | irfan | PENDING | issue #77 |
+| P5-02 | 2D polar map with OpenLayers, proj4 and Trek SP tiles, site markers | afreen | PENDING | issue #78 |
+| P5-03 | Moon globe with Trek equirectangular tiles and real Sun and Earth directions | member3 | PENDING | issue #79 |
+| P5-04 | Local 3D terrain with draped imagery, Sun light, shadows, exaggeration control | afreen | PENDING | issue #80 |
+| P5-05 | Sky dome first-person view with skyline and discs | member3 | PENDING | issue #81 |
+| P5-06 | Shared mission clock and animation controls across all views | afreen | PENDING | issue #82 |
+| P5-07 | 3D performance, LOD, tile cache, reduced-motion and low-power fallback | member3 | PENDING | issue #83 |
+| P6-01 | Lander profile model: arrays, battery, loads, slope and thermal limits | irfan | PENDING | issue #84 |
+| P6-02 | Suitability engine and /lander/assess with tests | irfan | PENDING | issue #85 |
+| P6-03 | Spacecraft Dashboard UI | afreen | PENDING | issue #86 |
+| P6-04 | Public View guided story, glossary, simple and detailed modes, CSA and NASA links with attribution | member3 | PENDING | issue #87 |
+| P6-05 | Mission objective presets (science versus engineering constraints) | member3 | PENDING | issue #88 |
+| P6-06 | Saved scenarios and brief export (permalink, PNG, summary text) | irfan | PENDING | issue #89 |
+| P7-01 | Accessibility audit and fixes (axe, keyboard, contrast, reduced motion) | afreen | PENDING | issue #90 |
+| P7-02 | Performance audit and fixes (Lighthouse, bundle, 3D) | afreen | PENDING | issue #91 |
+| P7-03 | Security hardening, dependency audit, secret scan, headers | irfan | PENDING | issue #92 |
+| P7-04 | Resilience drills: Horizons outage, backup restore, service kill, rollback | irfan | PENDING | issue #93 |
+| P7-05 | Attribution audit, in-app Credits page, third-party licence report, NOTICE | member3 | PENDING | issue #94 |
+| P7-06 | Docs: README, user guide, architecture, validation report, SI_USAGE final | member3 | PENDING | issue #95 |
+| P7-07 | Demo assets: 3 minute script, screenshots, submission text draft | member3 | PENDING | issue #96 |
+| P7-08 | Final deploy, uptime check, tag v1.0.0, release notes, START_PROOF export | irfan | PENDING | issue #97 |
+| P7-09 | Feature freeze and final gate: checklist all DONE (--require-complete) | irfan | PENDING | issue #98 |
