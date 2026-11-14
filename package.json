@@ -1,0 +1,8 @@
+{
+  "name": "lunar-navigator-root",
+  "private": true,
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "workspaces": ["apps/web"],
+  "engines": { "node": ">=24" }
+}

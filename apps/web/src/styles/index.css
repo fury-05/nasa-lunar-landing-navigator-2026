@@ -1,0 +1,60 @@
+@import "@fontsource/sora/400.css";
+@import "@fontsource/sora/600.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "tailwindcss";
+
+/* Design tokens from docs/06-frontend-spec.md */
+@theme {
+  --color-void: #04060b;
+  --color-earth: #5ea2ff;
+  --color-sun: #ffb454;
+  --color-good: #4fd1c5;
+  --color-warn: #ffb454;
+  --color-bad: #ff7a8a;
+  --color-ink: #e8eefc;
+  --color-muted: #9aa6c4;
+  --color-blue-deep: #1d4ed8;
+  --color-blue-pale: #9fd0ff;
+  --radius-card: 22px;
+  --radius-chip: 999px;
+  --radius-cell: 8px;
+  --font-display: "Sora", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-void);
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  background-image: radial-gradient(1200px 600px at 70% -10%, rgb(29 78 216 / 0.28), transparent),
+    radial-gradient(900px 500px at 0% 100%, rgb(94 162 255 / 0.1), transparent);
+  background-attachment: fixed;
+}
+
+/* Visible focus rings (accessibility) */
+:focus-visible {
+  outline: 2px solid var(--color-blue-pale);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
