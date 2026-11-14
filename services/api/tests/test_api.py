@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 from lunar_api.main import app
 
 client = TestClient(app)
+BAD_ID = "bad id with spaces"  # spaces make it fail the id pattern
 
 
 def test_health() -> None:
@@ -39,9 +40,9 @@ def test_request_id_is_generated_echoed_and_validated() -> None:
     assert len(rid) == 32
     ok = client.get("/api/v1/health", headers={"X-Request-ID": "abc-12345-XYZ"})
     assert ok.headers["x-request-id"] == "abc-12345-XYZ"
-    bad = client.get("/api/v1/health", headers={"X-Request-ID": "bad id with spaces\t"})
+    bad = client.get("/api/v1/health", headers={"X-Request-ID": BAD_ID})
     fresh = bad.headers["x-request-id"]
-    assert fresh != "bad id with spaces	" and len(fresh) == 32
+    assert fresh != BAD_ID and len(fresh) == 32
     assert client.get("/api/v1/nope").json()["request_id"]
 
 
