@@ -40,7 +40,8 @@ def test_request_id_is_generated_echoed_and_validated() -> None:
     ok = client.get("/api/v1/health", headers={"X-Request-ID": "abc-12345-XYZ"})
     assert ok.headers["x-request-id"] == "abc-12345-XYZ"
     bad = client.get("/api/v1/health", headers={"X-Request-ID": "bad id with spaces\t"})
-    assert bad.headers["x-request-id"] != "bad id with spaces\t" and len(bad.headers["x-request-id"]) == 32
+    fresh = bad.headers["x-request-id"]
+    assert fresh != "bad id with spaces	" and len(fresh) == 32
     assert client.get("/api/v1/nope").json()["request_id"]
 
 
