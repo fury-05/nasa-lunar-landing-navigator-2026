@@ -3,6 +3,7 @@
 import json
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
 W = {"start": "2026-12-03T00:00:00Z", "end": "2026-12-08T00:00:00Z"}
@@ -231,3 +232,25 @@ def test_derived_cache_is_rebuilt_when_the_bundle_changes_on_disk(bundle: Path) 
     second = store.derived("alpha")
     assert second is not first
     assert store.derived("alpha") is second
+
+
+def test_requests_share_one_store_so_caches_survive_between_requests(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Regression: a store built per request threw the derived-series cache away every time."""
+    from lunar_api import routes
+    from lunar_api import store as store_module
+
+    built: list[int] = []
+    original = store_module.Derived.__init__
+
+    def counting(self, site):  # type: ignore[no-untyped-def]
+        built.append(1)
+        original(self, site)
+
+    monkeypatch.setattr(store_module.Derived, "__init__", counting)
+    routes._STORES.clear()
+    for _ in range(5):
+        r = client.get("/api/v1/sites/alpha/state", params={"t": "2026-12-03T06:00:00Z"})
+        assert r.status_code == 200
+    assert built == [1], f"derived series were built {len(built)} times for 5 requests"
