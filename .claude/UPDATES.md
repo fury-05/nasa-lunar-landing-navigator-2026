@@ -11,3 +11,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-14T18:50:00Z | afreen+irfan | P1-07 | site catalogue v1: 36 sourced or pending-source records, never invented | feat/data-site-catalogue
 2026-11-14T19:15:00Z | irfan+member3 | P1-03,P1-06 | RTS cross-check (limb vs centre finding), QuickMap URL parameters recorded, polar proj id unverified | feat/data-dem-acquisition
 2026-11-14T19:40:00Z | irfan | P1-08,P1-09 | 10 DEM tiles downloaded on the VM (610 MB), 10 of 10 sha256 verified, MANIFEST.json | feat/data-dem-acquisition
+2026-11-14T19:30:00Z | member3+irfan | P1-06 | QuickMap south polar proj 27 found and verified against QuickMap hover readouts, link builder + tests | feat/data-quickmap-links
