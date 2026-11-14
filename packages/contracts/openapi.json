@@ -1,0 +1,2584 @@
+{
+  "components": {
+    "schemas": {
+      "AssessOut": {
+        "properties": {
+          "assumptions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Assumptions",
+            "type": "array"
+          },
+          "criteria_status": {
+            "title": "Criteria Status",
+            "type": "string"
+          },
+          "delta_deg": {
+            "title": "Delta Deg",
+            "type": "number"
+          },
+          "earth_share": {
+            "$ref": "#/components/schemas/Band"
+          },
+          "elevation_deg": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Elevation Deg",
+            "type": "object"
+          },
+          "end_utc": {
+            "title": "End Utc",
+            "type": "string"
+          },
+          "longest_dark_hours": {
+            "$ref": "#/components/schemas/Band"
+          },
+          "longest_outage_hours": {
+            "$ref": "#/components/schemas/Band"
+          },
+          "power_index_w_m2": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Power Index W M2",
+            "type": "object"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/Provenance"
+          },
+          "robust": {
+            "title": "Robust",
+            "type": "boolean"
+          },
+          "site_id": {
+            "title": "Site Id",
+            "type": "string"
+          },
+          "start_utc": {
+            "title": "Start Utc",
+            "type": "string"
+          },
+          "sun_share": {
+            "$ref": "#/components/schemas/Band"
+          },
+          "sunlight_hours": {
+            "$ref": "#/components/schemas/Band"
+          },
+          "verdict": {
+            "enum": [
+              "viable",
+              "marginal",
+              "not viable"
+            ],
+            "title": "Verdict",
+            "type": "string"
+          },
+          "verdict_by_run": {
+            "additionalProperties": {
+              "enum": [
+                "viable",
+                "marginal",
+                "not viable"
+              ],
+              "type": "string"
+            },
+            "title": "Verdict By Run",
+            "type": "object"
+          }
+        },
+        "required": [
+          "verdict",
+          "verdict_by_run",
+          "robust",
+          "delta_deg",
+          "criteria_status",
+          "sunlight_hours",
+          "sun_share",
+          "earth_share",
+          "longest_dark_hours",
+          "longest_outage_hours",
+          "elevation_deg",
+          "power_index_w_m2",
+          "assumptions",
+          "site_id",
+          "start_utc",
+          "end_utc",
+          "provenance"
+        ],
+        "title": "AssessOut",
+        "type": "object"
+      },
+      "AttributionOut": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "notice": {
+            "title": "Notice",
+            "type": "string"
+          },
+          "software": {
+            "title": "Software",
+            "type": "string"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/CreditOut"
+            },
+            "title": "Sources",
+            "type": "array"
+          },
+          "unconfirmed_terms": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Unconfirmed Terms",
+            "type": "array"
+          }
+        },
+        "required": [
+          "notice",
+          "count",
+          "unconfirmed_terms",
+          "sources",
+          "software"
+        ],
+        "title": "AttributionOut",
+        "type": "object"
+      },
+      "Band": {
+        "properties": {
+          "high": {
+            "title": "High",
+            "type": "number"
+          },
+          "low": {
+            "title": "Low",
+            "type": "number"
+          },
+          "nominal": {
+            "title": "Nominal",
+            "type": "number"
+          }
+        },
+        "required": [
+          "low",
+          "nominal",
+          "high"
+        ],
+        "title": "Band",
+        "type": "object"
+      },
+      "CheckResult": {
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok",
+          "detail"
+        ],
+        "title": "CheckResult",
+        "type": "object"
+      },
+      "CompareIn": {
+        "properties": {
+          "criteria": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CriteriaIn"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sites": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Sites",
+            "type": "array"
+          },
+          "windows": {
+            "items": {
+              "$ref": "#/components/schemas/WindowIn"
+            },
+            "maxItems": 8,
+            "minItems": 1,
+            "title": "Windows",
+            "type": "array"
+          }
+        },
+        "required": [
+          "sites",
+          "windows"
+        ],
+        "title": "CompareIn",
+        "type": "object"
+      },
+      "CompareOut": {
+        "properties": {
+          "pairwise": {
+            "items": {
+              "$ref": "#/components/schemas/Pairwise"
+            },
+            "title": "Pairwise",
+            "type": "array"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/Provenance"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/CompareRow"
+            },
+            "title": "Rows",
+            "type": "array"
+          }
+        },
+        "required": [
+          "rows",
+          "pairwise",
+          "provenance"
+        ],
+        "title": "CompareOut",
+        "type": "object"
+      },
+      "CompareRow": {
+        "properties": {
+          "assumptions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Assumptions",
+            "type": "array"
+          },
+          "criteria_status": {
+            "title": "Criteria Status",
+            "type": "string"
+          },
+          "delta_deg": {
+            "title": "Delta Deg",
+            "type": "number"
+          },
+          "earth_share": {
+            "$ref": "#/components/schemas/Band"
+          },
+          "elevation_deg": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Elevation Deg",
+            "type": "object"
+          },
+          "end_utc": {
+            "title": "End Utc",
+            "type": "string"
+          },
+          "longest_dark_hours": {
+            "$ref": "#/components/schemas/Band"
+          },
+          "longest_outage_hours": {
+            "$ref": "#/components/schemas/Band"
+          },
+          "power_index_w_m2": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Power Index W M2",
+            "type": "object"
+          },
+          "robust": {
+            "title": "Robust",
+            "type": "boolean"
+          },
+          "site_id": {
+            "title": "Site Id",
+            "type": "string"
+          },
+          "start_utc": {
+            "title": "Start Utc",
+            "type": "string"
+          },
+          "sun_share": {
+            "$ref": "#/components/schemas/Band"
+          },
+          "sunlight_hours": {
+            "$ref": "#/components/schemas/Band"
+          },
+          "verdict": {
+            "enum": [
+              "viable",
+              "marginal",
+              "not viable"
+            ],
+            "title": "Verdict",
+            "type": "string"
+          },
+          "verdict_by_run": {
+            "additionalProperties": {
+              "enum": [
+                "viable",
+                "marginal",
+                "not viable"
+              ],
+              "type": "string"
+            },
+            "title": "Verdict By Run",
+            "type": "object"
+          },
+          "window_index": {
+            "title": "Window Index",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "verdict",
+          "verdict_by_run",
+          "robust",
+          "delta_deg",
+          "criteria_status",
+          "sunlight_hours",
+          "sun_share",
+          "earth_share",
+          "longest_dark_hours",
+          "longest_outage_hours",
+          "elevation_deg",
+          "power_index_w_m2",
+          "assumptions",
+          "site_id",
+          "window_index",
+          "start_utc",
+          "end_utc"
+        ],
+        "title": "CompareRow",
+        "type": "object"
+      },
+      "CreditOut": {
+        "properties": {
+          "credit": {
+            "title": "Credit",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "publisher": {
+            "title": "Publisher",
+            "type": "string"
+          },
+          "retrieved_at": {
+            "title": "Retrieved At",
+            "type": "string"
+          },
+          "terms_confirmed": {
+            "title": "Terms Confirmed",
+            "type": "boolean"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "usage_statement": {
+            "title": "Usage Statement",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "publisher",
+          "url",
+          "credit",
+          "usage_statement",
+          "retrieved_at",
+          "terms_confirmed"
+        ],
+        "title": "CreditOut",
+        "type": "object"
+      },
+      "CriteriaIn": {
+        "properties": {
+          "max_dark_hours": {
+            "minimum": 0.0,
+            "title": "Max Dark Hours",
+            "type": "number"
+          },
+          "max_outage_hours": {
+            "minimum": 0.0,
+            "title": "Max Outage Hours",
+            "type": "number"
+          },
+          "min_earth_share": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Min Earth Share",
+            "type": "number"
+          },
+          "min_sun_share": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Min Sun Share",
+            "type": "number"
+          }
+        },
+        "required": [
+          "min_sun_share",
+          "max_dark_hours",
+          "min_earth_share",
+          "max_outage_hours"
+        ],
+        "title": "CriteriaIn",
+        "type": "object"
+      },
+      "CustomSiteIn": {
+        "properties": {
+          "alt_m": {
+            "default": 0.0,
+            "description": "metres above the 1737400 m reference sphere",
+            "title": "Alt M",
+            "type": "number"
+          },
+          "lat": {
+            "description": "degrees, -90 to 90",
+            "title": "Lat",
+            "type": "number"
+          },
+          "lon": {
+            "description": "degrees east, -180 to 180",
+            "title": "Lon",
+            "type": "number"
+          }
+        },
+        "required": [
+          "lat",
+          "lon"
+        ],
+        "title": "CustomSiteIn",
+        "type": "object"
+      },
+      "Delta": {
+        "properties": {
+          "a": {
+            "title": "A",
+            "type": "number"
+          },
+          "b": {
+            "title": "B",
+            "type": "number"
+          },
+          "better": {
+            "enum": [
+              "a",
+              "b",
+              "tie"
+            ],
+            "title": "Better",
+            "type": "string"
+          },
+          "difference": {
+            "title": "Difference",
+            "type": "number"
+          },
+          "metric": {
+            "title": "Metric",
+            "type": "string"
+          }
+        },
+        "required": [
+          "metric",
+          "a",
+          "b",
+          "difference",
+          "better"
+        ],
+        "title": "Delta",
+        "type": "object"
+      },
+      "EarthState": {
+        "properties": {
+          "link_available": {
+            "title": "Link Available",
+            "type": "boolean"
+          },
+          "margin_deg": {
+            "title": "Margin Deg",
+            "type": "number"
+          },
+          "seconds_to_earthrise": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seconds To Earthrise"
+          },
+          "seconds_to_earthset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seconds To Earthset"
+          }
+        },
+        "required": [
+          "margin_deg",
+          "link_available",
+          "seconds_to_earthset",
+          "seconds_to_earthrise"
+        ],
+        "title": "EarthState",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HealthOut": {
+        "properties": {
+          "status": {
+            "const": "ok",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "HealthOut",
+        "type": "object"
+      },
+      "JobAccepted": {
+        "properties": {
+          "cached": {
+            "title": "Cached",
+            "type": "boolean"
+          },
+          "events_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Events Url"
+          },
+          "job_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Id"
+          },
+          "site_id": {
+            "title": "Site Id",
+            "type": "string"
+          },
+          "site_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Site Url"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "status_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status Url"
+          }
+        },
+        "required": [
+          "site_id",
+          "job_id",
+          "status",
+          "cached"
+        ],
+        "title": "JobAccepted",
+        "type": "object"
+      },
+      "JobOut": {
+        "properties": {
+          "created_at_utc": {
+            "title": "Created At Utc",
+            "type": "string"
+          },
+          "job_id": {
+            "title": "Job Id",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "progress": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Progress",
+            "type": "number"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          },
+          "retry": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retry"
+          },
+          "site_id": {
+            "title": "Site Id",
+            "type": "string"
+          },
+          "site_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Site Url"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "running",
+              "done",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "updated_at_utc": {
+            "title": "Updated At Utc",
+            "type": "string"
+          }
+        },
+        "required": [
+          "job_id",
+          "site_id",
+          "status",
+          "progress",
+          "message",
+          "reason",
+          "created_at_utc",
+          "updated_at_utc",
+          "result"
+        ],
+        "title": "JobOut",
+        "type": "object"
+      },
+      "Metrics": {
+        "properties": {
+          "assumptions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Assumptions",
+            "type": "array"
+          },
+          "criteria_status": {
+            "title": "Criteria Status",
+            "type": "string"
+          },
+          "delta_deg": {
+            "title": "Delta Deg",
+            "type": "number"
+          },
+          "earth_share": {
+            "$ref": "#/components/schemas/Band"
+          },
+          "elevation_deg": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Elevation Deg",
+            "type": "object"
+          },
+          "longest_dark_hours": {
+            "$ref": "#/components/schemas/Band"
+          },
+          "longest_outage_hours": {
+            "$ref": "#/components/schemas/Band"
+          },
+          "power_index_w_m2": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Power Index W M2",
+            "type": "object"
+          },
+          "robust": {
+            "title": "Robust",
+            "type": "boolean"
+          },
+          "sun_share": {
+            "$ref": "#/components/schemas/Band"
+          },
+          "sunlight_hours": {
+            "$ref": "#/components/schemas/Band"
+          },
+          "verdict": {
+            "enum": [
+              "viable",
+              "marginal",
+              "not viable"
+            ],
+            "title": "Verdict",
+            "type": "string"
+          },
+          "verdict_by_run": {
+            "additionalProperties": {
+              "enum": [
+                "viable",
+                "marginal",
+                "not viable"
+              ],
+              "type": "string"
+            },
+            "title": "Verdict By Run",
+            "type": "object"
+          }
+        },
+        "required": [
+          "verdict",
+          "verdict_by_run",
+          "robust",
+          "delta_deg",
+          "criteria_status",
+          "sunlight_hours",
+          "sun_share",
+          "earth_share",
+          "longest_dark_hours",
+          "longest_outage_hours",
+          "elevation_deg",
+          "power_index_w_m2",
+          "assumptions"
+        ],
+        "title": "Metrics",
+        "type": "object"
+      },
+      "Pairwise": {
+        "properties": {
+          "b_minus_a": {
+            "items": {
+              "$ref": "#/components/schemas/Delta"
+            },
+            "title": "B Minus A",
+            "type": "array"
+          },
+          "window_index": {
+            "title": "Window Index",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "window_index",
+          "b_minus_a"
+        ],
+        "title": "Pairwise",
+        "type": "object"
+      },
+      "Problem": {
+        "description": "RFC 7807 problem document returned for every error.",
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "errors": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Errors",
+            "type": "array"
+          },
+          "instance": {
+            "title": "Instance",
+            "type": "string"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          },
+          "status": {
+            "title": "Status",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "detail",
+          "instance",
+          "request_id",
+          "errors"
+        ],
+        "title": "Problem",
+        "type": "object"
+      },
+      "Provenance": {
+        "properties": {
+          "assumptions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Assumptions",
+            "type": "array"
+          },
+          "engine_version": {
+            "title": "Engine Version",
+            "type": "string"
+          },
+          "frame_note": {
+            "title": "Frame Note",
+            "type": "string"
+          },
+          "reproduce": {
+            "additionalProperties": true,
+            "title": "Reproduce",
+            "type": "object"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/Source"
+            },
+            "title": "Sources",
+            "type": "array"
+          },
+          "uncertainty": {
+            "additionalProperties": true,
+            "title": "Uncertainty",
+            "type": "object"
+          }
+        },
+        "required": [
+          "sources",
+          "engine_version",
+          "frame_note",
+          "assumptions",
+          "uncertainty",
+          "reproduce"
+        ],
+        "title": "Provenance",
+        "type": "object"
+      },
+      "QuickmapOut": {
+        "properties": {
+          "note": {
+            "title": "Note",
+            "type": "string"
+          },
+          "site_id": {
+            "title": "Site Id",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "site_id",
+          "url",
+          "note"
+        ],
+        "title": "QuickmapOut",
+        "type": "object"
+      },
+      "ReadyOut": {
+        "properties": {
+          "checks": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CheckResult"
+            },
+            "title": "Checks",
+            "type": "object"
+          },
+          "status": {
+            "enum": [
+              "ready",
+              "not-ready"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "checks"
+        ],
+        "title": "ReadyOut",
+        "type": "object"
+      },
+      "RegistryRow": {
+        "properties": {
+          "citation": {
+            "title": "Citation",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "modules": {
+            "title": "Modules",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "publisher": {
+            "title": "Publisher",
+            "type": "string"
+          },
+          "retrieved_at": {
+            "title": "Retrieved At",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "usage_statement": {
+            "title": "Usage Statement",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "publisher",
+          "url",
+          "retrieved_at",
+          "version",
+          "usage_statement",
+          "citation",
+          "modules"
+        ],
+        "title": "RegistryRow",
+        "type": "object"
+      },
+      "SiteDetail": {
+        "properties": {
+          "assumptions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Assumptions",
+            "type": "array"
+          },
+          "built_at_utc": {
+            "title": "Built At Utc",
+            "type": "string"
+          },
+          "dem": {
+            "additionalProperties": true,
+            "title": "Dem",
+            "type": "object"
+          },
+          "engine_version": {
+            "title": "Engine Version",
+            "type": "string"
+          },
+          "lat_deg": {
+            "title": "Lat Deg",
+            "type": "number"
+          },
+          "lon_east_deg": {
+            "title": "Lon East Deg",
+            "type": "number"
+          },
+          "quickmap": {
+            "title": "Quickmap",
+            "type": "string"
+          },
+          "site_id": {
+            "title": "Site Id",
+            "type": "string"
+          },
+          "skyline": {
+            "additionalProperties": true,
+            "title": "Skyline",
+            "type": "object"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Sources",
+            "type": "array"
+          },
+          "terrain_unavailable": {
+            "default": false,
+            "title": "Terrain Unavailable",
+            "type": "boolean"
+          },
+          "window": {
+            "additionalProperties": true,
+            "title": "Window",
+            "type": "object"
+          }
+        },
+        "required": [
+          "site_id",
+          "lat_deg",
+          "lon_east_deg",
+          "built_at_utc",
+          "engine_version",
+          "window",
+          "skyline",
+          "dem",
+          "sources",
+          "assumptions",
+          "quickmap"
+        ],
+        "title": "SiteDetail",
+        "type": "object"
+      },
+      "SiteList": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "notice": {
+            "title": "Notice",
+            "type": "string"
+          },
+          "sites": {
+            "items": {
+              "$ref": "#/components/schemas/SiteSummary"
+            },
+            "title": "Sites",
+            "type": "array"
+          }
+        },
+        "required": [
+          "count",
+          "sites",
+          "notice"
+        ],
+        "title": "SiteList",
+        "type": "object"
+      },
+      "SiteSummary": {
+        "properties": {
+          "built_at_utc": {
+            "title": "Built At Utc",
+            "type": "string"
+          },
+          "coordinate_status": {
+            "title": "Coordinate Status",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "lat_deg": {
+            "title": "Lat Deg",
+            "type": "number"
+          },
+          "lon_east_deg": {
+            "title": "Lon East Deg",
+            "type": "number"
+          },
+          "terrain_coverage": {
+            "$ref": "#/components/schemas/TerrainCoverage"
+          },
+          "window": {
+            "additionalProperties": true,
+            "title": "Window",
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "lat_deg",
+          "lon_east_deg",
+          "coordinate_status",
+          "window",
+          "built_at_utc",
+          "terrain_coverage"
+        ],
+        "title": "SiteSummary",
+        "type": "object"
+      },
+      "SkylineOut": {
+        "properties": {
+          "azimuth_deg": {
+            "items": {
+              "type": "number"
+            },
+            "title": "Azimuth Deg",
+            "type": "array"
+          },
+          "azimuth_step_deg": {
+            "title": "Azimuth Step Deg",
+            "type": "number"
+          },
+          "coverage_note": {
+            "title": "Coverage Note",
+            "type": "string"
+          },
+          "covered_fraction": {
+            "title": "Covered Fraction",
+            "type": "number"
+          },
+          "elevation_deg": {
+            "items": {
+              "type": "number"
+            },
+            "title": "Elevation Deg",
+            "type": "array"
+          },
+          "eye_height_m": {
+            "title": "Eye Height M",
+            "type": "number"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/Provenance"
+          },
+          "reach_m": {
+            "items": {
+              "type": "number"
+            },
+            "title": "Reach M",
+            "type": "array"
+          },
+          "requested_range_m": {
+            "title": "Requested Range M",
+            "type": "number"
+          },
+          "site_id": {
+            "title": "Site Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "site_id",
+          "eye_height_m",
+          "azimuth_step_deg",
+          "azimuth_deg",
+          "elevation_deg",
+          "reach_m",
+          "requested_range_m",
+          "covered_fraction",
+          "coverage_note",
+          "provenance"
+        ],
+        "title": "SkylineOut",
+        "type": "object"
+      },
+      "SlipCellOut": {
+        "properties": {
+          "earth_share": {
+            "title": "Earth Share",
+            "type": "number"
+          },
+          "end_utc": {
+            "title": "End Utc",
+            "type": "string"
+          },
+          "glyph": {
+            "enum": [
+              "check",
+              "tilde",
+              "cross"
+            ],
+            "title": "Glyph",
+            "type": "string"
+          },
+          "offset_days": {
+            "title": "Offset Days",
+            "type": "number"
+          },
+          "robust": {
+            "title": "Robust",
+            "type": "boolean"
+          },
+          "start_utc": {
+            "title": "Start Utc",
+            "type": "string"
+          },
+          "sunlight_hours": {
+            "title": "Sunlight Hours",
+            "type": "number"
+          },
+          "verdict": {
+            "enum": [
+              "viable",
+              "marginal",
+              "not viable"
+            ],
+            "title": "Verdict",
+            "type": "string"
+          }
+        },
+        "required": [
+          "offset_days",
+          "start_utc",
+          "end_utc",
+          "verdict",
+          "glyph",
+          "robust",
+          "sunlight_hours",
+          "earth_share"
+        ],
+        "title": "SlipCellOut",
+        "type": "object"
+      },
+      "SlipIn": {
+        "properties": {
+          "criteria": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CriteriaIn"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "duration_days": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 400.0,
+            "title": "Duration Days",
+            "type": "number"
+          },
+          "offsets_days": {
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 40,
+            "minItems": 1,
+            "title": "Offsets Days",
+            "type": "array"
+          },
+          "sites": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Sites",
+            "type": "array"
+          },
+          "start": {
+            "title": "Start",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sites",
+          "start",
+          "offsets_days",
+          "duration_days"
+        ],
+        "title": "SlipIn",
+        "type": "object"
+      },
+      "SlipOut": {
+        "properties": {
+          "cells": {
+            "items": {
+              "items": {
+                "$ref": "#/components/schemas/SlipCellOut"
+              },
+              "type": "array"
+            },
+            "title": "Cells",
+            "type": "array"
+          },
+          "offsets_days": {
+            "items": {
+              "type": "number"
+            },
+            "title": "Offsets Days",
+            "type": "array"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/Provenance"
+          },
+          "sites": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Sites",
+            "type": "array"
+          }
+        },
+        "required": [
+          "sites",
+          "offsets_days",
+          "cells",
+          "provenance"
+        ],
+        "title": "SlipOut",
+        "type": "object"
+      },
+      "Source": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "retrieved_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retrieved At"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          }
+        },
+        "required": [
+          "id",
+          "url",
+          "retrieved_at",
+          "version"
+        ],
+        "title": "Source",
+        "type": "object"
+      },
+      "Span": {
+        "properties": {
+          "end": {
+            "title": "End",
+            "type": "string"
+          },
+          "open_end": {
+            "title": "Open End",
+            "type": "boolean"
+          },
+          "open_start": {
+            "title": "Open Start",
+            "type": "boolean"
+          },
+          "start": {
+            "title": "Start",
+            "type": "string"
+          }
+        },
+        "required": [
+          "start",
+          "end",
+          "open_start",
+          "open_end"
+        ],
+        "title": "Span",
+        "type": "object"
+      },
+      "StateOut": {
+        "properties": {
+          "definitions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Definitions",
+            "type": "array"
+          },
+          "earth": {
+            "$ref": "#/components/schemas/EarthState"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/Provenance"
+          },
+          "site_id": {
+            "title": "Site Id",
+            "type": "string"
+          },
+          "sun": {
+            "$ref": "#/components/schemas/SunState"
+          },
+          "t": {
+            "title": "T",
+            "type": "string"
+          }
+        },
+        "required": [
+          "site_id",
+          "t",
+          "sun",
+          "earth",
+          "definitions",
+          "provenance"
+        ],
+        "title": "StateOut",
+        "type": "object"
+      },
+      "SunState": {
+        "properties": {
+          "note_if_null": {
+            "title": "Note If Null",
+            "type": "string"
+          },
+          "seconds_to_sunrise": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seconds To Sunrise"
+          },
+          "seconds_to_sunset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seconds To Sunset"
+          },
+          "up": {
+            "title": "Up",
+            "type": "boolean"
+          },
+          "visible_fraction": {
+            "title": "Visible Fraction",
+            "type": "number"
+          }
+        },
+        "required": [
+          "visible_fraction",
+          "up",
+          "seconds_to_sunset",
+          "seconds_to_sunrise",
+          "note_if_null"
+        ],
+        "title": "SunState",
+        "type": "object"
+      },
+      "TerrainCoverage": {
+        "properties": {
+          "covered_fraction": {
+            "title": "Covered Fraction",
+            "type": "number"
+          },
+          "max_reach_m": {
+            "title": "Max Reach M",
+            "type": "number"
+          },
+          "min_reach_m": {
+            "title": "Min Reach M",
+            "type": "number"
+          }
+        },
+        "required": [
+          "covered_fraction",
+          "min_reach_m",
+          "max_reach_m"
+        ],
+        "title": "TerrainCoverage",
+        "type": "object"
+      },
+      "TimelineOut": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "dark_intervals": {
+            "items": {
+              "$ref": "#/components/schemas/Span"
+            },
+            "title": "Dark Intervals",
+            "type": "array"
+          },
+          "earth_outages": {
+            "items": {
+              "$ref": "#/components/schemas/Span"
+            },
+            "title": "Earth Outages",
+            "type": "array"
+          },
+          "earth_windows": {
+            "items": {
+              "$ref": "#/components/schemas/Span"
+            },
+            "title": "Earth Windows",
+            "type": "array"
+          },
+          "end_utc": {
+            "title": "End Utc",
+            "type": "string"
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/Metrics"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/Provenance"
+          },
+          "series": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Series",
+            "type": "array"
+          },
+          "site_id": {
+            "title": "Site Id",
+            "type": "string"
+          },
+          "start_utc": {
+            "title": "Start Utc",
+            "type": "string"
+          },
+          "step_min": {
+            "title": "Step Min",
+            "type": "integer"
+          },
+          "sun_intervals": {
+            "items": {
+              "$ref": "#/components/schemas/Span"
+            },
+            "title": "Sun Intervals",
+            "type": "array"
+          }
+        },
+        "required": [
+          "site_id",
+          "start_utc",
+          "end_utc",
+          "step_min",
+          "count",
+          "series",
+          "sun_intervals",
+          "dark_intervals",
+          "earth_windows",
+          "earth_outages",
+          "metrics",
+          "provenance"
+        ],
+        "title": "TimelineOut",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "VersionOut": {
+        "properties": {
+          "api": {
+            "title": "Api",
+            "type": "string"
+          },
+          "disclaimer": {
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "engine": {
+            "title": "Engine",
+            "type": "string"
+          }
+        },
+        "required": [
+          "api",
+          "engine",
+          "disclaimer"
+        ],
+        "title": "VersionOut",
+        "type": "object"
+      },
+      "WindowIn": {
+        "properties": {
+          "end": {
+            "title": "End",
+            "type": "string"
+          },
+          "start": {
+            "title": "Start",
+            "type": "string"
+          }
+        },
+        "required": [
+          "start",
+          "end"
+        ],
+        "title": "WindowIn",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Planning tool, not for flight operations.",
+    "title": "Lunar Landing Site Navigator API",
+    "version": "0.0.1"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/attribution": {
+      "get": {
+        "operationId": "get_attribution_api_v1_attribution_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Invalid input"
+          }
+        },
+        "summary": "Get Attribution"
+      }
+    },
+    "/api/v1/attribution/{source_id}": {
+      "get": {
+        "operationId": "get_attribution_one_api_v1_attribution__source_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "title": "Source Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistryRow"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Invalid input"
+          }
+        },
+        "summary": "Get Attribution One"
+      }
+    },
+    "/api/v1/compare": {
+      "post": {
+        "operationId": "post_compare_api_v1_compare_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompareIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompareOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Invalid input"
+          }
+        },
+        "summary": "Post Compare"
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "operationId": "health_api_v1_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health"
+      }
+    },
+    "/api/v1/jobs/{job_id}": {
+      "get": {
+        "operationId": "get_job_api_v1_jobs__job_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "title": "Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Invalid input"
+          }
+        },
+        "summary": "Get Job"
+      }
+    },
+    "/api/v1/jobs/{job_id}/events": {
+      "get": {
+        "operationId": "job_events_api_v1_jobs__job_id__events_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "title": "Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Server sent events. `event: progress` carries JSON {status, progress, message, reason} and is sent only when it changes. `event: end` carries {status} and closes the stream. `event: timeout` closes it after 150 s. Lines starting with a colon are keepalive comments."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Job Events"
+      }
+    },
+    "/api/v1/links/quickmap": {
+      "get": {
+        "operationId": "get_quickmap_api_v1_links_quickmap_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "site",
+            "required": true,
+            "schema": {
+              "title": "Site",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "t",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "T"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shadows",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Shadows",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuickmapOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Invalid input"
+          }
+        },
+        "summary": "Get Quickmap"
+      }
+    },
+    "/api/v1/ready": {
+      "get": {
+        "operationId": "ready_api_v1_ready_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadyOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadyOut"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Ready"
+      }
+    },
+    "/api/v1/sites": {
+      "get": {
+        "operationId": "list_sites_api_v1_sites_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Invalid input"
+          }
+        },
+        "summary": "List Sites"
+      }
+    },
+    "/api/v1/sites/custom": {
+      "post": {
+        "operationId": "create_custom_api_v1_sites_custom_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomSiteIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobAccepted"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobAccepted"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          }
+        },
+        "summary": "Create Custom"
+      }
+    },
+    "/api/v1/sites/{site_id}": {
+      "get": {
+        "operationId": "get_site_api_v1_sites__site_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "site_id",
+            "required": true,
+            "schema": {
+              "title": "Site Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Invalid input"
+          }
+        },
+        "summary": "Get Site"
+      }
+    },
+    "/api/v1/sites/{site_id}/assess": {
+      "get": {
+        "operationId": "get_assess_api_v1_sites__site_id__assess_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "site_id",
+            "required": true,
+            "schema": {
+              "title": "Site Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "start",
+            "required": true,
+            "schema": {
+              "title": "Start",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "end",
+            "required": true,
+            "schema": {
+              "title": "End",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Invalid input"
+          }
+        },
+        "summary": "Get Assess"
+      }
+    },
+    "/api/v1/sites/{site_id}/skyline": {
+      "get": {
+        "operationId": "get_skyline_api_v1_sites__site_id__skyline_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "site_id",
+            "required": true,
+            "schema": {
+              "title": "Site Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "step_deg",
+            "required": false,
+            "schema": {
+              "default": 1.0,
+              "maximum": 10.0,
+              "minimum": 0.25,
+              "title": "Step Deg",
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkylineOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Invalid input"
+          }
+        },
+        "summary": "Get Skyline"
+      }
+    },
+    "/api/v1/sites/{site_id}/state": {
+      "get": {
+        "operationId": "get_state_api_v1_sites__site_id__state_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "site_id",
+            "required": true,
+            "schema": {
+              "title": "Site Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "t",
+            "required": true,
+            "schema": {
+              "title": "T",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StateOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Invalid input"
+          }
+        },
+        "summary": "Get State"
+      }
+    },
+    "/api/v1/sites/{site_id}/timeline": {
+      "get": {
+        "operationId": "get_timeline_api_v1_sites__site_id__timeline_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "site_id",
+            "required": true,
+            "schema": {
+              "title": "Site Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "start",
+            "required": true,
+            "schema": {
+              "title": "Start",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "end",
+            "required": true,
+            "schema": {
+              "title": "End",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "step_min",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "maximum": 60,
+              "minimum": 10,
+              "title": "Step Min",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimelineOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Invalid input"
+          }
+        },
+        "summary": "Get Timeline"
+      }
+    },
+    "/api/v1/slip-matrix": {
+      "post": {
+        "operationId": "post_slip_api_v1_slip_matrix_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlipIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlipOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Invalid input"
+          }
+        },
+        "summary": "Post Slip"
+      }
+    },
+    "/api/v1/version": {
+      "get": {
+        "operationId": "version_api_v1_version_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Version"
+      }
+    }
+  }
+}

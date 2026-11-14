@@ -5,7 +5,7 @@
 | P0 | 12 | 0 | 0 | 12 |
 | P1 | 10 | 1 | 0 | 11 |
 | P2 | 8 | 4 | 0 | 12 |
-| P3 | 4 | 5 | 0 | 9 |
+| P3 | 5 | 4 | 0 | 9 |
 | P4 | 0 | 11 | 0 | 11 |
 | P5 | 0 | 7 | 0 | 7 |
 | P6 | 0 | 6 | 0 | 6 |
@@ -53,7 +53,7 @@
 | P3-03 | Routes: sites, skyline, timeline, state, compare, slip-matrix | irfan | DONE | lunar_api.routes + store: GET /sites, /sites/{id}, /skyline, /assess, /timeline, /state; POST /compare, /slip-matrix; GET /links/quickmap; every response has a provenance block, NaN becomes null, windows capped at 400 days, 8 sites, 422 and 404 problem documents, path-traversal ids rejected; 19 route tests against a real precomputed bundle built with a fake Horizons; /state computes seconds to sunset and Earthset with the definitions spelled out; issue #59 |
 | P3-04 | Job queue (arq) with SSE progress and timeouts | irfan | DONE | POST /sites/custom (202 + Location, 200 cached for a known point, 422 problem docs), GET /jobs/{id}, GET /jobs/{id}/events (SSE: progress only on change, keepalive comments, stream time limit, end event); jobs run in a thread without Redis or through arq with RedisJobStore when REDIS_URL is set; arq worker limited to 2 jobs (docs/02 Horizons etiquette); 120 s job timeout fails the job with a reason; no covering DEM tile gives a flat horizon bundle flagged terrain_unavailable and NOT terrain aware, never an invented skyline; deterministic custom ids; 25 tests incl. fakeredis and a mocked arq pool; NOT yet exercised against the real Redis on the VM (P3-08); issue #60 |
 | P3-05 | Provenance and attribution endpoints | irfan | DONE | GET /api/v1/attribution and /attribution/{id} serve data/attribution.json, generated from docs/ATTRIBUTION.md by scripts/build_attribution.py; CI step and a test fail if they drift (mutation check: editing the markdown alone fails the test); response lists sources with unconfirmed_terms so the Credits page can be honest (7 sources, 6 still pending-source); every other endpoint already carries a provenance block; corrected the Horizons version cell from 1.3 to the observed 1.2; 4 tests; issue #61 |
-| P3-06 | OpenAPI export, generated TS client, contract tests | afreen | PENDING | issue #62 |
+| P3-06 | OpenAPI export, generated TS client, contract tests | afreen | DONE | packages/contracts/openapi.json exported from the code by scripts/export_openapi.py (17 routes, every JSON route has a typed response model and 404/422 are documented as RFC 7807 Problem, SSE route documents its events); typed TS schema generated into apps/web/src/api/schema.d.ts with openapi-typescript in packages/contracts (own TypeScript 5 because the tool does not support 6); typed client apps/web/src/api/client.ts; CI fails if the spec or generated types drift; mutation checks: a changed verdict enum breaks the web typecheck, and editing code without re-exporting fails the contract test; 5 contract tests + 5 web tests; issue #62 |
 | P3-07 | Rate limiting, caching headers, ETag | irfan | PENDING | issue #63 |
 | P3-08 | Deploy to VM, smoke tests, load test results recorded | irfan | PENDING | issue #64 |
 | P3-09 | Input validation and security review of the API | irfan | PENDING | issue #65 |

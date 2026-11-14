@@ -1,0 +1,14 @@
+{
+  "name": "@lunar/contracts",
+  "private": true,
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "description": "OpenAPI contract and its generated TypeScript types. Separate project because openapi-typescript needs TypeScript 5 while the web app uses 6.",
+  "scripts": {
+    "generate": "openapi-typescript openapi.json -o ../../apps/web/src/api/schema.d.ts"
+  },
+  "devDependencies": {
+    "openapi-typescript": "7.13.0",
+    "typescript": "5.9.3"
+  }
+}

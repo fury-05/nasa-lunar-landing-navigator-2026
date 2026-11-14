@@ -34,12 +34,20 @@ jobs:
           uv run ruff check .
           uv run mypy packages services
           uv run pytest -q --cov
+          uv run python scripts/export_openapi.py --check
   web:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 24 }
+      - name: Contract types are up to date
+        if: hashFiles('packages/contracts/package.json') != ''
+        working-directory: packages/contracts
+        run: |
+          npm ci
+          npm run generate
+          git diff --exit-code ../../apps/web/src/api/schema.d.ts
       - if: hashFiles('apps/web/package.json') != ''
         run: |
           npm ci
