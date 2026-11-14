@@ -13,6 +13,7 @@ jobs:
         with: { fetch-depth: 0 }
       - run: bash scripts/lint-dashes.sh
       - run: python3 scripts/checklist.py --check
+      - run: python3 scripts/build_attribution.py --check
       - name: PR title format
         if: github.event_name == 'pull_request'
         env:

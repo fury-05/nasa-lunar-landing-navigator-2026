@@ -5,7 +5,7 @@
 | P0 | 12 | 0 | 0 | 12 |
 | P1 | 10 | 1 | 0 | 11 |
 | P2 | 8 | 4 | 0 | 12 |
-| P3 | 2 | 7 | 0 | 9 |
+| P3 | 3 | 6 | 0 | 9 |
 | P4 | 0 | 11 | 0 | 11 |
 | P5 | 0 | 7 | 0 | 7 |
 | P6 | 0 | 6 | 0 | 6 |
@@ -52,7 +52,7 @@
 | P3-02 | Database schema and Alembic migrations | irfan | PENDING | issue #58 |
 | P3-03 | Routes: sites, skyline, timeline, state, compare, slip-matrix | irfan | DONE | lunar_api.routes + store: GET /sites, /sites/{id}, /skyline, /assess, /timeline, /state; POST /compare, /slip-matrix; GET /links/quickmap; every response has a provenance block, NaN becomes null, windows capped at 400 days, 8 sites, 422 and 404 problem documents, path-traversal ids rejected; 19 route tests against a real precomputed bundle built with a fake Horizons; /state computes seconds to sunset and Earthset with the definitions spelled out; issue #59 |
 | P3-04 | Job queue (arq) with SSE progress and timeouts | irfan | PENDING | issue #60 |
-| P3-05 | Provenance and attribution endpoints | irfan | PENDING | issue #61 |
+| P3-05 | Provenance and attribution endpoints | irfan | DONE | GET /api/v1/attribution and /attribution/{id} serve data/attribution.json, generated from docs/ATTRIBUTION.md by scripts/build_attribution.py; CI step and a test fail if they drift (mutation check: editing the markdown alone fails the test); response lists sources with unconfirmed_terms so the Credits page can be honest (7 sources, 6 still pending-source); every other endpoint already carries a provenance block; corrected the Horizons version cell from 1.3 to the observed 1.2; 4 tests; issue #61 |
 | P3-06 | OpenAPI export, generated TS client, contract tests | afreen | PENDING | issue #62 |
 | P3-07 | Rate limiting, caching headers, ETag | irfan | PENDING | issue #63 |
 | P3-08 | Deploy to VM, smoke tests, load test results recorded | irfan | PENDING | issue #64 |
