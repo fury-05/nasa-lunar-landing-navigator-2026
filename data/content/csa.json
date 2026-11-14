@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "source_id": "csa-moon",
+  "retrieved_at_utc": "2026-11-14T20:20:00Z",
+  "credit": "Content summarised from Canadian Space Agency web pages. Credit: Canadian Space Agency.",
+  "no_endorsement": "This project is not associated with or endorsed by the Canadian Space Agency.",
+  "terms": {
+    "url": "https://www.asc-csa.gc.ca/eng/terms.asp",
+    "summary": "The page grants permission to reproduce its materials for personal, educational or informational non-commercial use if the CSA is acknowledged as the source, due diligence is used on accuracy, no association or endorsement is implied, and the use is not misleading, defamatory or partisan. Commercial redistribution needs written permission. The CSA logo and Government of Canada symbols may not be used.",
+    "status": "read by Claude on 2026-11-14; a human must confirm this reading fits our use (todo/APPROVALS.md A1)"
+  },
+  "rules_we_follow": [
+    "Short paraphrased blurbs only; no copied paragraphs, images, logo or videos.",
+    "Every blurb shows the credit line and links to the page it came from.",
+    "Facts are stated as the CSA page described them on the retrieval date."
+  ],
+  "items": [
+    {
+      "id": "moon-exploration",
+      "title": "Moon exploration at the Canadian Space Agency",
+      "url": "https://www.asc-csa.gc.ca/eng/astronomy/moon-exploration/",
+      "blurb": "The CSA's hub page for Canada's part in returning to the Moon. It links to Canada's role, Canadarm3, Gateway, a Canadian utility rover and the Artemis campaign.",
+      "why_here": "Starting point for readers who want the wider story behind landing-site planning."
+    },
+    {
+      "id": "canada-role",
+      "title": "Canada's role in Moon exploration",
+      "url": "https://www.asc-csa.gc.ca/eng/astronomy/moon-exploration/canada-role.asp",
+      "blurb": "Canada plans to contribute the Canadarm3 robotic system to the Gateway station in lunar orbit, a science and technology programme, and rovers. The page says a Canadian rover is meant to explore a polar region of the Moon and help in the search for water ice.",
+      "why_here": "Connects the south pole focus of this tool to why polar sites matter."
+    },
+    {
+      "id": "utility-rover",
+      "title": "A Canadian utility rover on the Moon",
+      "url": "https://www.asc-csa.gc.ca/eng/astronomy/moon-exploration/canadian-utility-rover-on-the-moon.asp",
+      "blurb": "Describes a planned Canadian rover for logistics, science and support to astronauts. The page lists launch in the 2030s and a status of concept development, and says it should survive the roughly two-week lunar night.",
+      "why_here": "A concrete case of a surface vehicle that must plan around sunlight and darkness, the same question this tool helps with."
+    },
+    {
+      "id": "artemis",
+      "title": "The Artemis campaign",
+      "url": "https://www.asc-csa.gc.ca/eng/astronomy/moon-exploration/artemis-missions.asp",
+      "blurb": "Explains the Artemis campaign as an international effort led by NASA to send humans back to the Moon and on toward Mars, with the CSA among the partners. The CSA notes it is updating the page to match NASA's March 2026 programme changes.",
+      "why_here": "Context for why landing sites and dates are being chosen now."
+    },
+    {
+      "id": "apollo-to-artemis",
+      "title": "From Apollo to Artemis",
+      "url": "https://www.asc-csa.gc.ca/eng/astronomy/moon-exploration/from-apollo-to-artemis-the-evolution-of-crewed-lunar-missions.asp",
+      "blurb": "Compares the Apollo missions with Artemis, including goals such as staying longer, studying resources like water ice, and working with international and commercial partners.",
+      "why_here": "Links the Apollo landing sites in our catalogue to today's polar plans."
+    },
+    {
+      "id": "gateway",
+      "title": "Gateway",
+      "url": "https://www.asc-csa.gc.ca/eng/astronomy/moon-exploration/gateway.asp",
+      "blurb": "Describes Gateway as a small station in lunar orbit and Canada's planned Canadarm3 contribution. The CSA notes this page is being updated to follow NASA's latest Artemis changes, so details may change.",
+      "why_here": "Shows the orbital side of the system that surface planning connects to."
+    }
+  ]
+}
