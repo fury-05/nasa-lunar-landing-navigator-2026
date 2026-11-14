@@ -4,7 +4,7 @@ Window: +8 to +15h. Statuses: DONE, PENDING, POSTPONED. Update this table in the
 
 | ID | Task | Owner | Status | Evidence / Notes |
 |---|---|---|---|---|
-| P3-01 | FastAPI skeleton: config, logging, request ids, RFC 7807 errors | irfan | PENDING | issue #57 |
+| P3-01 | FastAPI skeleton: config, logging, request ids, RFC 7807 errors | irfan | DONE | lunar_api.errors (RFC 7807 problem documents for ApiError, validation 422, HTTP errors, unhandled 500 without leaking internals), lunar_api.middleware (request ids accepted if well formed else generated, echoed on every response including 500, JSON access log), Settings with data dir and limits; 7 API tests; bug found by test: 500 responses lacked the request id header, fixed; issue #57 |
 | P3-02 | Database schema and Alembic migrations | irfan | PENDING | issue #58 |
 | P3-03 | Routes: sites, skyline, timeline, state, compare, slip-matrix | irfan | PENDING | issue #59 |
 | P3-04 | Job queue (arq) with SSE progress and timeouts | irfan | PENDING | issue #60 |

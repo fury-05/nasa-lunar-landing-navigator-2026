@@ -5,7 +5,7 @@
 | P0 | 12 | 0 | 0 | 12 |
 | P1 | 9 | 2 | 0 | 11 |
 | P2 | 8 | 4 | 0 | 12 |
-| P3 | 0 | 9 | 0 | 9 |
+| P3 | 1 | 8 | 0 | 9 |
 | P4 | 0 | 11 | 0 | 11 |
 | P5 | 0 | 7 | 0 | 7 |
 | P6 | 0 | 6 | 0 | 6 |
@@ -48,7 +48,7 @@
 | P2-10 | Validation suite items 1 to 8 automated where possible, human QuickMap checklist prepared | afreen | PENDING | issue #54 |
 | P2-11 | Run human QuickMap and Trek spot checks; record permalinks and screenshots | member3 | PENDING | issue #55 |
 | P2-12 | docs/validation/REPORT.md with measured error budget | irfan | PENDING | issue #56 |
-| P3-01 | FastAPI skeleton: config, logging, request ids, RFC 7807 errors | irfan | PENDING | issue #57 |
+| P3-01 | FastAPI skeleton: config, logging, request ids, RFC 7807 errors | irfan | DONE | lunar_api.errors (RFC 7807 problem documents for ApiError, validation 422, HTTP errors, unhandled 500 without leaking internals), lunar_api.middleware (request ids accepted if well formed else generated, echoed on every response including 500, JSON access log), Settings with data dir and limits; 7 API tests; bug found by test: 500 responses lacked the request id header, fixed; issue #57 |
 | P3-02 | Database schema and Alembic migrations | irfan | PENDING | issue #58 |
 | P3-03 | Routes: sites, skyline, timeline, state, compare, slip-matrix | irfan | PENDING | issue #59 |
 | P3-04 | Job queue (arq) with SSE progress and timeouts | irfan | PENDING | issue #60 |
