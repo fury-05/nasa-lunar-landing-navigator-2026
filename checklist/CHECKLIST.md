@@ -3,7 +3,7 @@
 | Phase | Done | Pending | Postponed | Total |
 |---|---|---|---|---|
 | P0 | 12 | 0 | 0 | 12 |
-| P1 | 9 | 2 | 0 | 11 |
+| P1 | 10 | 1 | 0 | 11 |
 | P2 | 8 | 4 | 0 | 12 |
 | P3 | 2 | 7 | 0 | 9 |
 | P4 | 0 | 11 | 0 | 11 |
@@ -35,7 +35,7 @@
 | P1-08 | DEM decision ADR-0003 and acquisition script with checksums; build COG pyramid (near, mid, far) | irfan | PENDING | near tier done: 10 PGDA 5 m tiles converted to COG on the VM (404 MB, DEFLATE, overviews, every pixel identical, data/MANIFEST.cog.json); lunar_engine.terrain (bilinear sampler, 7 tests); mid and far tiers NOT built: no verified source yet (ADR-0003, approval A2); issue #31 |
 | P1-09 | data/MANIFEST.json and ATTRIBUTION rows for every dataset | irfan | DONE | data/MANIFEST.json lists 10 files with url, size, sha256, retrieval time, licence status (pending-source) and citation; ATTRIBUTION rows: horizons, trek-moon, quickmap, csa-moon, lola-dem, nssdc-apollo, nasa-clps; tests check the manifest; issue #32 |
 | P1-10 | CSA content set for Public View: links and short paraphrased blurbs with attribution | member3 | DONE | data/content/csa.json: 6 paraphrased blurbs, each linked to its CSA page with credit and a no-endorsement line; facts checked against the retrieved page text; CSA terms read and summarised (non-commercial use with acknowledgement); 3 tests; whether our use fits the terms is human item A1; issue #33 |
-| P1-11 | Start 3 year precompute of curated sites in the background on the VM | irfan | PENDING |  |
+| P1-11 | Start 3 year precompute of curated sites in the background on the VM | irfan | DONE | 3 year precompute finished on the VM: 10 sites x 157825 samples (2026-12-01 to 2029-12-01, 10 min), 66 MB, Horizons API 1.2, 17 other catalogue sites skipped because they have no downloaded tile, 0 checksum refusals; the skyline in every bundle stops at the tile edge (coverage flag), see ADR-0006 and approval A2; issue #34 |
 | P2-01 | Geometry primitives and curvature-aware elevation formula with tests | irfan | DONE | lunar_engine.geometry: elevation formula, sphere dip, horizon distance, great-circle helpers, azimuth unwrap; 17 tests incl. independent vector derivation and hypothesis properties; finding: docs/04 says 0.07 deg at 100 km and 3 km, exact value is 0.0669 deg (rounds to 0.07); issue #45 |
 | P2-02 | DEM window reader (pyproj polar stereographic, rasterio, bilinear) with multi-tier merge | irfan | PENDING | issue #46 |
 | P2-03 | Skyline ray caster (numba), coverage flags, benchmark meets targets | irfan | DONE | lunar_engine.skyline.cast_skyline (numba, parallel azimuths, 0.25 deg, curvature-aware, sphere-dip floor, per-azimuth reach for coverage flags); 14 tests on synthetic terrain (flat ground = dip, disc at known distance/height/azimuth, eye height monotonic, NaN hole, tile edge); real Shackleton-rim tile: 1440 azimuths to 16 km in 380 ms (target under 3 s cold); NOT yet validated against QuickMap or Trek, see P2-10 and P2-11; mid and far tiers missing (approval A2); issue #47 |

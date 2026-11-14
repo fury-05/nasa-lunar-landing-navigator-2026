@@ -25,3 +25,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-14T20:04:31Z | irfan | P2-09 | precompute pipeline, first real run on pgda-site04 (Earth never clears the skyline there) | feat/engine-precompute
 2026-11-14T20:12:03Z | irfan | P3-01 | API skeleton: problem+json errors, request ids, access log | feat/api-skeleton
 2026-11-14T20:20:20Z | irfan | P3-03 | read-only API routes backed by precomputed bundles | feat/api-routes
+2026-11-14T20:24:25Z | irfan | P1-11 | 3 year precompute done on VM (10 sites, 66 MB); ADR-0006 proposes a wide-area DEM, awaiting approval A2 | docs/adr-0006-wide-dem
