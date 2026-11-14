@@ -254,3 +254,61 @@ def test_requests_share_one_store_so_caches_survive_between_requests(
         r = client.get("/api/v1/sites/alpha/state", params={"t": "2026-12-03T06:00:00Z"})
         assert r.status_code == 200
     assert built == [1], f"derived series were built {len(built)} times for 5 requests"
+
+
+def test_warm_builds_every_sites_caches_and_reports_seconds(bundle: Path) -> None:
+    from lunar_api.store import SiteStore
+
+    store = SiteStore(bundle)
+    times = store.warm()
+    assert set(times) == {"alpha", "beta"} and all(t >= 0 for t in times.values())
+    d = store.derived("alpha")
+    assert d._sun_events is not None and d._earth_events is not None  # already computed
+
+
+def test_warm_survives_one_broken_bundle(bundle: Path, tmp_path: Path) -> None:
+    import shutil
+
+    from lunar_api.store import SiteStore
+
+    root = tmp_path / "pre"
+    shutil.copytree(bundle / "alpha", root / "alpha")
+    shutil.copytree(bundle / "beta", root / "beta")
+    (root / "beta" / "sun.npz").write_bytes(b"not a real archive")
+    times = SiteStore(root).warm()
+    assert times["beta"] == -1.0 and times["alpha"] >= 0.0
+
+
+def test_startup_warming_runs_in_the_background_and_does_not_block(
+    monkeypatch: pytest.MonkeyPatch, bundle: Path
+) -> None:
+    import time
+
+    from fastapi.testclient import TestClient
+    from lunar_api import main, routes
+    from lunar_api import store as store_module
+
+    monkeypatch.setenv("LUNAR_PRECOMPUTE_DIR", str(bundle))
+    routes._STORES.clear()
+    gate_open = False
+    real = store_module.SiteStore.warm
+
+    def slow(self):  # type: ignore[no-untyped-def]
+        t = time.time()
+        while not gate_open and time.time() - t < 3:
+            time.sleep(0.01)
+        return real(self)
+
+    monkeypatch.setattr(store_module.SiteStore, "warm", slow)
+    main.WARM.update({"state": "idle", "sites": {}})
+    t0 = time.time()
+    with TestClient(main.app) as c:  # entering the context runs startup
+        assert time.time() - t0 < 2.0  # startup did not wait for the slow warm
+        assert c.get("/api/v1/version").status_code == 200  # requests are served while warming
+        assert main.WARM["state"] == "running"
+        gate_open = True
+        for _ in range(100):
+            if main.WARM["state"] == "done":
+                break
+            time.sleep(0.05)
+    assert main.WARM["state"] == "done" and set(main.WARM["sites"]) == {"alpha", "beta"}
