@@ -7,3 +7,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-14T17:20:00Z | irfan | P0-03,P0-07,P0-11 | phase 0 complete, 12 of 12 rows DONE, deployed at 13-52-97-105.sslip.io, tagging v0.0.1 | ci/p0-playwright-licences
 2026-11-14T17:30:00Z | irfan | P0-gate | deployed 72f3d9b to https://13-52-97-105.sslip.io; smoke: /api/v1/ready,/,/command,/public,/credits all 200; tag v0.0.1 pushed | 72f3d9b
 2026-11-14T18:05:00Z | irfan | P1-01,P1-02 | Horizons client, parser, real fixtures, convention tests (28 python tests pass), ADR-0004 | feat/engine-horizons-client
+2026-11-14T18:25:00Z | member3+irfan | P1-04 | Trek discovery: no raw elevation endpoint, ADR-0002 and ADR-0003 (PGDA 5 m LOLA tiles, 16 km), trek_discover.py | docs/p1-trek-discovery
