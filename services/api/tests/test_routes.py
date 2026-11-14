@@ -1,6 +1,7 @@
 """Route behaviour against a real precomputed bundle (fake Horizons, flat synthetic DEM)."""
 
 import json
+from pathlib import Path
 
 from fastapi.testclient import TestClient
 
@@ -188,3 +189,45 @@ def test_every_json_response_is_valid_json_without_nan(client: TestClient) -> No
         text = client.get(path).text
         json.loads(text)
         assert_no_nan(text)
+
+
+def test_state_uses_cached_derived_series_and_matches_a_fresh_computation(
+    client: TestClient, bundle: Path
+) -> None:
+    from lunar_api.store import SiteStore
+    from lunar_engine.events import HermiteSeries, find_events
+    from lunar_engine.metrics import sun_fraction_series
+
+    store = SiteStore(bundle)
+    d1 = store.derived("alpha")
+    assert store.derived("alpha") is d1  # same object: built once, reused
+    assert d1.sun_events is d1.sun_events and d1.earth_events is d1.earth_events
+
+    site, _ = store.get("alpha")
+    fresh = find_events(
+        HermiteSeries(site.sun.times, sun_fraction_series(site.sun, site.skyline)), 0.5
+    )
+    assert [(e.time_utc, e.kind) for e in d1.sun_events] == [(e.time_utc, e.kind) for e in fresh]
+
+    r1 = client.get("/api/v1/sites/alpha/state", params={"t": "2026-12-03T06:00:00Z"}).json()
+    r2 = client.get("/api/v1/sites/alpha/state", params={"t": "2026-12-03T06:00:00Z"}).json()
+    assert r1 == r2 and r1["sun"]["seconds_to_sunset"] > 0
+
+
+def test_derived_cache_is_rebuilt_when_the_bundle_changes_on_disk(bundle: Path) -> None:
+    import os
+    import shutil
+
+    from lunar_api.store import SiteStore
+
+    copy = bundle.parent / "copy_for_stale_test"
+    shutil.copytree(bundle / "alpha", copy / "alpha")
+    store = SiteStore(copy)
+    first = store.derived("alpha")
+    assert store.derived("alpha") is first
+    meta = copy / "alpha" / "meta.json"
+    later = meta.stat().st_mtime + 10
+    os.utime(meta, (later, later))  # the bundle was rebuilt
+    second = store.derived("alpha")
+    assert second is not first
+    assert store.derived("alpha") is second

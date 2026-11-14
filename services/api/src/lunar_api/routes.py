@@ -16,7 +16,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, Query, Request
 from lunar_engine import ENGINE_VERSION
 from lunar_engine.compare import SiteSky, assess_window, compare, deltas, slip_matrix
-from lunar_engine.events import HermiteSeries, Interval, find_events, time_remaining
+from lunar_engine.events import Interval, time_remaining
 from lunar_engine.links import quickmap_link
 from lunar_engine.metrics import sun_fraction_series
 from lunar_engine.sensitivity import PLACEHOLDER_CRITERIA, Assessment, Criteria
@@ -83,7 +83,10 @@ TIME_CHARS = re.compile(r"^[0-9T:.+\-Z ]{10,40}$")
 def parse_utc(text: str, field: str) -> datetime:
     if not TIME_CHARS.fullmatch(text):
         raise ApiError(
-            422, "Invalid input", f"{field} is not an ISO 8601 time.", "validation",
+            422,
+            "Invalid input",
+            f"{field} is not an ISO 8601 time.",
+            "validation",
             [{"field": field, "message": "expected e.g. 2026-12-01T00:00:00Z"}],
         )
     try:
@@ -401,13 +404,10 @@ def get_state(
             "outside-coverage",
             [{"field": "t", "message": "outside coverage"}],
         )
-    frac = HermiteSeries(site.sun.times, sun_fraction_series(site.sun, site.skyline))
-    margin = HermiteSeries(
-        site.earth.times, site.earth.elevation_deg - site.skyline.at_array(site.earth.azimuth_deg)
-    )
+    d = store.derived(site_id)
+    frac, margin = d.sun_fraction, d.earth_margin
     sun_now, earth_now = frac.at(now), margin.at(now)
-    sun_events = find_events(frac, 0.5)
-    earth_events = find_events(margin, 0.0)
+    sun_events, earth_events = d.sun_events, d.earth_events
     left_sun = time_remaining(now, sun_events, "set")
     left_earth = time_remaining(now, earth_events, "set")
     sunrise = time_remaining(now, sun_events, "rise")
