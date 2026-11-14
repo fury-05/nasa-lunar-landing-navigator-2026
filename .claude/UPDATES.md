@@ -29,3 +29,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-14T20:29:13Z | irfan | P3-05 | attribution endpoints generated from the registry, drift-checked in CI | feat/api-attribution
 2026-11-14T20:38:37Z | irfan | P3-04 | custom site jobs: POST/GET/SSE, arq worker, flat-horizon fallback, timeouts | feat/api-jobs
 2026-11-14T20:53:25Z | afreen+irfan | P3-06 | OpenAPI export, typed TS client, contract tests, CI drift checks | feat/api-contract
+2026-11-14T21:00:58Z | irfan | P3-07 | rate limits, ETags and cache headers | feat/api-caching

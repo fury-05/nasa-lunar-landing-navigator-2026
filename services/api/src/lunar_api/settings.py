@@ -15,6 +15,10 @@ class Settings:
     log_level: str = "INFO"
     max_window_days: int = 400  # docs/05 limits
     max_compare_sites: int = 8
+    rate_per_s: float = 5.0  # reads per second per client, after the burst
+    rate_burst: int = 60
+    heavy_rate_per_s: float = 0.5  # POSTs (compare, slip matrix, custom jobs)
+    heavy_burst: int = 6
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -26,4 +30,8 @@ class Settings:
             redis_url=os.environ.get("REDIS_URL", ""),
             data_dir=data_dir,
             log_level=os.environ.get("LOG_LEVEL", "INFO").upper(),
+            rate_per_s=float(os.environ.get("RATE_PER_S", "5")),
+            rate_burst=int(os.environ.get("RATE_BURST", "60")),
+            heavy_rate_per_s=float(os.environ.get("HEAVY_RATE_PER_S", "0.5")),
+            heavy_burst=int(os.environ.get("HEAVY_BURST", "6")),
         )

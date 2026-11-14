@@ -8,6 +8,7 @@ from fastapi import FastAPI, Response
 from lunar_engine import ENGINE_VERSION
 
 from lunar_api import API_VERSION
+from lunar_api.caching import EtagMiddleware, RateLimitMiddleware
 from lunar_api.checks import check_db, check_redis
 from lunar_api.errors import install_error_handlers
 from lunar_api.job_routes import router as job_router
@@ -26,6 +27,15 @@ app = FastAPI(
     openapi_url="/api/v1/openapi.json",
 )
 configure_logging(Settings.from_env().log_level)
+app.add_middleware(EtagMiddleware)
+_cfg = Settings.from_env()
+app.add_middleware(
+    RateLimitMiddleware,
+    rate_per_s=_cfg.rate_per_s,
+    burst=_cfg.rate_burst,
+    heavy_rate_per_s=_cfg.heavy_rate_per_s,
+    heavy_burst=_cfg.heavy_burst,
+)
 app.add_middleware(RequestIdMiddleware)
 install_error_handlers(app)
 app.include_router(router)
