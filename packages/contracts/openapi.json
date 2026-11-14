@@ -938,6 +938,13 @@
             "additionalProperties": true,
             "title": "Uncertainty",
             "type": "object"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
           }
         },
         "required": [
@@ -945,6 +952,7 @@
           "engine_version",
           "frame_note",
           "assumptions",
+          "warnings",
           "uncertainty",
           "reproduce"
         ],

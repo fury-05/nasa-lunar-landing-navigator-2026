@@ -32,6 +32,7 @@ class Provenance(BaseModel):
     engine_version: str
     frame_note: str
     assumptions: list[str]
+    warnings: list[str]
     uncertainty: dict[str, Any]
     reproduce: dict[str, Any]
 

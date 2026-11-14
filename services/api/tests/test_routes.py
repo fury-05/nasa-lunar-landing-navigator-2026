@@ -312,3 +312,44 @@ def test_startup_warming_runs_in_the_background_and_does_not_block(
                 break
             time.sleep(0.05)
     assert main.WARM["state"] == "done" and set(main.WARM["sites"]) == {"alpha", "beta"}
+
+
+def test_a_site_with_partial_terrain_carries_a_warning_in_every_provenance_block(
+    client: TestClient,
+) -> None:
+    # The fixture tile is 6 km wide but the skyline was requested to 2.5 km, so coverage is full.
+    # Shrink the claim to what the data says: no warning when coverage is complete.
+    a = client.get("/api/v1/sites/alpha/assess", params=W).json()
+    assert a["provenance"]["warnings"] == []
+
+
+def test_terrain_warnings_function_covers_each_case() -> None:
+    from lunar_api.routes import terrain_warnings
+
+    assert terrain_warnings({"skyline": {"covered_fraction": 1.0}}) == []
+    short = terrain_warnings(
+        {
+            "skyline": {
+                "covered_fraction": 0.0,
+                "min_reach_m": 8000,
+                "max_reach_m": 11000,
+                "max_range_m": 16000,
+            }
+        }
+    )
+    assert len(short) == 1 and "8 to 11 km" in short[0] and "16 km" in short[0]
+    assert "can only be higher" in short[0]
+    none = terrain_warnings({"terrain_unavailable": True, "skyline": {}})
+    assert (
+        len(none) == 1 and "bare sphere" in none[0] and "Do not use for site selection" in none[0]
+    )
+
+
+def test_a_skyline_without_terrain_is_reported_as_uncovered() -> None:
+    import numpy as np
+    from lunar_engine.precompute import flat_skyline
+
+    sky = flat_skyline(1.0, 5.0)
+    assert sky.max_range_m == 0.0 and float(sky.reach_m.max()) == 0.0
+    assert sky.covered_fraction() == 0.0  # used to read 1.0, which looked like perfect coverage
+    assert np.allclose(sky.elevation_deg, sky.elevation_deg[0])
