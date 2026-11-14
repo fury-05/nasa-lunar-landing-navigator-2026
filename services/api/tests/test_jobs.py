@@ -214,6 +214,8 @@ def http(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):  # type: ignore[no-un
     (root / "dem").mkdir(parents=True)
     _write_tile(root / "dem")
     monkeypatch.setenv("LUNAR_PRECOMPUTE_DIR", str(root / "precompute"))
+    monkeypatch.setenv("LUNAR_DEM_DIR", str(root / "dem"))
+    monkeypatch.setenv("LUNAR_CACHE_DIR", str(root / "cache"))
     store = MemoryJobStore()
     app.dependency_overrides[job_routes.job_store] = lambda: store
     app.dependency_overrides[job_routes.get_client] = lambda: _client()
