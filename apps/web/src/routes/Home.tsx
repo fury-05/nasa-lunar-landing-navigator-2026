@@ -14,7 +14,7 @@ export function Home() {
     <div className="flex flex-col gap-8">
       <section>
         <Chip tone="warn">Planning tool, not for flight operations</Chip>
-        <h1 className="mt-4 bg-gradient-to-r from-blue-deep via-earth to-blue-pale bg-clip-text text-4xl font-semibold text-transparent sm:text-5xl">
+        <h1 className="mt-4 bg-gradient-to-r from-earth to-blue-pale bg-clip-text text-4xl font-semibold text-transparent sm:text-5xl">
           Lunar Landing Site Navigator
         </h1>
         <p className="mt-4 max-w-2xl text-lg text-muted">

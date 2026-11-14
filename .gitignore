@@ -16,3 +16,5 @@ data/dem/
 .DS_Store
 .venv/
 *.tsbuildinfo
+.playwright-mcp/
+.claude/shot-*.png

@@ -5,7 +5,7 @@
 /scripts/ @fury-05
 /apps/web/ @Stella-10
 /docs/06-frontend-spec.md @Stella-10
-# Member 3 (enable when the username is known, replace <login>):
-# /apps/web/src/visuals/ @<login>
-# /apps/web/src/public/ @<login>
-# /docs/validation/ @<login>
+# Member 3 (Luz Aponte):
+/apps/web/src/visuals/ @nluz4105-ai
+/apps/web/src/public/ @nluz4105-ai
+/docs/validation/ @nluz4105-ai
