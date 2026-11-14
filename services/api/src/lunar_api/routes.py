@@ -115,6 +115,19 @@ def parse_utc(text: str, field: str) -> datetime:
     return t.replace(tzinfo=UTC) if t.tzinfo is None else t.astimezone(UTC)
 
 
+def effective_coverage(meta: dict[str, Any]) -> dict[str, float]:
+    """Coverage numbers for the listing. The flag wins over a stored number, so a bundle built
+    before a fix cannot claim terrain it never had."""
+    sky = meta["skyline"]
+    if meta.get("terrain_unavailable"):
+        return {"covered_fraction": 0.0, "min_reach_m": 0.0, "max_reach_m": 0.0}
+    return {
+        "covered_fraction": sky["covered_fraction"],
+        "min_reach_m": sky["min_reach_m"],
+        "max_reach_m": sky["max_reach_m"],
+    }
+
+
 def terrain_warnings(meta: dict[str, Any]) -> list[str]:
     """Plain-language caveats that must travel with every number from this site."""
     out: list[str] = []
@@ -295,11 +308,7 @@ def list_sites(store: Annotated[SiteStore, Depends(get_store)]) -> dict[str, Any
                 "coordinate_status": "derived-tile-centre",
                 "window": m["window"],
                 "built_at_utc": m["built_at_utc"],
-                "terrain_coverage": {
-                    "covered_fraction": m["skyline"]["covered_fraction"],
-                    "min_reach_m": m["skyline"]["min_reach_m"],
-                    "max_reach_m": m["skyline"]["max_reach_m"],
-                },
+                "terrain_coverage": effective_coverage(m),
             }
         )
     return clean(
