@@ -18,3 +18,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-14T19:11:49Z | irfan | fix-#42 | CORRECTION: entries from 2026-11-14T16:50Z to 20:30Z carry round-number times typed by hand, ten of them later than the commit that holds them. The commit time in git is authoritative. Also corrected: csa.json retrieved_at (now 18:58:03Z from the page file time) and the Horizons probe meta (now 17:42:31Z from the response header). From now on entries use date -u | fix/issue-42-timestamps
 2026-11-14T19:24:44Z | irfan | P2-03 + issues P2..P7 | skyline ray caster (380 ms for 16 km on a real tile), 54 issues created for phases 2 to 7 and assigned to owners | feat/engine-skyline
 2026-11-14T19:30:25Z | irfan | P2-04 | disc visibility integrator with analytic tests | feat/engine-visibility
+2026-11-14T19:35:10Z | irfan | P2-05 | interpolation, event detection, intervals, time remaining; matches Horizons RTS within 2 min | feat/engine-events
