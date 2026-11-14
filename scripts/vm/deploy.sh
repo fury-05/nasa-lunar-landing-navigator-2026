@@ -12,12 +12,12 @@ uv sync --frozen --no-dev
 ( cd apps/web && npm ci && npm run build )
 set -a; . /etc/lunar/lunar.env; set +a
 uv run alembic -c services/api/alembic.ini upgrade head
-PREV=$(readlink -f "$ROOT/current" || true)
+PREV=""; if [ -L "$ROOT/current" ] && [ -d "$ROOT/current/" ]; then PREV=$(readlink -f "$ROOT/current"); fi
 ln -sfn "$DIR" "$ROOT/current.new" && mv -Tf "$ROOT/current.new" "$ROOT/current"
-sudo systemctl restart lunar-api lunar-worker && sudo systemctl reload caddy
+sudo systemctl restart lunar-api && sudo systemctl restart lunar-worker && sudo systemctl reload caddy
 ok=""; for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8000/api/v1/ready >/dev/null && ok=1 && break; sleep 2; done
 if [ -z "$ok" ]; then
-  echo "HEALTH CHECK FAILED, rolling back"; [ -n "$PREV" ] && ln -sfn "$PREV" "$ROOT/current" && sudo systemctl restart lunar-api lunar-worker; exit 1
+  echo "HEALTH CHECK FAILED, rolling back"; if [ -n "$PREV" ]; then ln -sfn "$PREV" "$ROOT/current" && sudo systemctl restart lunar-api && sudo systemctl restart lunar-worker; fi; exit 1
 fi
 install -m755 "$DIR/scripts/vm/deploy.sh" "$ROOT/bin/deploy.sh"
 ls -1dt "$REL"/*/ | tail -n +6 | while read -r d; do git -C "$REPO" worktree remove --force "$d"; done
