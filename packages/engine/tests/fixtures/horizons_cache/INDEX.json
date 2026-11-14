@@ -4,34 +4,48 @@
     "sha256": "fccb4a3ef832eba14016d7ce04d0e73742cc7d8bef7dff4df937f387c7a1a4ff",
     "rows": 7,
     "api_version": "1.2",
-    "retrieved_at_utc": "2026-11-14T17:49:02Z"
+    "retrieved_at_utc": "2026-11-14T18:17:20Z"
   },
   {
     "name": "earth_lon30W_lat0",
     "sha256": "31b7da73c59b108632060d50c7ee5f1b0737b9bfca5cbf61f4d5e817639805b8",
     "rows": 7,
     "api_version": "1.2",
-    "retrieved_at_utc": "2026-11-14T17:49:03Z"
+    "retrieved_at_utc": "2026-11-14T18:17:20Z"
   },
   {
     "name": "earth_lon0_lat0",
     "sha256": "5ad882a11e05d9a8d3c80cc76bf3e62d60b9f35a9758457b53e0b129fd55cd04",
     "rows": 7,
     "api_version": "1.2",
-    "retrieved_at_utc": "2026-11-14T17:49:04Z"
+    "retrieved_at_utc": "2026-11-14T18:17:20Z"
   },
   {
     "name": "sun_lat_m89p9_month",
     "sha256": "da8aaec49ecf87820027427a26f453fd063e79e8d98727601498d4554cbf8d76",
     "rows": 121,
     "api_version": "1.2",
-    "retrieved_at_utc": "2026-11-14T17:49:05Z"
+    "retrieved_at_utc": "2026-11-14T18:17:20Z"
   },
   {
     "name": "sun_lat_p89p9_month",
     "sha256": "af58a4c80e41bf511d452435d39018e0f23853148c325d5de55cf5266290875e",
     "rows": 121,
     "api_version": "1.2",
-    "retrieved_at_utc": "2026-11-14T17:49:06Z"
+    "retrieved_at_utc": "2026-11-14T18:17:20Z"
+  },
+  {
+    "name": "sun_rts_lon0_lat0_day",
+    "sha256": "638268e72705dfe85342a7d73a42286fe3e6eb0ba8a4cb141e06e60930661a81",
+    "rows": 1,
+    "api_version": "1.2",
+    "retrieved_at_utc": "2026-11-14T18:17:21Z"
+  },
+  {
+    "name": "sun_series_lon0_lat0_day",
+    "sha256": "2b1606bd185af2aa42e2b76ba87ffd4e44a1667e814afa456f044f3506fa4ac1",
+    "rows": 145,
+    "api_version": "1.2",
+    "retrieved_at_utc": "2026-11-14T18:17:22Z"
   }
 ]
