@@ -6,8 +6,10 @@ reason, never NaN. Limits come from `Settings`.
 
 from __future__ import annotations
 
+import json
 import math
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -571,3 +573,55 @@ def get_quickmap(
         ),
         "note": "Opens the public QuickMap viewer. The coordinates are a derived tile centre.",
     }
+
+
+# ---- attribution ------------------------------------------------------------------------------
+
+ATTRIBUTION_PATHS = (
+    Path(__file__).resolve().parents[4] / "data" / "attribution.json",  # repository checkout
+    Path("/opt/lunar/current/data/attribution.json"),  # deployed release
+)
+
+
+def load_attribution() -> dict[str, Any]:
+    for p in ATTRIBUTION_PATHS:
+        if p.exists():
+            doc: dict[str, Any] = json.loads(p.read_text(encoding="utf8"))
+            return doc
+    raise ApiError(503, "Attribution unavailable", "The credits file is missing on this server.",
+                   "attribution-missing")
+
+
+@router.get("/attribution")
+def get_attribution() -> dict[str, Any]:
+    doc = load_attribution()
+    credits = [
+        {
+            "id": s["id"],
+            "name": s["name"],
+            "publisher": s["publisher"],
+            "url": s["url"],
+            "credit": s["citation"],
+            "usage_statement": s["usage_statement"],
+            "retrieved_at": s["retrieved_at"],
+            "terms_confirmed": "pending-source" not in s["usage_statement"],
+        }
+        for s in doc["sources"]
+    ]
+    return {
+        "notice": doc["notice"],
+        "count": len(credits),
+        "unconfirmed_terms": [c["id"] for c in credits if not c["terms_confirmed"]],
+        "sources": credits,
+        "software": "Third party software licences are listed in THIRD_PARTY_LICENSES.",
+    }
+
+
+@router.get("/attribution/{source_id}")
+def get_attribution_one(source_id: str) -> dict[str, Any]:
+    for s in load_attribution()["sources"]:
+        if s["id"] == source_id:
+            return dict(s)
+    raise ApiError(
+        404, "Source not found", f"No attribution entry '{source_id}'.", "source-not-found"
+    )
