@@ -9,6 +9,8 @@ from lunar_engine import ENGINE_VERSION
 
 from lunar_api import API_VERSION
 from lunar_api.checks import check_db, check_redis
+from lunar_api.errors import install_error_handlers
+from lunar_api.middleware import RequestIdMiddleware, configure_logging
 from lunar_api.settings import Settings
 
 DISCLAIMER = "Planning tool, not for flight operations."
@@ -20,6 +22,9 @@ app = FastAPI(
     docs_url="/api/v1/docs",
     openapi_url="/api/v1/openapi.json",
 )
+configure_logging(Settings.from_env().log_level)
+app.add_middleware(RequestIdMiddleware)
+install_error_handlers(app)
 
 
 @app.get("/api/v1/health")
