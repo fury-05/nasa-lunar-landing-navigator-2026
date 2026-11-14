@@ -21,6 +21,8 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
+from lunar_api.errors import safe_echo
+
 CACHEABLE_PREFIXES = ("/api/v1/sites", "/api/v1/attribution", "/api/v1/links")
 NEVER_CACHED = ("/api/v1/sites/custom",)
 MAX_CACHE_BODY = 2_000_000  # do not buffer and hash bigger responses
@@ -89,7 +91,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 "title": "Too many requests",
                 "status": 429,
                 "detail": f"Rate limit reached. Try again in {retry} s.",
-                "instance": request.url.path,
+                "instance": safe_echo(request.url.path, 200),
                 "request_id": getattr(request.state, "request_id", None),
                 "errors": [],
             }
