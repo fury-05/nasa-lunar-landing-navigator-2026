@@ -35,3 +35,45 @@ First contentful paint under 2 s on a mid laptop on broadband, route chunks unde
 
 ## Quality gates
 ESLint and TypeScript strict clean, Vitest component tests, Playwright smoke tests on the three views, axe with zero serious violations, Lighthouse accessibility at least 95.
+
+## Decision note: no Trek imagery draped on the local terrain view (P5-04, issue #80)
+Status: decided for the freeze, revisit after it. Date: 2026-11-15.
+
+The spec above says the local 3D terrain is "draped with Trek imagery". The shipped view
+(`apps/web/src/components/TerrainView.tsx`) does not do this. It shades the real height grid from
+`GET /sites/{id}/terrain` with the real Sun direction at the mission clock time, using surface
+angle plus a cast-shadow test. This note records why.
+
+What was checked (2026-11-15):
+* It is possible to fetch the imagery. The `LRO_NAC_Mosaic_SPole85.5_1mp` layer answers HTTP 200 with
+  `Access-Control-Allow-Origin: *` at z9, z10 and z11 for the Shackleton rim window. The deployed CSP
+  (`infra/Caddyfile`) already allows `img-src` and `connect-src` for `https://trek.nasa.gov`, so no new
+  origin is needed. At z10 (8.4 m per pixel) a 4 km window needs about 12 tiles of 256 px.
+* The LOLA grayscale layer is not usable at z10 and z11 (HTTP 404 there) and is shading, not imagery.
+
+Why it is not built:
+1. The imagery has its own light. A NAC tile is a photograph taken at one Sun angle, so shadows are
+   baked into the pixels (the z10 tile checked above has large black shadows). Draped on a surface
+   that is lit by the Sun at the scrubber time, the picture would show two different Suns. That
+   would look more real and be less true. Shaded relief from the height grid is the only rendering
+   whose lighting is the same Sun as the metrics.
+2. The effort does not fit the freeze. The Trek grid is south polar stereographic, but the height
+   grid is oriented to local north, which differs from the polar grid by the site longitude (about 172
+   degrees at Shackleton rim). Draping needs a rotation, a resample of about 12 PNGs per site, and a
+   textured-quad renderer in place of the present flat-shaded one.
+3. It would add a network dependency to a view that currently works from one API call.
+
+What replaces it: shaded relief, labelled as such, with the exaggeration, the null (no data) cells,
+the interpolation and height-error basis texts and the 5 m caveat shown beside it. The 2D polar map
+on `/sites/pick` keeps the real Trek imagery, with its credit text.
+
+If this is revisited: use the WAC or NAC layer only as a flat 2D underlay on the shaded map
+(multiply blend, labelled "imagery lit at a different angle"), not as a texture on the 3D surface.
+
+## Terrain labels (P5-04)
+Relief is shown as "relief plus or minus uncertainty", where the uncertainty is the data provider's
+stated height error combined for a difference of two heights, and the note beside it says what that
+leaves out (interpolation and smoothing). Where a 5 m product supplied part of the grid, a caveat
+quotes ADR-0003: about 90 percent of those pixels are interpolated, so 5 m is the grid spacing and
+not the spacing of real measurements. Individual crater rim heights and floor depths are never
+presented as measured at 5 m. Tests: `src/lib/terrain.test.ts` ("honesty about 5 m heights").

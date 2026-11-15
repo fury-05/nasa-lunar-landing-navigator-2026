@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  RELIEF_UNCERTAINTY_NOTE,
+  fiveMetreCaveat,
   illumination,
   missingPct,
   relief,
@@ -234,15 +236,15 @@ export function TerrainView({ tile, sun }: { tile: TerrainTile; sun: SunDir | nu
       )}
       <dl className="m-0 grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
         <div>
-          <dt className="text-xs text-muted">Lowest point in tile</dt>
+          <dt className="text-xs text-muted">Lowest DEM value in tile</dt>
           <dd className="m-0 font-mono">{rel!.minM.toFixed(0)} m</dd>
         </div>
         <div>
-          <dt className="text-xs text-muted">Highest point in tile</dt>
+          <dt className="text-xs text-muted">Highest DEM value in tile</dt>
           <dd className="m-0 font-mono">{rel!.maxM.toFixed(0)} m</dd>
         </div>
         <div>
-          <dt className="text-xs text-muted">Relief (high minus low)</dt>
+          <dt className="text-xs text-muted">Relief ± uncertainty (high minus low)</dt>
           <dd className="m-0 font-mono">
             {rel!.reliefM.toFixed(0)} m{rel!.errorM !== null && ` ± ${rel!.errorM.toFixed(1)} m`}
           </dd>
@@ -256,6 +258,8 @@ export function TerrainView({ tile, sun }: { tile: TerrainTile; sun: SunDir | nu
       </dl>
       <ul className="m-0 list-disc pl-5 text-xs text-muted">
         <li>Height error: {tile.height_error_basis}.</li>
+        <li>{RELIEF_UNCERTAINTY_NOTE}</li>
+        {fiveMetreCaveat(tile) && <li>{fiveMetreCaveat(tile)}</li>}
         <li>Interpolation: {tile.interpolated_basis}.</li>
         <li>
           Coverage: {missingPct(tile)}% of cells have no height data (grey). Elevation tiers used:{" "}

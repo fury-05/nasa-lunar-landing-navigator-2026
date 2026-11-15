@@ -423,3 +423,27 @@ test("command centre: site search narrows the select and keeps the chosen site",
   await expect(page).toHaveURL(/site=beta/);
   await expect(select.locator("option")).toHaveCount(1);
 });
+
+test("terrain view: relief is labelled plus or minus uncertainty and never claims measured 5 m heights", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.route("**/api/v1/sites/*/terrain*", (r) =>
+    json(
+      r,
+      terrainTile({
+        spacing_m: 5,
+        native_resolution_m: 5,
+        height_error_m: 0.25,
+        tier_share: { "site-tile-5m": 1 },
+      }),
+    ),
+  );
+  await page.goto("/command?site=alpha");
+  await expect(page.getByText(/Relief ± uncertainty \(high minus low\)/)).toBeVisible();
+  await expect(page.getByText(/± 0\.4 m/)).toBeVisible(); // sqrt(2) * 0.25
+  await expect(page.getByText(/does not include interpolation or smoothing/)).toBeVisible();
+  await expect(page.getByText(/mostly interpolated/)).toBeVisible();
+  await expect(page.getByText(/not the spacing of real measurements/)).toBeVisible();
+  await expect(page.getByText(/are measured at 5 m/i)).toHaveCount(0);
+});
