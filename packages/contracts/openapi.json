@@ -204,6 +204,119 @@
         "title": "Band",
         "type": "object"
       },
+      "CheckOut": {
+        "properties": {
+          "available": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available"
+          },
+          "id": {
+            "enum": [
+              "power",
+              "communication",
+              "terrain_slope",
+              "thermal",
+              "mission_needs"
+            ],
+            "title": "Id",
+            "type": "string"
+          },
+          "margin_nominal": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Margin Nominal"
+          },
+          "margin_pessimistic": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Margin Pessimistic"
+          },
+          "reasoning": {
+            "title": "Reasoning",
+            "type": "string"
+          },
+          "required_nominal": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Required Nominal"
+          },
+          "required_pessimistic": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Required Pessimistic"
+          },
+          "status": {
+            "enum": [
+              "pass",
+              "marginal",
+              "fail",
+              "not_assessed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "status",
+          "reasoning",
+          "unit",
+          "available",
+          "required_nominal",
+          "required_pessimistic",
+          "margin_nominal",
+          "margin_pessimistic"
+        ],
+        "title": "CheckOut",
+        "type": "object"
+      },
       "CheckResult": {
         "properties": {
           "detail": {
@@ -842,6 +955,387 @@
         "title": "JobOut",
         "type": "object"
       },
+      "LanderAssessIn": {
+        "properties": {
+          "end": {
+            "title": "End",
+            "type": "string"
+          },
+          "lander": {
+            "$ref": "#/components/schemas/LanderIn"
+          },
+          "mission_needs": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MissionNeedsIn"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "site_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Site Id",
+            "type": "string"
+          },
+          "start": {
+            "title": "Start",
+            "type": "string"
+          }
+        },
+        "required": [
+          "site_id",
+          "start",
+          "end",
+          "lander"
+        ],
+        "title": "LanderAssessIn",
+        "type": "object"
+      },
+      "LanderAssessOut": {
+        "properties": {
+          "assumptions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Assumptions",
+            "type": "array"
+          },
+          "band_basis": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Band Basis",
+            "type": "array"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/CheckOut"
+            },
+            "title": "Checks",
+            "type": "array"
+          },
+          "conclusive": {
+            "title": "Conclusive",
+            "type": "boolean"
+          },
+          "end_utc": {
+            "title": "End Utc",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "lander": {
+            "$ref": "#/components/schemas/LanderEcho"
+          },
+          "longest_dark_hours": {
+            "$ref": "#/components/schemas/Band"
+          },
+          "longest_outage_hours": {
+            "$ref": "#/components/schemas/Band"
+          },
+          "mission_needs": {
+            "$ref": "#/components/schemas/CriteriaOut"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/Provenance"
+          },
+          "site_id": {
+            "title": "Site Id",
+            "type": "string"
+          },
+          "slope": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SlopeOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "start_utc": {
+            "title": "Start Utc",
+            "type": "string"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "terrain": {
+            "$ref": "#/components/schemas/TerrainOut"
+          },
+          "verdict": {
+            "enum": [
+              "pass",
+              "marginal",
+              "fail",
+              "upper_bound_terrain_incomplete"
+            ],
+            "title": "Verdict",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "site_id",
+          "start_utc",
+          "end_utc",
+          "verdict",
+          "conclusive",
+          "summary",
+          "checks",
+          "lander",
+          "terrain",
+          "band_basis",
+          "longest_dark_hours",
+          "longest_outage_hours",
+          "slope",
+          "mission_needs",
+          "warnings",
+          "assumptions",
+          "label",
+          "provenance"
+        ],
+        "title": "LanderAssessOut",
+        "type": "object"
+      },
+      "LanderEcho": {
+        "properties": {
+          "array_power_w": {
+            "anyOf": [
+              {
+                "maximum": 10000000.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Echoed only, no charging model.",
+            "title": "Array Power W"
+          },
+          "autonomy_without_earth_h": {
+            "description": "Longest run without Earth contact, h.",
+            "maximum": 100000.0,
+            "minimum": 0.0,
+            "title": "Autonomy Without Earth H",
+            "type": "number"
+          },
+          "battery_capacity_wh": {
+            "description": "Battery energy, Wh.",
+            "maximum": 10000000.0,
+            "minimum": 0.0,
+            "title": "Battery Capacity Wh",
+            "type": "number"
+          },
+          "dark_survival_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dark Survival Hours"
+          },
+          "max_survival_temp_c": {
+            "anyOf": [
+              {
+                "maximum": 1000.0,
+                "minimum": -273.15,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Echoed only, no thermal model.",
+            "title": "Max Survival Temp C"
+          },
+          "min_survival_temp_c": {
+            "anyOf": [
+              {
+                "maximum": 1000.0,
+                "minimum": -273.15,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Echoed only, no thermal model.",
+            "title": "Min Survival Temp C"
+          },
+          "reserve_fraction": {
+            "description": "Unused share of the capacity.",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Reserve Fraction",
+            "type": "number"
+          },
+          "slope_limit_deg": {
+            "anyOf": [
+              {
+                "maximum": 90.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Enables the slope check.",
+            "title": "Slope Limit Deg"
+          },
+          "source": {
+            "description": "Where these numbers come from, or a placeholder label.",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Source",
+            "type": "string"
+          },
+          "survival_load_w": {
+            "description": "Constant night load, W.",
+            "maximum": 1000000.0,
+            "minimum": 0.0,
+            "title": "Survival Load W",
+            "type": "number"
+          },
+          "usable_energy_wh": {
+            "title": "Usable Energy Wh",
+            "type": "number"
+          }
+        },
+        "required": [
+          "battery_capacity_wh",
+          "reserve_fraction",
+          "survival_load_w",
+          "autonomy_without_earth_h",
+          "source",
+          "usable_energy_wh",
+          "dark_survival_hours"
+        ],
+        "title": "LanderEcho",
+        "type": "object"
+      },
+      "LanderIn": {
+        "description": "Lander profile. Units and ranges mirror `lunar_engine.lander.LANDER_FIELDS`.",
+        "properties": {
+          "array_power_w": {
+            "anyOf": [
+              {
+                "maximum": 10000000.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Echoed only, no charging model.",
+            "title": "Array Power W"
+          },
+          "autonomy_without_earth_h": {
+            "description": "Longest run without Earth contact, h.",
+            "maximum": 100000.0,
+            "minimum": 0.0,
+            "title": "Autonomy Without Earth H",
+            "type": "number"
+          },
+          "battery_capacity_wh": {
+            "description": "Battery energy, Wh.",
+            "maximum": 10000000.0,
+            "minimum": 0.0,
+            "title": "Battery Capacity Wh",
+            "type": "number"
+          },
+          "max_survival_temp_c": {
+            "anyOf": [
+              {
+                "maximum": 1000.0,
+                "minimum": -273.15,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Echoed only, no thermal model.",
+            "title": "Max Survival Temp C"
+          },
+          "min_survival_temp_c": {
+            "anyOf": [
+              {
+                "maximum": 1000.0,
+                "minimum": -273.15,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Echoed only, no thermal model.",
+            "title": "Min Survival Temp C"
+          },
+          "reserve_fraction": {
+            "description": "Unused share of the capacity.",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Reserve Fraction",
+            "type": "number"
+          },
+          "slope_limit_deg": {
+            "anyOf": [
+              {
+                "maximum": 90.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Enables the slope check.",
+            "title": "Slope Limit Deg"
+          },
+          "source": {
+            "description": "Where these numbers come from, or a placeholder label.",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Source",
+            "type": "string"
+          },
+          "survival_load_w": {
+            "description": "Constant night load, W.",
+            "maximum": 1000000.0,
+            "minimum": 0.0,
+            "title": "Survival Load W",
+            "type": "number"
+          }
+        },
+        "required": [
+          "battery_capacity_wh",
+          "reserve_fraction",
+          "survival_load_w",
+          "autonomy_without_earth_h",
+          "source"
+        ],
+        "title": "LanderIn",
+        "type": "object"
+      },
       "Metrics": {
         "properties": {
           "assumptions": {
@@ -958,6 +1452,65 @@
           "assumptions"
         ],
         "title": "Metrics",
+        "type": "object"
+      },
+      "MissionNeedsIn": {
+        "description": "Same names and meaning as the optional query parameters of GET /sites/{id}/assess.",
+        "properties": {
+          "max_dark_hours": {
+            "anyOf": [
+              {
+                "maximum": 9600.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Dark Hours"
+          },
+          "max_outage_hours": {
+            "anyOf": [
+              {
+                "maximum": 9600.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Outage Hours"
+          },
+          "min_earth_fraction": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Earth Fraction"
+          },
+          "min_sun_fraction": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Sun Fraction"
+          }
+        },
+        "title": "MissionNeedsIn",
         "type": "object"
       },
       "Pairwise": {
@@ -1666,6 +2219,73 @@
           "provenance"
         ],
         "title": "SlipOut",
+        "type": "object"
+      },
+      "SlopeOut": {
+        "properties": {
+          "baseline_m": {
+            "title": "Baseline M",
+            "type": "number"
+          },
+          "height_error_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height Error M"
+          },
+          "max_slope_deg": {
+            "title": "Max Slope Deg",
+            "type": "number"
+          },
+          "mean_slope_deg": {
+            "title": "Mean Slope Deg",
+            "type": "number"
+          },
+          "native_resolution_m": {
+            "title": "Native Resolution M",
+            "type": "number"
+          },
+          "patch_m": {
+            "title": "Patch M",
+            "type": "number"
+          },
+          "pessimistic_deg": {
+            "title": "Pessimistic Deg",
+            "type": "number"
+          },
+          "slope_error_deg": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slope Error Deg"
+          },
+          "valid_fraction": {
+            "title": "Valid Fraction",
+            "type": "number"
+          }
+        },
+        "required": [
+          "max_slope_deg",
+          "mean_slope_deg",
+          "pessimistic_deg",
+          "slope_error_deg",
+          "baseline_m",
+          "patch_m",
+          "valid_fraction",
+          "native_resolution_m",
+          "height_error_m"
+        ],
+        "title": "SlopeOut",
         "type": "object"
       },
       "Source": {
@@ -2429,6 +3049,54 @@
           }
         },
         "summary": "Job Events"
+      }
+    },
+    "/api/v1/lander/assess": {
+      "post": {
+        "operationId": "post_lander_assess_api_v1_lander_assess_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LanderAssessIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LanderAssessOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Invalid input"
+          }
+        },
+        "summary": "Post Lander Assess"
       }
     },
     "/api/v1/links/quickmap": {
