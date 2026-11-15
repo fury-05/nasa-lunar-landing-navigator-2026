@@ -19,12 +19,12 @@ function BandRow({
 }) {
   const same = band.high - band.low < 1e-9;
   return (
-    <div className="flex items-baseline justify-between gap-4 border-b border-white/[0.07] py-2">
+    <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-white/[0.07] py-2">
       <dt className="text-base text-ink">
         {label}
         <span className="block text-sm font-normal text-muted">{def}</span>
       </dt>
-      <dd className="m-0 shrink-0 text-right font-mono text-base">
+      <dd className="m-0 min-w-0 text-right font-mono text-base">
         <span className="text-lg font-semibold text-ink">{fmt(band.nominal)}</span>
         {!same && (
           <span className="ml-2 text-sm text-muted">
@@ -164,7 +164,7 @@ export function Metrics({ a }: { a: Assess }) {
           fmt={fmtHours}
           def="Longest unbroken stretch with Earth hidden below the skyline."
         />
-        <div className="flex items-baseline justify-between gap-4 py-2">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2">
           <dt className="text-base text-ink">
             Sun elevation (min / mean / max)
             <span className="block text-sm text-muted">

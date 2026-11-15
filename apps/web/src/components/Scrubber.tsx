@@ -22,7 +22,7 @@ export function Scrubber({
   const t = times[index] ?? 0;
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-      <label htmlFor={id} className="text-base text-muted">
+      <label htmlFor={id} className="text-sm text-muted">
         Time shown in the sky views (UTC)
       </label>
       <div className="flex min-w-[16rem] flex-1 items-center gap-2">
@@ -30,7 +30,7 @@ export function Scrubber({
           type="button"
           aria-label="One step earlier"
           onClick={() => onChange(clamp(index - 1))}
-          className="min-h-11 min-w-11 rounded-cell border border-white/20 text-ink hover:bg-white/10"
+          className="min-h-11 min-w-11 rounded-cell border border-white/20 text-ink hover:bg-white/10 lg:min-h-9 lg:min-w-9"
         >
           -
         </button>
@@ -52,13 +52,13 @@ export function Scrubber({
               onChange(clamp(index - stepsPerDay));
             }
           }}
-          className="min-h-11 flex-1 accent-earth"
+          className="min-h-11 flex-1 accent-earth lg:min-h-9"
         />
         <button
           type="button"
           aria-label="One step later"
           onClick={() => onChange(clamp(index + 1))}
-          className="min-h-11 min-w-11 rounded-cell border border-white/20 text-ink hover:bg-white/10"
+          className="min-h-11 min-w-11 rounded-cell border border-white/20 text-ink hover:bg-white/10 lg:min-h-9 lg:min-w-9"
         >
           +
         </button>
@@ -70,7 +70,7 @@ export function Scrubber({
             onClick={clock.playing ? clock.pause : clock.play}
             disabled={clock.reduced || times.length < 2}
             aria-pressed={clock.playing}
-            className="min-h-11 min-w-24 rounded-cell border border-earth/60 bg-earth/10 px-4 text-base font-semibold text-earth hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+            className="min-h-11 min-w-24 rounded-cell border border-earth/60 bg-earth/10 px-4 text-base font-semibold text-earth hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50 lg:min-h-9"
           >
             {clock.playing ? "Pause" : "Play"}
           </button>
@@ -79,7 +79,7 @@ export function Scrubber({
             <select
               value={clock.speed.id}
               onChange={(e) => clock.setSpeed(e.target.value)}
-              className="min-h-11 rounded-cell border border-white/20 bg-void px-2 text-ink"
+              className="min-h-11 rounded-cell border border-white/20 bg-void px-2 text-base text-ink lg:min-h-9"
             >
               {SPEEDS.map((sp) => (
                 <option key={sp.id} value={sp.id}>

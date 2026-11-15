@@ -194,26 +194,26 @@ export function Command() {
 
   return (
     <div className="flex flex-col gap-4">
-      <header className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
-        <div>
-          <h1 className="m-0 text-3xl">Command Centre</h1>
-          <p className="m-0 mt-1 text-base text-muted">
+      <header className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1">
+        <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+          <h1 className="m-0 text-2xl">Command Centre</h1>
+          <p className="m-0 text-sm text-muted">
             <strong className="text-ink">1</strong> Choose a site and dates,{" "}
             <strong className="text-ink">2</strong> read the verdict on the right,{" "}
             <strong className="text-ink">3</strong> press{" "}
             <strong className="text-earth">Play</strong> to watch the Sun and Earth move against the
-            real horizon. Everything below updates together.
+            real horizon.
           </p>
         </div>
         <Chip tone="warn">Planning tool, not for flight operations</Chip>
       </header>
 
-      <Glass className="flex flex-col gap-3 p-4 [@media(min-height:820px)]:lg:sticky [@media(min-height:820px)]:lg:top-2 [@media(min-height:820px)]:lg:z-30">
-        <div className="flex flex-wrap items-end gap-x-4 gap-y-3">
-          <label className="flex flex-col gap-1 text-base text-muted">
+      <Glass className="flex flex-col gap-2 p-3">
+        <div className="flex flex-wrap items-end gap-x-3 gap-y-2">
+          <label className="flex min-w-0 max-w-full flex-col gap-0.5 text-sm text-muted">
             Site
             <select
-              className="min-h-11 rounded-cell border border-white/20 bg-void px-3 text-base text-ink"
+              className="min-h-11 w-full min-w-0 max-w-full rounded-cell border border-white/20 bg-void px-2 text-base text-ink lg:min-h-9"
               value={id}
               onChange={(e) => set("site", e.target.value)}
             >
@@ -224,10 +224,10 @@ export function Command() {
               ))}
             </select>
           </label>
-          <label className="flex flex-col gap-1 text-base text-muted">
+          <label className="flex flex-col gap-0.5 text-sm text-muted">
             Length
             <select
-              className="min-h-11 rounded-cell border border-white/20 bg-void px-3 text-base text-ink"
+              className="min-h-11 rounded-cell border border-white/20 bg-void px-2 text-base text-ink lg:min-h-9"
               value={days}
               onChange={(e) => set("days", e.target.value)}
             >
@@ -255,13 +255,13 @@ export function Command() {
               aria-expanded={showFilter}
               aria-controls="site-filter-panel"
               onClick={() => setShowFilter((v) => !v)}
-              className="min-h-11 rounded-cell border border-white/20 px-4 text-base text-ink hover:bg-white/10"
+              className="min-h-11 rounded-cell border border-white/20 px-3 text-sm text-ink hover:bg-white/10 lg:min-h-9"
             >
               {showFilter ? "Hide site search" : "Search and filter sites"}
             </button>
             <Link
               to="/sites/pick"
-              className="inline-flex min-h-11 items-center rounded-cell border border-white/20 px-4 text-base text-earth no-underline hover:bg-white/10"
+              className="inline-flex min-h-11 items-center rounded-cell border border-white/20 px-3 text-sm text-earth no-underline hover:bg-white/10 lg:min-h-9"
             >
               Pick another site on the map
             </Link>
