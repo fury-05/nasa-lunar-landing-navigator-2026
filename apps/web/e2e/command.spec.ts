@@ -490,7 +490,9 @@ test("date control: reachable and operable with the keyboard alone", async ({ pa
   await next.focus();
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/start=2026-12-12/);
-  await next.focus();
+  // Wait until the page has re-rendered with the new start, then use the other key.
+  await expect(page.getByLabel("Start date (UTC)")).toHaveValue("2026-12-12");
+  await expect(next).toBeFocused();
   await page.keyboard.press("Space");
   await expect(page).toHaveURL(/start=2026-12-13/);
 });
