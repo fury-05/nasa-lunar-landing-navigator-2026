@@ -266,3 +266,14 @@ def test_docs_page_is_self_contained_and_lists_the_routes(client: TestClient) ->
     assert "<script" not in r.text.lower()
     assert "/api/v1/sites/{site_id}/assess" in r.text
     assert "not for flight operations" in r.text
+
+
+def test_docs_page_may_style_itself_but_nothing_else_is_loosened(client: TestClient) -> None:
+    """Audit F3: the reference page has an inline <style>; only that route gets style-src."""
+    c = client
+    docs = c.get("/api/v1/docs").headers["content-security-policy"]
+    assert "style-src 'unsafe-inline'" in docs and "default-src 'none'" in docs
+    assert "script-src" not in docs and "frame-ancestors 'none'" in docs
+    for path in ("/api/v1/health", "/api/v1/version", "/api/v1/openapi.json"):
+        h = c.get(path).headers["content-security-policy"]
+        assert h == "default-src 'none'; frame-ancestors 'none'", path

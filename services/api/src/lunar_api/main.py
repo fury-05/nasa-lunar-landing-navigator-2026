@@ -136,4 +136,6 @@ def _docs_html() -> str:
 
 @app.get("/api/v1/docs", include_in_schema=False)
 def docs() -> HTMLResponse:
-    return HTMLResponse(_docs_html())
+    # The page has one inline <style>; allow styles for this route only, still no scripts.
+    csp = "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'"
+    return HTMLResponse(_docs_html(), headers={"Content-Security-Policy": csp})
