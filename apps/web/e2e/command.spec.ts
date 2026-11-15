@@ -447,3 +447,50 @@ test("mission clock: reduced motion turns playback off and says why", async ({ b
   await expect(page).toHaveURL(/t=2026-12-13/);
   await ctx.close();
 });
+
+test("date control: day steps and lunar month jumps change the start in the link", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.goto("/command?site=alpha&start=2026-12-11");
+  await page.getByRole("button", { name: "Next day" }).click();
+  await expect(page).toHaveURL(/start=2026-12-12/);
+  await expect(page.getByLabel("Start date (UTC)")).toHaveValue("2026-12-12");
+  await page.getByRole("button", { name: /Next lunar month/ }).click();
+  await expect(page).toHaveURL(/start=2027-01-11/); // 12-12 + 30 whole days
+  await expect(page.getByText(/Next lunar month: start is now 2027-01-11/)).toBeVisible();
+  await page.getByRole("button", { name: /Previous lunar month/ }).click();
+  await expect(page).toHaveURL(/start=2026-12-12/);
+  await expect(page.getByText(/approximation/)).toBeVisible();
+});
+
+test("date control: a jump stopped by the data range says so", async ({ page }) => {
+  await mock(page);
+  await page.goto("/command?site=alpha&start=2026-12-05");
+  await page.getByRole("button", { name: /Previous lunar month/ }).click();
+  await expect(page).toHaveURL(/start=2026-12-01/);
+  await expect(page.getByText(/stopped at 2026-12-01 because the data covers/)).toBeVisible();
+});
+
+test("date control: next 30 days from today is clamped into the data range", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-11-15T10:00:00Z") });
+  await mock(page);
+  await page.goto("/command?site=alpha&start=2027-03-01");
+  await page.getByRole("button", { name: "Next 30 days from today" }).click();
+  await expect(page).toHaveURL(/start=2026-12-01/);
+  await expect(page).toHaveURL(/days=30/);
+  await expect(page.getByLabel("Length")).toHaveValue("30");
+  await expect(page.getByText(/stopped at 2026-12-01/)).toBeVisible();
+});
+
+test("date control: reachable and operable with the keyboard alone", async ({ page }) => {
+  await mock(page);
+  await page.goto("/command?site=alpha&start=2026-12-11");
+  const next = page.getByRole("button", { name: "Next day" });
+  await next.focus();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/start=2026-12-12/);
+  await next.focus();
+  await page.keyboard.press("Space");
+  await expect(page).toHaveURL(/start=2026-12-13/);
+});

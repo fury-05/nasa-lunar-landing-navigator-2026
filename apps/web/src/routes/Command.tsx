@@ -6,6 +6,7 @@ import { Metrics } from "../components/Metrics";
 import { SiteContext } from "../components/SiteContext";
 import { SkyView } from "../components/SkyView";
 import { DEFAULT_SPEED, useMissionClock } from "../lib/clock";
+import { DateControl } from "../components/DateControl";
 import { ExportBar } from "../components/ExportBar";
 import { HorizonStrip } from "../components/HorizonStrip";
 import { Readout } from "../components/Readout";
@@ -154,17 +155,6 @@ export function Command() {
           </select>
         </label>
         <label className="flex flex-col gap-1 text-sm text-muted">
-          Start date (UTC)
-          <input
-            type="date"
-            min="2026-12-01"
-            max="2029-11-01"
-            className="min-h-11 rounded-cell border border-white/20 bg-void px-3 text-ink"
-            value={start}
-            onChange={(e) => e.target.value && set("start", e.target.value)}
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-sm text-muted">
           Length
           <select
             className="min-h-11 rounded-cell border border-white/20 bg-void px-3 text-ink"
@@ -185,6 +175,20 @@ export function Command() {
           Pick another site on the map
         </Link>
         <Chip tone="warn">Planning tool, not for flight operations</Chip>
+      </Glass>
+
+      <Glass>
+        <DateControl
+          start={start}
+          days={days}
+          onChange={(st, len) => {
+            const next = new URLSearchParams(params);
+            next.set("start", st);
+            if (len !== undefined) next.set("days", String(len));
+            next.delete("t"); // a new window starts at its own middle
+            setParams(next, { replace: true });
+          }}
+        />
       </Glass>
 
       {info && usable && (
