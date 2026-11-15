@@ -796,6 +796,30 @@
         "title": "HealthOut",
         "type": "object"
       },
+      "HorizonsDegraded": {
+        "description": "Set while the last Horizons call from the API or worker failed (clears on success or after\n10 minutes). Stored bundles are still served, `using_cache` says whether any exist.",
+        "properties": {
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "since_utc": {
+            "title": "Since Utc",
+            "type": "string"
+          },
+          "using_cache": {
+            "title": "Using Cache",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "since_utc",
+          "reason",
+          "using_cache"
+        ],
+        "title": "HorizonsDegraded",
+        "type": "object"
+      },
       "JobAccepted": {
         "properties": {
           "cached": {
@@ -1684,6 +1708,16 @@
             },
             "title": "Checks",
             "type": "object"
+          },
+          "horizons_degraded": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HorizonsDegraded"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "status": {
             "enum": [
@@ -2773,6 +2807,16 @@
           "engine": {
             "title": "Engine",
             "type": "string"
+          },
+          "horizons_degraded": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HorizonsDegraded"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [

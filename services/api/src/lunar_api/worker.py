@@ -14,6 +14,7 @@ from typing import Any
 from arq.connections import RedisSettings
 from lunar_engine.ephemeris import HorizonsClient
 
+from lunar_api.degraded import RedisHealth
 from lunar_api.jobs import JOB_TIMEOUT_S, RedisJobStore, run_custom_site
 from lunar_api.settings import Settings
 
@@ -46,6 +47,7 @@ async def custom_site(
         settings.data_dir,
         datetime.fromisoformat(start_iso).astimezone(UTC),
         days,
+        health=RedisHealth(ctx["sync_redis"]),
     )
     state = store.get(job_id)
     return state.status if state else "missing"

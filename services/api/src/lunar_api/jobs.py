@@ -28,6 +28,8 @@ from lunar_engine.links import south_polar_xy
 from lunar_engine.precompute import BuildSettings, build_site
 from lunar_engine.terrain import DemTile, read_tile
 
+from lunar_api.degraded import Health
+
 JOB_TIMEOUT_S = 120.0
 TERMINAL = {"done", "failed"}
 MIN_SOUTH_LAT = -89.999  # the polar projection is singular at the pole itself
@@ -171,6 +173,7 @@ def run_custom_site(
     timeout_s: float = JOB_TIMEOUT_S,
     clock: Callable[[], float] = time.monotonic,
     load_tile: Callable[[Path], DemTile] = read_tile,
+    health: Health | None = None,
 ) -> None:
     """Do the work and keep the job state current. Never raises; failures become state."""
     t0 = clock()
@@ -209,6 +212,8 @@ def run_custom_site(
             out_dir,
             settings,
         )
+        if health is not None:
+            health.record_success()
         step(0.95, "storing the result")
         meta = json.loads((out_dir / site_id / "meta.json").read_text(encoding="utf8"))
         store.update(
@@ -234,6 +239,8 @@ def run_custom_site(
         store.update(job_id, status="failed", reason=str(exc), message="failed", retryable=False)
     except _Retryable:
         # The raw text ("_Retryable: network error: ConnectError") means nothing to a visitor.
+        if health is not None:
+            health.record_failure(UNREACHABLE_MESSAGE.rstrip("."))
         store.update(
             job_id, status="failed", reason=UNREACHABLE_MESSAGE, message="failed", retryable=True
         )

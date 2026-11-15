@@ -326,15 +326,26 @@ class CheckResult(BaseModel):
     detail: str
 
 
+class HorizonsDegraded(BaseModel):
+    """Set while the last Horizons call from the API or worker failed (clears on success or after
+    10 minutes). Stored bundles are still served, `using_cache` says whether any exist."""
+
+    since_utc: str
+    reason: str
+    using_cache: bool
+
+
 class ReadyOut(BaseModel):
     status: Literal["ready", "not-ready"]
     checks: dict[str, CheckResult]
+    horizons_degraded: HorizonsDegraded | None = None
 
 
 class VersionOut(BaseModel):
     api: str
     engine: str
     disclaimer: str
+    horizons_degraded: HorizonsDegraded | None = None
 
 
 class TerrainTileOut(BaseModel):
