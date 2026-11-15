@@ -76,8 +76,8 @@ class SiteStore:
             raise KeyError(site_id)
         with self._lock:
             hit = self._cache.get(site_id)
-            if hit is not None:
-                return hit
+        if hit is not None and (self.root / site_id / "meta.json").exists():
+            return hit  # a deleted (expired or evicted) bundle must stop being served
         if not (self.root / site_id / "meta.json").exists():
             raise KeyError(site_id)
         loaded = load_site(self.root, site_id)

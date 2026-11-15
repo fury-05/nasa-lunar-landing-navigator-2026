@@ -48,6 +48,8 @@ async def custom_site(
         datetime.fromisoformat(start_iso).astimezone(UTC),
         days,
         health=RedisHealth(ctx["sync_redis"]),
+        max_custom_sites=settings.max_custom_sites,
+        custom_max_age_days=settings.custom_max_age_days,
     )
     state = store.get(job_id)
     return state.status if state else "missing"
