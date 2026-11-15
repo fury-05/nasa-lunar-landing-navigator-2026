@@ -16,6 +16,12 @@ const cell = (over: Partial<SlipCell> = {}): SlipCell => ({
 const site = (f: number, reach = 8000) =>
   toSiteInfo({
     id: "s",
+    name: "",
+    source: "",
+    quickmap: "",
+    terrain_available: true,
+    reach_km: reach / 1000,
+    reach_km_max: reach / 1000,
     lat_deg: -89,
     lon_east_deg: 0,
     coordinate_status: "x",
