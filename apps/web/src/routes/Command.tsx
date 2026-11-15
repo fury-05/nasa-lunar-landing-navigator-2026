@@ -1,10 +1,13 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Chip } from "../components/Chip";
 import { Glass } from "../components/Glass";
 import { Metrics } from "../components/Metrics";
 import { SiteContext } from "../components/SiteContext";
 import { SkyView } from "../components/SkyView";
+import { HorizonStrip } from "../components/HorizonStrip";
+import { Readout } from "../components/Readout";
+import { Scrubber } from "../components/Scrubber";
 import { Timeline } from "../components/Timeline";
 import {
   addDays,
@@ -85,11 +88,21 @@ export function Command() {
     `t|${key}`,
   );
 
-  const midpoint: SeriesRow | null =
-    timeline.state === "ok"
-      ? ((timeline.data.series[Math.floor(timeline.data.series.length / 2)] as
-          SeriesRow | undefined) ?? null)
-      : null;
+  const rows = useMemo(
+    () => (timeline.state === "ok" ? (timeline.data.series as unknown as SeriesRow[]) : []),
+    [timeline],
+  );
+  // Scrubber position belongs to the window it was set in; a new window starts at the middle.
+  const [pos, setPos] = useState<{ key: string; i: number } | null>(null);
+  const index =
+    rows.length === 0
+      ? 0
+      : pos && pos.key === key
+        ? Math.min(pos.i, rows.length - 1)
+        : Math.floor(rows.length / 2);
+  const midpoint: SeriesRow | null = rows[index] ?? null;
+  const times = useMemo(() => rows.map((r) => Date.parse(r.t)), [rows]);
+  const nowMs = midpoint ? Date.parse(midpoint.t) : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -179,17 +192,19 @@ export function Command() {
         />
       </Glass>
 
+      {midpoint && timeline.state === "ok" && (
+        <Glass className="grid gap-6 lg:grid-cols-2">
+          <Scrubber times={times} index={index} onChange={(i) => setPos({ key, i })} />
+          <Readout data={timeline.data} t={Date.parse(midpoint.t)} />
+        </Glass>
+      )}
+
       <div className="grid gap-6 lg:grid-cols-2">
         <Glass>
           <h2 className="mt-0 text-xl">Sky from the site</h2>
           {skyline.state === "loading" && <Loading what="terrain horizon" />}
           {skyline.state === "error" && <Problem message={skyline.message} />}
           {skyline.state === "ok" && <SkyView skyline={skyline.data} now={midpoint} />}
-          {midpoint && (
-            <p className="mb-0 mt-2 font-mono text-xs text-muted">
-              Shown at {midpoint.t} (middle of the window)
-            </p>
-          )}
         </Glass>
         <Glass>
           {assess.state === "loading" && <Loading what="results" />}
@@ -199,10 +214,19 @@ export function Command() {
       </div>
 
       <Glass>
+        <h2 className="mt-0 text-xl">Horizon strip</h2>
+        {skyline.state === "ok" && rows.length > 0 ? (
+          <HorizonStrip skyline={skyline.data} rows={rows} now={midpoint} />
+        ) : (
+          <Loading what="horizon strip" />
+        )}
+      </Glass>
+
+      <Glass>
         <h2 className="mt-0 text-xl">Timeline</h2>
         {timeline.state === "loading" && <Loading what="timeline" />}
         {timeline.state === "error" && <Problem message={timeline.message} />}
-        {timeline.state === "ok" && <Timeline data={timeline.data} />}
+        {timeline.state === "ok" && <Timeline data={timeline.data} marker={nowMs} />}
       </Glass>
     </div>
   );

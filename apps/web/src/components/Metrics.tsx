@@ -6,12 +6,25 @@ import type { SiteInfo } from "../lib/site";
 
 type Band = { low: number; nominal: number; high: number };
 
-function BandRow({ label, band, fmt }: { label: string; band: Band; fmt: (n: number) => string }) {
+function BandRow({
+  label,
+  band,
+  fmt,
+  def,
+}: {
+  label: string;
+  band: Band;
+  fmt: (n: number) => string;
+  def: string;
+}) {
   const same = band.high - band.low < 1e-9;
   return (
     <div className="flex items-baseline justify-between gap-4 border-b border-white/[0.07] py-2">
-      <dt className="text-sm text-muted">{label}</dt>
-      <dd className="m-0 text-right font-mono text-sm">
+      <dt className="text-sm text-muted">
+        {label}
+        <span className="block text-xs font-normal">{def}</span>
+      </dt>
+      <dd className="m-0 shrink-0 text-right font-mono text-sm">
         <span className="text-base text-ink">{fmt(band.nominal)}</span>
         {!same && (
           <span className="ml-2 text-xs text-muted">
@@ -63,13 +76,41 @@ export function Metrics({ a, site = null }: { a: Assess; site?: SiteInfo | null 
             : "The verdict changes inside the uncertainty band (shown as a range)."}
       </p>
       <dl className="m-0">
-        <BandRow label="Sunlight" band={a.sunlight_hours} fmt={fmtHours} />
-        <BandRow label="Sun share of window" band={a.sun_share} fmt={pct} />
-        <BandRow label="Longest dark spell" band={a.longest_dark_hours} fmt={fmtHours} />
-        <BandRow label="Earth link share" band={a.earth_share} fmt={pct} />
-        <BandRow label="Longest Earth outage" band={a.longest_outage_hours} fmt={fmtHours} />
+        <BandRow
+          label="Sunlight"
+          band={a.sunlight_hours}
+          fmt={fmtHours}
+          def="Hours with at least half of the Sun's disc above the terrain skyline."
+        />
+        <BandRow
+          label="Sun share of window"
+          band={a.sun_share}
+          fmt={pct}
+          def="Sunlight hours as a share of the whole window."
+        />
+        <BandRow
+          label="Longest dark spell"
+          band={a.longest_dark_hours}
+          fmt={fmtHours}
+          def="Longest unbroken stretch with less than half of the Sun visible."
+        />
+        <BandRow
+          label="Earth link share"
+          band={a.earth_share}
+          fmt={pct}
+          def="Share of the window with Earth in line of sight only; radio power and antennas are not modelled."
+        />
+        <BandRow
+          label="Longest Earth outage"
+          band={a.longest_outage_hours}
+          fmt={fmtHours}
+          def="Longest unbroken stretch with Earth hidden below the skyline."
+        />
         <div className="flex items-baseline justify-between gap-4 py-2">
-          <dt className="text-sm text-muted">Sun elevation (min / mean / max)</dt>
+          <dt className="text-sm text-muted">
+            Sun elevation (min / mean / max)
+            <span className="block text-xs">Angle of the Sun's centre above the flat horizon.</span>
+          </dt>
           <dd className="m-0 font-mono text-sm">
             {a.elevation_deg.min?.toFixed(1)} / {a.elevation_deg.mean?.toFixed(1)} /{" "}
             {a.elevation_deg.max?.toFixed(1)} deg
