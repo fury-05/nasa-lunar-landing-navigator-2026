@@ -208,200 +208,218 @@ export function Command() {
         <Chip tone="warn">Planning tool, not for flight operations</Chip>
       </header>
 
-      <Glass className="flex flex-col gap-2 p-3">
-        <div className="flex flex-wrap items-end gap-x-3 gap-y-2">
-          <label className="flex min-w-0 max-w-full flex-col gap-0.5 text-sm text-muted">
-            Site
-            <select
-              className="min-h-11 w-full min-w-0 max-w-full rounded-cell border border-white/20 bg-void px-2 text-base text-ink lg:min-h-9"
-              value={id}
-              onChange={(e) => set("site", e.target.value)}
-            >
-              {options.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex flex-col gap-0.5 text-sm text-muted">
-            Length
-            <select
-              className="min-h-11 rounded-cell border border-white/20 bg-void px-2 text-base text-ink lg:min-h-9"
-              value={days}
-              onChange={(e) => set("days", e.target.value)}
-            >
-              {DAY_CHOICES.map((d) => (
-                <option key={d} value={d}>
-                  {d} days
-                </option>
-              ))}
-            </select>
-          </label>
-          <DateControl
-            start={startMs === null ? DEFAULT_START : start}
-            days={days}
-            onChange={(st, len) => {
-              const next = new URLSearchParams(params);
-              next.set("start", st);
-              if (len !== undefined) next.set("days", String(len));
-              next.delete("t"); // a new window starts at its own middle
-              setParams(next, { replace: true });
-            }}
-          />
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              aria-expanded={showFilter}
-              aria-controls="site-filter-panel"
-              onClick={() => setShowFilter((v) => !v)}
-              className="min-h-11 rounded-cell border border-white/20 px-3 text-sm text-ink hover:bg-white/10 lg:min-h-9"
-            >
-              {showFilter ? "Hide site search" : "Search and filter sites"}
-            </button>
-            <Link
-              to="/sites/pick"
-              className="inline-flex min-h-11 items-center rounded-cell border border-white/20 px-3 text-sm text-earth no-underline hover:bg-white/10 lg:min-h-9"
-            >
-              Pick another site on the map
-            </Link>
-          </div>
-          {showFilter && (
-            <div id="site-filter-panel" className="basis-full">
-              <SiteFilter
-                value={siteFilter}
-                onChange={setSiteFilter}
-                kinds={kindsPresent(allInfos)}
-                shown={applyFilter(allInfos, siteFilter).length}
-                total={allInfos.length}
-              />
+      <div className="grid items-start gap-4 min-[1600px]:grid-cols-[15rem_minmax(0,1fr)]">
+        <Glass className="flex flex-col gap-3 p-3 min-[1600px]:sticky min-[1600px]:top-2 min-[1600px]:max-h-[calc(100vh-1rem)] min-[1600px]:overflow-y-auto">
+          <div className="flex flex-wrap items-end gap-x-3 gap-y-2">
+            <label className="flex min-w-0 max-w-full flex-col gap-0.5 text-sm text-muted min-[1600px]:w-full">
+              Site
+              <select
+                className="min-h-11 w-full min-w-0 max-w-full rounded-cell border border-white/20 bg-void px-2 text-base text-ink lg:min-h-9"
+                value={id}
+                onChange={(e) => set("site", e.target.value)}
+              >
+                {options.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-0.5 text-sm text-muted min-[1600px]:w-full">
+              Length
+              <select
+                className="min-h-11 rounded-cell border border-white/20 bg-void px-2 text-base text-ink lg:min-h-9 min-[1600px]:w-full"
+                value={days}
+                onChange={(e) => set("days", e.target.value)}
+              >
+                {DAY_CHOICES.map((d) => (
+                  <option key={d} value={d}>
+                    {d} days
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="flex flex-wrap items-center gap-2 pb-0.5">
+              <button
+                type="button"
+                aria-expanded={showFilter}
+                aria-controls="site-filter-panel"
+                onClick={() => setShowFilter((v) => !v)}
+                className="min-h-11 rounded-cell border border-white/20 px-3 text-sm text-ink hover:bg-white/10 lg:min-h-9"
+              >
+                {showFilter ? "Hide site search" : "Search and filter sites"}
+              </button>
+              <Link
+                to="/sites/pick"
+                className="inline-flex min-h-11 items-center rounded-cell border border-white/20 px-3 text-sm text-earth no-underline hover:bg-white/10 lg:min-h-9"
+              >
+                Pick another site on the map
+              </Link>
             </div>
-          )}
-        </div>
-        {midpoint && timeline.state === "ok" ? (
-          <Scrubber times={times} index={clock.index} onChange={clock.scrub} clock={clock} />
-        ) : (
-          <p role="status" className="m-0 text-base text-muted">
-            The time control appears when the timeline has loaded.
-          </p>
-        )}
-      </Glass>
-
-      {sites.state === "loading" && <Loading what="sites" />}
-      {shownProblems.map((m) => (
-        <Problem key={m} message={m} />
-      ))}
-
-      {assess.state === "ok" && assess.data.provenance.warnings.length > 0 && (
-        <div role="note" className="rounded-cell border border-warn/50 p-3 text-base text-warn">
-          <strong>Read this first.</strong>
-          <ul className="m-0 mt-1 list-disc pl-5">
-            {assess.data.provenance.warnings.map((w) => (
-              <li key={w}>{w}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <div className="grid items-start gap-4 lg:grid-cols-2 xl:grid-cols-[minmax(0,5fr)_minmax(0,6fr)_minmax(0,5fr)]">
-        <div className="flex min-w-0 flex-col gap-4">
-          <Glass className="p-4">
-            <h2 className="mt-0 text-xl">Sky from the site</h2>
-            {skyline.state === "loading" && <Loading what="terrain horizon" />}
-            {skyline.state === "error" && <Failed what="terrain horizon" />}
-            {skyline.state === "ok" && (
-              <SkyView skyline={skyline.data} now={midpoint} svgRef={skyRef} />
-            )}
-          </Glass>
-          {midpoint && timeline.state === "ok" && (
-            <Glass className="p-4">
-              <Readout data={timeline.data} t={Date.parse(midpoint.t)} />
-            </Glass>
-          )}
-        </div>
-
-        <div className="order-last flex min-w-0 flex-col gap-4 lg:col-span-2 xl:order-none xl:col-span-1">
-          <Glass className="p-4">
-            <h2 className="mt-0 text-xl">Horizon strip</h2>
-            {skyline.state === "ok" && rows.length > 0 ? (
-              <HorizonStrip skyline={skyline.data} rows={rows} now={midpoint} svgRef={stripRef} />
-            ) : (
-              <Loading what="horizon strip" />
-            )}
-          </Glass>
-          <Glass className="p-4">
-            <h2 className="mt-0 text-xl">Local terrain</h2>
-            {terrain.state === "loading" && <Loading what="terrain tile" />}
-            {terrain.state === "error" && <Failed what="terrain tile" />}
-            {terrain.state === "ok" && terrain.data.kind === "tile" && (
-              <Suspense fallback={<Loading what="terrain view" />}>
-                <TerrainView tile={terrain.data.tile} sun={sunData} />
-              </Suspense>
-            )}
-            {terrain.state === "ok" && terrain.data.kind === "unavailable" && (
-              <div className="flex flex-col gap-3 text-base">
-                <p className="m-0 text-muted">
-                  No local relief is shown for this site. {terrain.data.detail} The horizon strip
-                  above uses the skyline the engine built for this site; where terrain is missing it
-                  is a flat horizon and is marked that way.
-                </p>
-                {!demo ? (
-                  <button
-                    type="button"
-                    onClick={() => setDemo(true)}
-                    className="min-h-11 w-fit rounded-cell border border-white/20 px-4 text-base text-muted hover:text-ink"
-                  >
-                    Show a synthetic preview of the viewer (made-up surface, not this site)
-                  </button>
-                ) : (
-                  <Suspense fallback={<Loading what="terrain view" />}>
-                    <TerrainView tile={syntheticDemoTile()} sun={sunData} />
-                  </Suspense>
-                )}
+            {showFilter && (
+              <div id="site-filter-panel" className="basis-full">
+                <SiteFilter
+                  value={siteFilter}
+                  onChange={setSiteFilter}
+                  kinds={kindsPresent(allInfos)}
+                  shown={applyFilter(allInfos, siteFilter).length}
+                  total={allInfos.length}
+                />
               </div>
             )}
-          </Glass>
-        </div>
-
-        <Glass className="order-first p-4 xl:order-none">
-          {assess.state === "loading" && <Loading what="results" />}
-          {assess.state === "error" && <Failed what="results" />}
-          {assess.state === "ok" && <Metrics a={assess.data} />}
+          </div>
+          <div className="flex min-w-0 flex-wrap items-end gap-x-3 gap-y-2">
+            <DateControl
+              start={startMs === null ? DEFAULT_START : start}
+              days={days}
+              onChange={(st, len) => {
+                const next = new URLSearchParams(params);
+                next.set("start", st);
+                if (len !== undefined) next.set("days", String(len));
+                next.delete("t"); // a new window starts at its own middle
+                setParams(next, { replace: true });
+              }}
+            />
+          </div>
+          {midpoint && timeline.state === "ok" ? (
+            <Scrubber times={times} index={clock.index} onChange={clock.scrub} clock={clock} />
+          ) : (
+            <p role="status" className="m-0 text-base text-muted">
+              The time control appears when the timeline has loaded.
+            </p>
+          )}
         </Glass>
-      </div>
+        <div className="flex min-w-0 flex-col gap-4">
+          {sites.state === "loading" && <Loading what="sites" />}
+          {shownProblems.map((m) => (
+            <Problem key={m} message={m} />
+          ))}
 
-      <Glass className="p-4">
-        <h2 className="mt-0 text-xl">Timeline</h2>
-        {timeline.state === "loading" && <Loading what="timeline" />}
-        {timeline.state === "error" && <Failed what="timeline" />}
-        {timeline.state === "ok" && <Timeline data={timeline.data} marker={nowMs} />}
-      </Glass>
+          {assess.state === "ok" && assess.data.provenance.warnings.length > 0 && (
+            <div
+              role="note"
+              className="rounded-cell border border-warn/50 px-3 py-2 text-base text-warn"
+            >
+              <details>
+                <summary className="cursor-pointer">
+                  <strong>Read this first.</strong> Terrain is incomplete, so every number is an
+                  upper bound. Click for details.
+                </summary>
+                <ul className="m-0 mt-1 list-disc pl-5">
+                  {assess.data.provenance.warnings.map((w) => (
+                    <li key={w}>{w}</li>
+                  ))}
+                </ul>
+              </details>
+            </div>
+          )}
 
-      <div className="grid items-start gap-4 lg:grid-cols-3">
-        <Glass className="p-4">
-          <NeedsForm
-            key={needsKey}
-            needs={needs}
-            onApply={(n) => setParams(needsToParams(params, n), { replace: true })}
-          />
-        </Glass>
-        {info && usable ? (
+          <div className="grid items-start gap-4 lg:grid-cols-2 xl:grid-cols-[minmax(0,5fr)_minmax(0,6fr)_minmax(0,5fr)]">
+            <div className="flex min-w-0 flex-col gap-4">
+              <Glass className="p-4">
+                <h2 className="mt-0 text-xl">Sky from the site</h2>
+                {skyline.state === "loading" && <Loading what="terrain horizon" />}
+                {skyline.state === "error" && <Failed what="terrain horizon" />}
+                {skyline.state === "ok" && (
+                  <SkyView skyline={skyline.data} now={midpoint} svgRef={skyRef} />
+                )}
+              </Glass>
+              {midpoint && timeline.state === "ok" && (
+                <Glass className="p-4">
+                  <Readout data={timeline.data} t={Date.parse(midpoint.t)} />
+                </Glass>
+              )}
+            </div>
+
+            <div className="order-last flex min-w-0 flex-col gap-4 lg:col-span-2 xl:order-none xl:col-span-1">
+              <Glass className="p-4">
+                <h2 className="mt-0 text-xl">Horizon strip</h2>
+                {skyline.state === "ok" && rows.length > 0 ? (
+                  <HorizonStrip
+                    skyline={skyline.data}
+                    rows={rows}
+                    now={midpoint}
+                    svgRef={stripRef}
+                  />
+                ) : (
+                  <Loading what="horizon strip" />
+                )}
+              </Glass>
+              <Glass className="p-4">
+                <h2 className="mt-0 text-xl">Local terrain</h2>
+                {terrain.state === "loading" && <Loading what="terrain tile" />}
+                {terrain.state === "error" && <Failed what="terrain tile" />}
+                {terrain.state === "ok" && terrain.data.kind === "tile" && (
+                  <Suspense fallback={<Loading what="terrain view" />}>
+                    <TerrainView tile={terrain.data.tile} sun={sunData} />
+                  </Suspense>
+                )}
+                {terrain.state === "ok" && terrain.data.kind === "unavailable" && (
+                  <div className="flex flex-col gap-3 text-base">
+                    <p className="m-0 text-muted">
+                      No local relief is shown for this site. {terrain.data.detail} The horizon
+                      strip above uses the skyline the engine built for this site; where terrain is
+                      missing it is a flat horizon and is marked that way.
+                    </p>
+                    {!demo ? (
+                      <button
+                        type="button"
+                        onClick={() => setDemo(true)}
+                        className="min-h-11 w-fit rounded-cell border border-white/20 px-4 text-base text-muted hover:text-ink"
+                      >
+                        Show a synthetic preview of the viewer (made-up surface, not this site)
+                      </button>
+                    ) : (
+                      <Suspense fallback={<Loading what="terrain view" />}>
+                        <TerrainView tile={syntheticDemoTile()} sun={sunData} />
+                      </Suspense>
+                    )}
+                  </div>
+                )}
+              </Glass>
+            </div>
+
+            <Glass className="order-first p-4 xl:order-none">
+              {assess.state === "loading" && <Loading what="results" />}
+              {assess.state === "error" && <Failed what="results" />}
+              {assess.state === "ok" && <Metrics a={assess.data} />}
+            </Glass>
+          </div>
+
           <Glass className="p-4">
-            <SiteContext site={info} timeIso={midpoint ? midpoint.t : iso(a)} />
+            <h2 className="mt-0 text-xl">Timeline</h2>
+            {timeline.state === "loading" && <Loading what="timeline" />}
+            {timeline.state === "error" && <Failed what="timeline" />}
+            {timeline.state === "ok" && <Timeline data={timeline.data} marker={nowMs} />}
           </Glass>
-        ) : (
-          <div />
-        )}
-        <Glass className="p-4">
-          <ExportBar
-            siteId={id}
-            site={info}
-            assess={assess.state === "ok" ? assess.data : null}
-            timeline={timeline.state === "ok" ? timeline.data : null}
-            skySvg={() => skyRef.current}
-            stripSvg={() => stripRef.current}
-          />
-        </Glass>
+
+          <div className="grid items-start gap-4 lg:grid-cols-3">
+            <Glass className="p-4">
+              <NeedsForm
+                key={needsKey}
+                needs={needs}
+                onApply={(n) => setParams(needsToParams(params, n), { replace: true })}
+              />
+            </Glass>
+            {info && usable ? (
+              <Glass className="p-4">
+                <SiteContext site={info} timeIso={midpoint ? midpoint.t : iso(a)} />
+              </Glass>
+            ) : (
+              <div />
+            )}
+            <Glass className="p-4">
+              <ExportBar
+                siteId={id}
+                site={info}
+                assess={assess.state === "ok" ? assess.data : null}
+                timeline={timeline.state === "ok" ? timeline.data : null}
+                skySvg={() => skyRef.current}
+                stripSvg={() => stripRef.current}
+              />
+            </Glass>
+          </div>
+        </div>
       </div>
     </div>
   );

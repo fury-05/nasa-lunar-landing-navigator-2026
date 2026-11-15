@@ -21,11 +21,11 @@ export function Scrubber({
   const clamp = (i: number) => Math.min(Math.max(i, 0), last);
   const t = times[index] ?? 0;
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+    <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
       <label htmlFor={id} className="text-sm text-muted">
         Time shown in the sky views (UTC)
       </label>
-      <div className="flex min-w-[16rem] flex-1 items-center gap-2">
+      <div className="flex min-w-0 flex-1 basis-60 items-center gap-2">
         <button
           type="button"
           aria-label="One step earlier"
@@ -64,7 +64,7 @@ export function Scrubber({
         </button>
       </div>
       {clock && (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={clock.playing ? clock.pause : clock.play}
@@ -74,12 +74,12 @@ export function Scrubber({
           >
             {clock.playing ? "Pause" : "Play"}
           </button>
-          <label className="flex items-center gap-2 text-base text-muted">
+          <label className="flex min-w-0 max-w-full items-center gap-2 text-sm text-muted">
             Speed
             <select
               value={clock.speed.id}
               onChange={(e) => clock.setSpeed(e.target.value)}
-              className="min-h-11 rounded-cell border border-white/20 bg-void px-2 text-base text-ink lg:min-h-9"
+              className="min-h-11 min-w-0 max-w-full rounded-cell border border-white/20 bg-void px-2 text-base text-ink lg:min-h-9"
             >
               {SPEEDS.map((sp) => (
                 <option key={sp.id} value={sp.id}>
