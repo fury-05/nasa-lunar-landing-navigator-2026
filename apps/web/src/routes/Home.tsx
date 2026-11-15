@@ -28,7 +28,7 @@ const steps = [
     ),
   },
   {
-    title: "Read the verdict on the right",
+    title: "Read the verdict",
     body: (
       <>
         An amber <Hl>Upper bound</Hl> means the real answer can only be worse than shown.

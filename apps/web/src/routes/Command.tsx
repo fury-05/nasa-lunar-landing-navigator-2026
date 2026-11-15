@@ -199,7 +199,7 @@ export function Command() {
           <h1 className="m-0 text-2xl">Command Centre</h1>
           <p className="m-0 text-sm text-muted">
             <strong className="text-ink">1</strong> Choose a site and dates,{" "}
-            <strong className="text-ink">2</strong> read the verdict on the right,{" "}
+            <strong className="text-ink">2</strong> read the verdict,{" "}
             <strong className="text-ink">3</strong> press{" "}
             <strong className="text-earth">Play</strong> to watch the Sun and Earth move against the
             real horizon.
