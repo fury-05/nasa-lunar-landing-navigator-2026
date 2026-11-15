@@ -31,3 +31,56 @@ test("keyboard: skip link is the first tab stop", async ({ page }) => {
   await page.keyboard.press("Tab");
   await expect(page.getByRole("link", { name: "Skip to content" })).toBeFocused();
 });
+
+test("degraded: a not-ready service shows a banner naming the failed check", async ({ page }) => {
+  await page.route("**/api/v1/ready", (r) =>
+    r.fulfill({
+      status: 503,
+      json: {
+        status: "not-ready",
+        checks: { redis: { ok: false, detail: "no connection" }, data: { ok: true, detail: "ok" } },
+      },
+    }),
+  );
+  await page.goto("/");
+  await expect(page.getByRole("status").filter({ hasText: "reduced state" })).toContainText(
+    "redis: no connection",
+  );
+});
+
+test("degraded: an unreachable service is stated plainly", async ({ page }) => {
+  await page.route("**/api/v1/ready", (r) => r.abort());
+  await page.goto("/");
+  await expect(page.getByText(/cannot be reached/)).toBeVisible();
+});
+
+test("screen reader: focus moves to the page after a client-side navigation", async ({ page }) => {
+  await page.route("**/api/v1/ready", (r) => r.fulfill({ json: { status: "ready", checks: {} } }));
+  await page.goto("/");
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  await page.getByRole("link", { name: "Credits" }).first().click();
+  await expect(page).toHaveURL(/\/credits/);
+  await expect(page.locator("main")).toBeFocused();
+});
+
+test("keyboard: every control on the Command Centre can be reached with Tab and has a name", async ({
+  page,
+}) => {
+  await page.goto("/command");
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  const bad = await page.evaluate(() => {
+    const out: string[] = [];
+    const sel = "a[href], button, input, select, textarea, [tabindex]";
+    for (const el of document.querySelectorAll<HTMLElement>(sel)) {
+      if (el.hasAttribute("disabled") || el.getAttribute("tabindex") === "-1") continue;
+      const name =
+        el.getAttribute("aria-label") ||
+        el.textContent?.trim() ||
+        (el as HTMLInputElement).labels?.[0]?.textContent?.trim() ||
+        el.getAttribute("aria-labelledby");
+      if (!name) out.push(el.outerHTML.slice(0, 80));
+    }
+    return out;
+  });
+  expect(bad).toEqual([]);
+});

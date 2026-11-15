@@ -219,8 +219,12 @@ export function Slip() {
                                     ? "border-solid"
                                     : "border-dashed"
                                 }`}
-                                aria-label={`${name(id)}, ${c.offset_days === 0 ? "no slip" : `${c.offset_days} days slip`}: ${v.label}${c.robust ? "" : ", fragile"}, sunlight ${fmtHours(c.sunlight_hours)}, Earth link ${(c.earth_share * 100).toFixed(0)} percent. Open in Command Centre.`}
                               >
+                                <span className="sr-only">
+                                  {name(id)},{" "}
+                                  {c.offset_days === 0 ? "no slip" : `${c.offset_days} days slip`}
+                                  :{" "}
+                                </span>
                                 <span className="font-mono">
                                   {v.glyph} {value}
                                 </span>
@@ -232,6 +236,11 @@ export function Slip() {
                                 {!c.robust && v.state !== "upper-bound" && (
                                   <span className="text-xs">fragile</span>
                                 )}
+                                <span className="sr-only">
+                                  . Sunlight {fmtHours(c.sunlight_hours)}, Earth link{" "}
+                                  {(c.earth_share * 100).toFixed(0)} percent. Open in Command
+                                  Centre.
+                                </span>
                               </Link>
                             </td>
                           );
