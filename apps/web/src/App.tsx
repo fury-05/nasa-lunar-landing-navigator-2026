@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
 import { Shell } from "./components/Shell";
 import { Command } from "./routes/Command";
+import { Compare } from "./routes/Compare";
 import { Credits } from "./routes/Credits";
 import { Home } from "./routes/Home";
 import { Placeholder } from "./routes/Placeholder";
@@ -21,6 +22,7 @@ export function App() {
         <Route path="command" element={<Command />} />
         <Route path="spacecraft" element={<Spacecraft />} />
         <Route path="public" element={<Public />} />
+        <Route path="compare" element={<Compare />} />
         <Route
           path="sites/pick"
           element={
