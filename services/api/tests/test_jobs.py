@@ -332,3 +332,22 @@ def test_a_no_terrain_site_says_so_in_every_response_it_serves(http) -> None:  #
         assert len(warnings) == 1 and "Do not use for site selection" in warnings[0], url
     listing = {s["id"]: s for s in client.get("/api/v1/sites").json()["sites"]}
     assert listing[sid]["terrain_coverage"]["covered_fraction"] == 0.0
+
+
+def test_custom_job_end_to_end_lists_the_new_site_with_name_source_radius_and_reach(http) -> None:  # type: ignore[no-untyped-def]
+    client, _store, _root = http
+    r = client.post("/api/v1/sites/custom", json={"lat": LAT, "lon": LON})
+    assert r.status_code == 202
+    job = r.json()
+    seen = client.get(f"/api/v1/jobs/{job['job_id']}").json()
+    assert 0.0 <= seen["progress"] <= 1.0 and seen["status"] in ("queued", "running", "done")
+    done = _wait_done(client, job["job_id"])
+    assert done["status"] == "done" and done["progress"] == 1.0
+    listing = client.get("/api/v1/sites").json()
+    row = next(s for s in listing["sites"] if s["id"] == job["site_id"])
+    assert row["name"] == f"Custom point {LAT:.4f},{LON:.4f}" and row["source"] == "custom"
+    assert row["terrain_available"] is True and row["reach_km"] > 0
+    assert row["tile_radius_km"] is None  # no catalogue geometry for a custom point: not invented
+    assert row["quickmap"].startswith("https://quickmap.lroc.im-ldi.com/?proj=27")
+    qm = client.get("/api/v1/links/quickmap", params={"site": job["site_id"]}).json()
+    assert qm["url"] == row["quickmap"]
