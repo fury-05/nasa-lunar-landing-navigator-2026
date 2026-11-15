@@ -1,5 +1,6 @@
 import { api } from "../api/client";
 import type { components } from "../api/schema";
+import { terrainCache } from "./tileCache";
 
 export type SiteList = components["schemas"]["SiteList"];
 export type Assess = components["schemas"]["AssessOut"];
@@ -121,11 +122,15 @@ export type TerrainResult =
  * Any other failure throws and is shown as an error.
  */
 export async function loadTerrainTile(id: string): Promise<TerrainResult> {
+  const hit = terrainCache.get(id);
+  if (hit) return { kind: "tile", tile: hit };
   const r = await api.GET("/api/v1/sites/{site_id}/terrain", {
     params: { path: { site_id: id } },
   });
   if (r.data !== undefined) {
-    return { kind: "tile", tile: r.data as unknown as import("./terrain").TerrainTile };
+    const tile = r.data as unknown as import("./terrain").TerrainTile;
+    terrainCache.set(id, tile); // only real tiles are kept; 404s and errors are never cached
+    return { kind: "tile", tile };
   }
   if (r.response.status === 404) {
     const detail =
