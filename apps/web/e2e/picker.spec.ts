@@ -259,3 +259,34 @@ test("site list: the filter is fully keyboard operable", async ({ page }) => {
   await page.keyboard.press("ArrowDown"); // full
   await expect(page.getByText(/No sites match/)).toBeVisible();
 });
+
+test("site list: Apollo and CLPS kinds from the API are offered and filter the list", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.route("**/api/v1/sites", (r) =>
+    json(
+      r,
+      siteList([
+        siteSummary("pgda-site04", { name: "Shackleton rim", kind: "pgda-tile" }),
+        siteSummary("apollo-11", { name: "Apollo 11", kind: "apollo" }, 0),
+        siteSummary("clps-x", { name: "A CLPS lander", kind: "clps" }, 0),
+        siteSummary("custom-1", { name: "Custom point 1", source: "custom", kind: "custom" }),
+      ]),
+    ),
+  );
+  await page.goto("/sites/pick");
+  const kind = page.getByLabel("Kind");
+  await expect(kind.locator("option")).toHaveText([
+    "All kinds",
+    "Catalogue (PGDA tile)",
+    "Apollo landing site",
+    "CLPS lander site",
+    "Custom point",
+  ]);
+  await kind.selectOption("apollo");
+  await expect(page.getByText("1 of 4 sites match.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Apollo 11" })).toBeVisible();
+  await kind.selectOption("clps");
+  await expect(page.getByRole("link", { name: "A CLPS lander" })).toBeVisible();
+});

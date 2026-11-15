@@ -28,7 +28,7 @@ The header card shows the site id, latitude (negative is south), longitude (east
 ### The verdict
 The Verdict panel gives one label and a robust or fragile tag:
 * **Viable**, **Marginal** and **Not viable** compare the results with your mission needs (below). The default needs are placeholders, not mission requirements; the panel says "default placeholders" until you change them.
-* **Robust** means the label stays the same when the skyline is moved slightly up and down. **Fragile** means it changes inside that range.
+* **Robust** means the label stays the same when the skyline is moved slightly up and down. **Fragile** means it changes inside that range. A fragile card says which measure does it, under "Why is this fragile?". The verdict has two lines for each need, the need itself and a marginal line (the need relaxed by 20 percent), so a result can be below the need in every run and still be fragile when the range crosses the marginal line.
 * **Upper bound, terrain incomplete** (amber, with a "!" mark) replaces a good result when terrain is missing. It means: the true sunlight and Earth link can only be lower than shown, so do not read it as a pass. No robust or fragile tag is given then. A "Not viable" result stays "Not viable" even with missing terrain, because missing terrain can only make things worse.
 
 The state is never shown by colour alone: each chip carries a symbol and words.

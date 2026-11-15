@@ -3,23 +3,39 @@ import type { SiteInfo } from "./site";
 /**
  * Search and filters for the site list.
  *
- * The list endpoint does not say whether a site is an Apollo, PGDA or CLPS site, only `source`
- * ("lola-dem" for the catalogue, "custom" for points a visitor built) and an id with a prefix
- * ("pgda-", "custom-"). So the kind filter offers exactly what can be told from those two:
- * catalogue (id starts with pgda-), custom, and other. Apollo and CLPS sites are not served by the
- * API today, so no such filter is shown. If the API adds a `kind` field, extend `kindOf` only.
+ * The kind of a site comes from the API field `kind` ("apollo", "clps", "pgda-tile", "custom",
+ * "other"). Only when an older API does not send it, the kind is guessed from the id prefix
+ * ("pgda-", "custom-") and the `source`, which is all that was available before. Kinds are shown
+ * in the filter only when sites of that kind exist.
  */
-export type Kind = "catalogue" | "custom" | "other";
+export type Kind = "apollo" | "clps" | "catalogue" | "custom" | "other";
 export type TerrainFilter = "any" | "full" | "partial" | "none";
 export type KindFilter = "any" | Kind;
 
 export const KIND_LABEL: Record<Kind, string> = {
-  catalogue: "Catalogue (PGDA)",
+  apollo: "Apollo landing site",
+  clps: "CLPS lander site",
+  catalogue: "Catalogue (PGDA tile)",
   custom: "Custom point",
   other: "Other",
 };
 
+/** The order kinds are listed and sorted in: catalogue first, custom last. */
+const KIND_ORDER: Record<Kind, number> = { catalogue: 0, apollo: 1, clps: 2, other: 3, custom: 4 };
+const ALL_KINDS = (Object.keys(KIND_ORDER) as Kind[]).sort((a, b) => KIND_ORDER[a] - KIND_ORDER[b]);
+
 export function kindOf(i: SiteInfo): Kind {
+  switch (i.kind) {
+    case "pgda-tile":
+      return "catalogue";
+    case "apollo":
+    case "clps":
+    case "custom":
+    case "other":
+      return i.kind;
+    default:
+      break; // an older API sent no kind: fall back to the id prefix below
+  }
   if (i.id.startsWith("custom-") || i.source === "custom") return "custom";
   if (i.id.startsWith("pgda-")) return "catalogue";
   return "other";
@@ -50,9 +66,7 @@ export function isFiltered(f: Filter): boolean {
 
 /** Kinds actually present, so the filter never offers an empty choice. */
 export function kindsPresent(infos: SiteInfo[]): Kind[] {
-  return (["catalogue", "custom", "other"] as Kind[]).filter((k) =>
-    infos.some((i) => kindOf(i) === k),
-  );
+  return ALL_KINDS.filter((k) => infos.some((i) => kindOf(i) === k));
 }
 
 export function resultText(shown: number, total: number): string {
@@ -60,8 +74,6 @@ export function resultText(shown: number, total: number): string {
   if (shown === 0) return `No sites match. ${total} sites in the list.`;
   return `${shown} of ${total} sites match.`;
 }
-
-const KIND_ORDER: Record<Kind, number> = { catalogue: 0, other: 1, custom: 2 };
 
 /**
  * Catalogue sites first, then others, then custom points. Within a group the API order is kept
