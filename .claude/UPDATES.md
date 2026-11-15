@@ -66,3 +66,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-15T09:04:16Z | irfan | P7-09,P3 | custom sites use far terrain verified live (real job 69 s, reach 204 to 300 km, tiers mosaic and 20 m); final gate script added | docs/todo-evidence-10
 2026-11-15T09:14:44Z | irfan | P7-07 | 11 demo screenshots captured from the live site with an index that lists what must be retaken after the web fixes deploy | docs/demo-assets-index
 2026-11-15T09:35:41Z | irfan | P3 | API echoes marginal_factor in criteria and a kind on every site, regenerated contracts, mutation checked | feat/api-marginal-factor-kind
+2026-11-15T10:05:32Z | afreen+irfan | P7-01,P7-07 | accessibility close-out (axe 1280 and 375 px, keyboard-only tests, focus ring), fragile explanation, kind filter deployed (PR 193); 17 demo screenshots retaken after the fixes | docs/close-p7-01-p7-07
