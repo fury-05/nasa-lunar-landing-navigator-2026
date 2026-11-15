@@ -812,17 +812,29 @@ export interface components {
             coverage_note: string;
             /** Covered Fraction */
             covered_fraction: number;
+            /** Dem Error Deg */
+            dem_error_deg?: (number | null)[] | null;
+            /** Effective Resolution M */
+            effective_resolution_m?: (number | null)[] | null;
             /** Elevation Deg */
             elevation_deg: number[];
             /** Eye Height M */
             eye_height_m: number;
             provenance: components["schemas"]["Provenance"];
+            /** Reach Km */
+            reach_km: number[];
             /** Reach M */
             reach_m: number[];
             /** Requested Range M */
             requested_range_m: number;
+            /** Required Range Km */
+            required_range_km: number;
             /** Site Id */
             site_id: string;
+            /** Tier */
+            tier: (string | null)[];
+            /** Tiers */
+            tiers: string[];
         };
         /** SlipCellOut */
         SlipCellOut: {

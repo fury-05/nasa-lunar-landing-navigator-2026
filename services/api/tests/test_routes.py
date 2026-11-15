@@ -314,19 +314,29 @@ def test_startup_warming_runs_in_the_background_and_does_not_block(
     assert main.WARM["state"] == "done" and set(main.WARM["sites"]) == {"alpha", "beta"}
 
 
-def test_a_site_with_partial_terrain_carries_a_warning_in_every_provenance_block(
+def test_a_site_read_to_a_short_range_carries_a_warning_in_every_provenance_block(
     client: TestClient,
 ) -> None:
-    # The fixture tile is 6 km wide but the skyline was requested to 2.5 km, so coverage is full.
-    # Shrink the claim to what the data says: no warning when coverage is complete.
+    # The fixture tile covers its own 2.5 km request fully, but 300 km is needed (ADR-0007), so
+    # the result stays an upper bound and the warning must be there.
     a = client.get("/api/v1/sites/alpha/assess", params=W).json()
-    assert a["provenance"]["warnings"] == []
+    w = a["provenance"]["warnings"]
+    assert len(w) == 1 and "upper bound" in w[0] and "3 km" not in w[0] and "300 km" in w[0]
+
+
+def test_warnings_disappear_only_when_coverage_reaches_the_required_range() -> None:
+    from lunar_api.routes import terrain_warnings
+
+    ok = {"skyline": {"covered_fraction": 1.0, "max_range_m": 300_000.0}}
+    assert terrain_warnings(ok) == []
+    short = {"skyline": {"covered_fraction": 1.0, "max_range_m": 16_000.0}}
+    assert len(terrain_warnings(short)) == 1
 
 
 def test_terrain_warnings_function_covers_each_case() -> None:
     from lunar_api.routes import terrain_warnings
 
-    assert terrain_warnings({"skyline": {"covered_fraction": 1.0}}) == []
+    assert terrain_warnings({"skyline": {"covered_fraction": 1.0, "max_range_m": 300_000}}) == []
     short = terrain_warnings(
         {"skyline": {"covered_fraction": 0.0, "min_reach_m": 8000, "max_reach_m": 11000,
                      "max_range_m": 16000}}
@@ -426,3 +436,69 @@ def test_assess_reports_terrain_and_an_upper_bound_when_reach_is_short(client: T
     assert any("pending-source" in s and "relief" in s for s in b["band_basis"])
     assert any("assumed" in s for s in b["band_basis"])
     assert_no_nan(json.dumps(b))
+
+
+# ---- multi-tier skyline in the API (issue #130, ADR-0007) --------------------------------------
+
+
+@pytest.fixture()
+def tiered_client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
+    from datetime import timedelta
+
+    import httpx
+    import numpy as np
+    from conftest import _open_limits
+    from fakehorizons import T0, fake_horizons
+    from fastapi.testclient import TestClient as TC
+    from lunar_api.main import app
+    from lunar_engine.ephemeris import HorizonsClient
+    from lunar_engine.links import south_polar_xy
+    from lunar_engine.precompute import BuildSettings, build_site
+    from lunar_engine.terrain import DemTier, DemTile
+
+    lat, lon = -89.5, 40.0
+    sx, sy = south_polar_xy(lat, lon)
+
+    def tile(half: float, px: float, fill: float) -> DemTile:
+        n = int(2 * half / px)
+        return DemTile(np.full((n, n), fill, dtype=np.float32), sx - half, sy + half, px, "t")
+
+    tiers = [
+        DemTier("site-5m", tile(3000.0, 10.0, 0.0)),
+        DemTier("ldem-20m", tile(40_000.0, 40.0, 0.0)),
+    ]
+    client_h = HorizonsClient(
+        transport=httpx.MockTransport(fake_horizons(2.0)), sleep=lambda _s: None, min_interval_s=0
+    )
+    cfg = BuildSettings(T0, T0 + timedelta(days=10), max_range_m=30_000.0, azimuth_step_deg=1.0)
+    build_site(client_h, "gamma", lat, lon, None, {"file": "x", "sha256": "abc"}, tmp_path, cfg,
+               tiers=tiers, err=tile(40_000.0, 40.0, 3.0), effres=tile(40_000.0, 40.0, 40.0))
+    monkeypatch.setenv("LUNAR_PRECOMPUTE_DIR", str(tmp_path))
+    _open_limits(app)
+    return TC(app, raise_server_exceptions=False)
+
+
+def test_skyline_lists_reach_km_and_the_tier_per_azimuth(tiered_client: TestClient) -> None:
+    b = tiered_client.get("/api/v1/sites/gamma/skyline?step_deg=10").json()
+    assert b["tiers"] == ["site-5m", "ldem-20m"] and b["required_range_km"] == 300.0
+    assert len(b["reach_km"]) == len(b["tier"]) == len(b["azimuth_deg"]) == 36
+    assert min(b["reach_km"]) >= 29.9  # the wider tier carried every ray past the small tile
+    assert set(b["tier"]) <= {"site-5m", "ldem-20m", "bare-sphere"}
+    assert b["dem_error_deg"] is not None and len(b["dem_error_deg"]) == 36
+    assert b["effective_resolution_m"] is not None
+
+
+def test_tiered_site_still_warns_because_30_km_is_short_of_300(tiered_client: TestClient) -> None:
+    a = tiered_client.get("/api/v1/sites/gamma/assess", params=W).json()
+    assert a["terrain"]["complete"] is False and a["terrain"]["reach_km_min"] >= 29.9
+    assert a["verdict_state"] == "upper_bound_terrain_incomplete"
+    assert any("30 km" in w for w in a["provenance"]["warnings"])
+    assert any("ERR product" in s for s in a["band_basis"])
+
+
+def test_old_bundles_report_no_tiers_and_no_error_rather_than_inventing_them(
+    client: TestClient,
+) -> None:
+    b = client.get("/api/v1/sites/alpha/skyline?step_deg=10").json()
+    assert b["tiers"] == [] and set(b["tier"]) == {None}
+    assert b["dem_error_deg"] is None and b["effective_resolution_m"] is None

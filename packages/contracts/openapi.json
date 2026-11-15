@@ -1358,6 +1358,48 @@
             "title": "Covered Fraction",
             "type": "number"
           },
+          "dem_error_deg": {
+            "anyOf": [
+              {
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dem Error Deg"
+          },
+          "effective_resolution_m": {
+            "anyOf": [
+              {
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective Resolution M"
+          },
           "elevation_deg": {
             "items": {
               "type": "number"
@@ -1372,6 +1414,13 @@
           "provenance": {
             "$ref": "#/components/schemas/Provenance"
           },
+          "reach_km": {
+            "items": {
+              "type": "number"
+            },
+            "title": "Reach Km",
+            "type": "array"
+          },
           "reach_m": {
             "items": {
               "type": "number"
@@ -1383,9 +1432,34 @@
             "title": "Requested Range M",
             "type": "number"
           },
+          "required_range_km": {
+            "title": "Required Range Km",
+            "type": "number"
+          },
           "site_id": {
             "title": "Site Id",
             "type": "string"
+          },
+          "tier": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Tier",
+            "type": "array"
+          },
+          "tiers": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tiers",
+            "type": "array"
           }
         },
         "required": [
@@ -1395,6 +1469,10 @@
           "azimuth_deg",
           "elevation_deg",
           "reach_m",
+          "reach_km",
+          "tier",
+          "tiers",
+          "required_range_km",
           "requested_range_m",
           "covered_fraction",
           "coverage_note",

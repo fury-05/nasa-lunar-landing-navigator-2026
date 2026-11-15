@@ -94,6 +94,12 @@ class SkylineOut(BaseModel):
     azimuth_deg: list[float]
     elevation_deg: list[float]
     reach_m: list[float]
+    reach_km: list[float]
+    tier: list[str | None]
+    tiers: list[str]
+    dem_error_deg: list[float | None] | None = None
+    effective_resolution_m: list[float | None] | None = None
+    required_range_km: float
     requested_range_m: float
     covered_fraction: float
     coverage_note: str
