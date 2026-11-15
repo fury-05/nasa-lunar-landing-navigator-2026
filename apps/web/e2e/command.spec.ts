@@ -158,8 +158,8 @@ test("command centre shows verdict, warning, sky view and timeline", async ({ pa
   await expect(page.getByText("fragile")).toBeVisible();
   await expect(page.getByRole("note")).toContainText("Test warning: terrain ends early.");
   await expect(page.getByRole("img", { name: /Sky from the site/ })).toBeVisible();
-  await expect(page.getByRole("img", { name: /Sun up: 1 period/ })).toBeVisible();
-  await expect(page.getByRole("img", { name: /Earth link: none in this window/ })).toBeVisible();
+  await expect(page.getByRole("img", { name: /Sun up: 1 period in view/ })).toBeVisible();
+  await expect(page.getByRole("img", { name: /Earth link: none in view/ })).toBeVisible();
 });
 
 test("choices live in the URL so a view can be shared", async ({ page }) => {
@@ -495,4 +495,88 @@ test("date control: reachable and operable with the keyboard alone", async ({ pa
   await expect(next).toBeFocused();
   await page.keyboard.press("Space");
   await expect(page).toHaveURL(/start=2026-12-13/);
+});
+
+const EVENT_TL = {
+  ...TL,
+  sun_intervals: [
+    {
+      start: "2026-12-11T00:00:00Z",
+      end: "2026-12-14T06:00:00Z",
+      open_start: true,
+      open_end: false,
+    },
+    {
+      start: "2026-12-16T09:30:00Z",
+      end: "2026-12-19T00:00:00Z",
+      open_start: false,
+      open_end: true,
+    },
+  ],
+  earth_windows: [
+    {
+      start: "2026-12-12T00:00:00Z",
+      end: "2026-12-13T12:00:00Z",
+      open_start: false,
+      open_end: false,
+    },
+  ],
+};
+
+test("timeline: events come from the strip edges and have a text alternative and a list", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.route("**/api/v1/sites/*/timeline*", (r) => r.fulfill({ json: EVENT_TL }));
+  await page.goto("/command?site=alpha");
+  const events = page.getByRole("img", { name: /event.* in view:/ });
+  await expect(events).toHaveAttribute("aria-label", /4 events in view/);
+  await expect(events).toHaveAttribute("aria-label", /Sunset 2026-12-14 06:00 UTC/);
+  await expect(events).toHaveAttribute("aria-label", /Sunrise 2026-12-16 09:30 UTC/);
+  await expect(events).toHaveAttribute("aria-label", /Earthrise 2026-12-12 00:00 UTC/);
+  await expect(events).toHaveAttribute("aria-label", /Earthset 2026-12-13 12:00 UTC/);
+  // The edges of the loaded window (open spans) are not events.
+  await expect(events).not.toHaveAttribute("aria-label", /2026-12-11 00:00/);
+  await expect(events).not.toHaveAttribute("aria-label", /2026-12-19/);
+  await expect(page.getByText("Events in view (4) as a list")).toBeVisible();
+});
+
+test("timeline: zoom and pan with buttons narrow the window and the event list follows", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.route("**/api/v1/sites/*/timeline*", (r) => r.fulfill({ json: EVENT_TL }));
+  await page.goto("/command?site=alpha");
+  await expect(page.getByRole("button", { name: "Zoom out" })).toBeDisabled();
+  await expect(page.getByText(/\(8\.0 days\)/)).toBeVisible();
+  await page.getByRole("button", { name: "Zoom in" }).click();
+  await expect(page.getByText(/\(4\.0 days\)/)).toBeVisible();
+  await page.getByRole("button", { name: "Zoom in" }).click();
+  await expect(page.getByText(/\(2\.0 days\)/)).toBeVisible();
+  // Centred on the middle of the window (2026-12-15), so the 12-12 and 12-13 events drop out.
+  const ev = page.getByRole("img", { name: /event.* in view|No sunrise/ });
+  await expect(ev).not.toHaveAttribute("aria-label", /Earthrise/);
+  await page.getByRole("button", { name: "Pan later" }).click();
+  await expect(page.getByRole("button", { name: "Pan earlier" })).toBeEnabled();
+  await expect(page.getByRole("img", { name: /Sun up: .* in view/ })).toBeVisible();
+  await page.getByRole("button", { name: "Show all" }).click();
+  await expect(page.getByText(/\(8\.0 days\)/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Show all" })).toBeDisabled();
+});
+
+test("timeline: keyboard zoom and pan work on the focused timeline", async ({ page }) => {
+  await mock(page);
+  await page.route("**/api/v1/sites/*/timeline*", (r) => r.fulfill({ json: EVENT_TL }));
+  await page.goto("/command?site=alpha");
+  const region = page.getByRole("group", { name: /Use plus and minus to zoom/ });
+  await region.focus();
+  await page.keyboard.press("+");
+  await expect(page.getByText(/\(4\.0 days\)/)).toBeVisible();
+  await page.keyboard.press("ArrowRight");
+  await expect(page.getByRole("button", { name: "Pan earlier" })).toBeEnabled();
+  await page.keyboard.press("-");
+  await expect(page.getByText(/\(8\.0 days\)/)).toBeVisible();
+  await page.keyboard.press("+");
+  await page.keyboard.press("0");
+  await expect(page.getByText(/\(8\.0 days\)/)).toBeVisible();
 });
