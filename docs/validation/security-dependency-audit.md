@@ -96,3 +96,9 @@ Live checks were made with `curl -I` against `https://13-52-97-105.sslip.io` on 
 
 ## 5. Fixes applied to the edge (2026-11-15, infra/Caddyfile)
 Applied F1 (CSP `base-uri`, `form-action`, `object-src`), F4 (`Cross-Origin-Opener-Policy: same-origin`), F5 (`Cache-Control: no-cache` for pages outside `/assets` and `/api`), F6 for the Caddy banner (`-Server`) and F7 (`request_body max_size 64KB` on `/api/*`). Checked on the VM with `caddy validate` before reload. After reload: `/api/v1/health` 200, a 100000 byte POST to `/api/v1/compare` returned 413, a normal compare POST returned 200, the page headers show the new CSP, COOP and `no-cache`, and `/sites/pick` loads with no console warnings. The `Server: uvicorn` header from the API process, F2, F3, F8 to F11 remain open.
+
+## 6. More fixes (2026-11-15)
+* F8 applied: `ProtectKernelTunables`, `ProtectControlGroups` and `RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6` added to both systemd units in `infra/`. They take effect on the VM at the next `systemctl daemon-reload` and restart (see the deploy notes in the pull request); `MemoryMax` was not set because the VM is shared with Postgres and Redis and no measured limit exists.
+* F10 applied: CI runs `scripts/scan_secrets.py` (blocking) and a warn-only `npm audit --omit=dev` plus `pip-audit`. The licence report check is not in CI because it reads installed npm metadata, which the python job does not install; run `python scripts/gen_licenses.py --check` locally before release.
+* F3 applied by the API work (PR 160): `/api/v1/docs` only gets the relaxed style source.
+* Still open: F2 (accepted risk), F9 (dev-only advisory, accepted until a released fix is 14 days old), F6 uvicorn banner, F11 covered by PR 160 (cap and 7 day expiry).
