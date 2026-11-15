@@ -16,6 +16,13 @@ import {
 
 type Span = { start: string; end: string };
 
+/** "Dec 11" style day label, always in UTC like the rest of the page. */
+const DAY_LABEL = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  timeZone: "UTC",
+});
+
 const EVENT_GLYPH: Record<EventKind, string> = {
   sunset: "▼",
   sunrise: "▲",
@@ -49,12 +56,12 @@ function Strip({
     ? `${visible.length} period${visible.length === 1 ? "" : "s"} in view`
     : "none in view";
   return (
-    <div className="grid grid-cols-[7rem_1fr] items-center gap-3">
-      <span className="text-sm text-muted">{label}</span>
+    <div className="grid grid-cols-[6rem_1fr] sm:grid-cols-[7.5rem_1fr] items-center gap-3">
+      <span className="text-sm text-ink">{label}</span>
       <div
         role="img"
         aria-label={`${label}: ${text}`}
-        className="relative h-6 overflow-hidden rounded-cell border border-white/10 bg-white/[0.04]"
+        className="relative h-8 overflow-hidden rounded-cell border border-white/10 bg-white/[0.04]"
       >
         {visible.map((s, i) => {
           const a = Math.max(Date.parse(s.start), t0);
@@ -109,9 +116,7 @@ export function Timeline({ data, marker = null }: { data: TimelineData; marker?:
   const ticks = Array.from({ length: 5 }, (_, i) => new Date(view.t0 + (total * i) / 4));
   const showTime = days < 3;
   const fmtTick = (d: Date) =>
-    showTime
-      ? `${d.toISOString().slice(5, 10)} ${d.toISOString().slice(11, 16)}`
-      : d.toISOString().slice(5, 10);
+    showTime ? `${DAY_LABEL.format(d)} ${d.toISOString().slice(11, 16)}` : DAY_LABEL.format(d);
   const full_ = isFull(view, full);
 
   return (
@@ -156,7 +161,7 @@ export function Timeline({ data, marker = null }: { data: TimelineData; marker?:
         <button type="button" className={btn} onClick={() => set(full)} disabled={full_}>
           Show all
         </button>
-        <span role="status" className="font-mono text-xs text-muted">
+        <span role="status" className="font-mono text-sm text-muted">
           Showing {fmtWhen(view.t0)} to {fmtWhen(view.t1)} ({days.toFixed(days < 10 ? 1 : 0)} days)
         </span>
       </div>
@@ -213,8 +218,8 @@ export function Timeline({ data, marker = null }: { data: TimelineData; marker?:
           marker={marker}
         />
 
-        <div className="grid grid-cols-[7rem_1fr] items-center gap-3">
-          <span className="text-sm text-muted">Events</span>
+        <div className="grid grid-cols-[6rem_1fr] sm:grid-cols-[7.5rem_1fr] items-center gap-3">
+          <span className="text-sm text-ink">Events</span>
           <div
             role="img"
             aria-label={
@@ -222,14 +227,14 @@ export function Timeline({ data, marker = null }: { data: TimelineData; marker?:
                 ? `${shown.length} event${shown.length === 1 ? "" : "s"} in view: ${shown.map(fmtEvent).join("; ")}`
                 : "No sunrise, sunset, Earthrise or Earthset in view"
             }
-            className="relative h-7 rounded-cell border border-white/10 bg-white/[0.04]"
+            className="relative h-8 rounded-cell border border-white/10 bg-white/[0.04]"
           >
             {shown.map((e, i) => (
               <span
                 key={`${e.kind}${e.at}${i}`}
                 aria-hidden="true"
                 title={fmtEvent(e)}
-                className="absolute top-0 -translate-x-1/2 text-sm leading-7"
+                className="absolute top-0 -translate-x-1/2 text-base leading-8"
                 style={{ left: `${((e.at - view.t0) / total) * 100}%`, color: EVENT_COLOR[e.kind] }}
               >
                 {EVENT_GLYPH[e.kind]}
@@ -238,9 +243,9 @@ export function Timeline({ data, marker = null }: { data: TimelineData; marker?:
           </div>
         </div>
 
-        <div className="grid grid-cols-[7rem_1fr] gap-3">
+        <div className="grid grid-cols-[6rem_1fr] sm:grid-cols-[7.5rem_1fr] gap-3">
           <span />
-          <div className="flex justify-between font-mono text-[11px] text-muted">
+          <div className="flex justify-between font-mono text-xs text-muted">
             {ticks.map((d, i) => (
               <span key={i}>{fmtTick(d)}</span>
             ))}
@@ -248,7 +253,7 @@ export function Timeline({ data, marker = null }: { data: TimelineData; marker?:
         </div>
       </div>
 
-      <details className="text-xs text-muted" open={shown.length > 0 && shown.length <= 12}>
+      <details className="text-sm text-muted" open={shown.length > 0 && shown.length <= 12}>
         <summary className="min-h-11 cursor-pointer py-2">
           Events in view ({shown.length}) as a list
         </summary>
@@ -264,7 +269,7 @@ export function Timeline({ data, marker = null }: { data: TimelineData; marker?:
           </ul>
         )}
       </details>
-      <p className="m-0 text-xs text-muted">
+      <p className="m-0 text-sm text-muted">
         UTC. Strips show when each condition holds; colour is also named in the row label. The white
         line marks the time chosen with the time control. Events are the edges of the strips:{" "}
         {EVENT_GLYPH.sunrise} {EVENT_LABEL.sunrise.toLowerCase()}, {EVENT_GLYPH.sunset}{" "}
