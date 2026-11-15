@@ -34,8 +34,12 @@ def test_attribution_endpoint_lists_credits_and_flags_unconfirmed_terms(client: 
     assert b["count"] == len(b["sources"]) >= 7 and "not for flight operations" in b["notice"]
     by_id = {s["id"]: s for s in b["sources"]}
     assert by_id["csa-moon"]["credit"].startswith("Credit: Canadian Space Agency")
-    assert by_id["horizons"]["terms_confirmed"] is False
-    assert "horizons" in b["unconfirmed_terms"] and "THIRD_PARTY" in b["software"]
+    # Horizons terms were read on 2026-11-15 (JPL SSD FAQ); QuickMap and Moon Trek could not be
+    # read by a text reader and stay flagged until a person reads them.
+    assert by_id["horizons"]["terms_confirmed"] is True
+    assert by_id["quickmap"]["terms_confirmed"] is False
+    assert set(b["unconfirmed_terms"]) == {"quickmap", "trek-moon"}
+    assert "THIRD_PARTY" in b["software"]
     assert all(s["url"].startswith("https://") for s in b["sources"])
 
 

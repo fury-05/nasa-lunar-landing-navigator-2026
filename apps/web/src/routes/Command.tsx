@@ -6,6 +6,7 @@ import { Metrics } from "../components/Metrics";
 import { SiteContext } from "../components/SiteContext";
 import { SkyView } from "../components/SkyView";
 import { DEFAULT_SPEED, useMissionClock } from "../lib/clock";
+import { DateControl } from "../components/DateControl";
 import { ExportBar } from "../components/ExportBar";
 import { HorizonStrip } from "../components/HorizonStrip";
 import { Readout } from "../components/Readout";
@@ -25,6 +26,8 @@ import {
 import { NeedsForm } from "../components/NeedsForm";
 import { needsFromParams, needsToParams, needsToQuery } from "../lib/mission";
 import { toSiteInfo } from "../lib/site";
+import { applyFilter, kindsPresent, NO_FILTER, type Filter } from "../lib/siteFilter";
+import { SiteFilter } from "../components/SiteFilter";
 import { useAsync } from "../lib/useAsync";
 
 const TerrainView = lazy(() =>
@@ -68,6 +71,8 @@ export function Command() {
     params.get("earth"),
     params.get("outage"),
   ].join(",");
+  const [siteFilter, setSiteFilter] = useState<Filter>(NO_FILTER);
+  const [showFilter, setShowFilter] = useState(false);
   const sites = useAsync(loadSites, "sites");
   const first = sites.state === "ok" ? sites.data.sites[0]?.id : undefined;
   const id = site || first || "";
@@ -79,6 +84,17 @@ export function Command() {
     const s = sites.data.sites.find((x) => x.id === id);
     return s ? toSiteInfo(s) : null;
   }, [sites, id]);
+
+  const allInfos = useMemo(
+    () => (sites.state === "ok" ? sites.data.sites.map(toSiteInfo) : []),
+    [sites],
+  );
+  // The chosen site always stays in the list, even when the filter would hide it.
+  const options = useMemo(() => {
+    const hit = applyFilter(allInfos, siteFilter);
+    const cur = allInfos.find((i) => i.id === id);
+    return cur && !hit.some((i) => i.id === cur.id) ? [cur, ...hit] : hit;
+  }, [allInfos, siteFilter, id]);
 
   const a = useMemo(() => new Date(`${start}T00:00:00Z`), [start]);
   const valid = !Number.isNaN(a.getTime()) && DAY_CHOICES.includes(days);
@@ -145,24 +161,12 @@ export function Command() {
             value={id}
             onChange={(e) => set("site", e.target.value)}
           >
-            {sites.state === "ok" &&
-              sites.data.sites.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {toSiteInfo(s).name}
-                </option>
-              ))}
+            {options.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
           </select>
-        </label>
-        <label className="flex flex-col gap-1 text-sm text-muted">
-          Start date (UTC)
-          <input
-            type="date"
-            min="2026-12-01"
-            max="2029-11-01"
-            className="min-h-11 rounded-cell border border-white/20 bg-void px-3 text-ink"
-            value={start}
-            onChange={(e) => e.target.value && set("start", e.target.value)}
-          />
         </label>
         <label className="flex flex-col gap-1 text-sm text-muted">
           Length
@@ -178,6 +182,15 @@ export function Command() {
             ))}
           </select>
         </label>
+        <button
+          type="button"
+          aria-expanded={showFilter}
+          aria-controls="site-filter-panel"
+          onClick={() => setShowFilter((v) => !v)}
+          className="min-h-11 rounded-cell border border-white/20 px-4 text-sm text-ink hover:bg-white/10"
+        >
+          {showFilter ? "Hide site search" : "Search and filter sites"}
+        </button>
         <Link
           to="/sites/pick"
           className="inline-flex min-h-11 items-center rounded-cell border border-white/20 px-4 text-sm text-earth no-underline hover:bg-white/10"
@@ -185,6 +198,31 @@ export function Command() {
           Pick another site on the map
         </Link>
         <Chip tone="warn">Planning tool, not for flight operations</Chip>
+        {showFilter && (
+          <div id="site-filter-panel" className="basis-full">
+            <SiteFilter
+              value={siteFilter}
+              onChange={setSiteFilter}
+              kinds={kindsPresent(allInfos)}
+              shown={applyFilter(allInfos, siteFilter).length}
+              total={allInfos.length}
+            />
+          </div>
+        )}
+      </Glass>
+
+      <Glass>
+        <DateControl
+          start={start}
+          days={days}
+          onChange={(st, len) => {
+            const next = new URLSearchParams(params);
+            next.set("start", st);
+            if (len !== undefined) next.set("days", String(len));
+            next.delete("t"); // a new window starts at its own middle
+            setParams(next, { replace: true });
+          }}
+        />
       </Glass>
 
       {info && usable && (

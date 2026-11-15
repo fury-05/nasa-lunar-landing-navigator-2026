@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  RELIEF_UNCERTAINTY_NOTE,
+  fiveMetreCaveat,
   illumination,
   missingPct,
   relief,
@@ -126,5 +128,50 @@ describe("relief and notes", () => {
     expect(d.source).toMatch(/SYNTHETIC/);
     expect(d.interpolated_fraction).toBeNull();
     expect(d.height_error_m).toBeNull();
+  });
+});
+
+describe("honesty about 5 m heights", () => {
+  it("warns whenever a 5 m tier supplied the grid, and quotes the source", () => {
+    const t = tile(() => 0, 21, 10, { tier_share: { "site-tile-5m": 1 }, native_resolution_m: 5 });
+    const c = fiveMetreCaveat(t)!;
+    expect(c).toContain("mostly interpolated");
+    expect(c).toContain("about 90 percent");
+    expect(c).toContain("ADR-0003");
+    expect(c).toContain("not the spacing of real measurements");
+    expect(
+      fiveMetreCaveat(
+        tile(() => 0, 21, 10, {
+          tier_share: { "mosaic-87s-5m": 0.12, "ldem-20m": 0.88 },
+          native_resolution_m: 20,
+        }),
+      ),
+    ).not.toBeNull();
+  });
+  it("does not make the claim for a coarser product that is not 5 m", () => {
+    const t = tile(() => 0, 21, 20, { tier_share: { "ldem-20m": 1 }, native_resolution_m: 20 });
+    expect(fiveMetreCaveat(t)).toBeNull();
+  });
+  it("never claims measured 5 m heights", () => {
+    const all = [
+      fiveMetreCaveat(
+        tile(() => 0, 21, 5, { tier_share: { "site-tile-5m": 1 }, native_resolution_m: 5 }),
+      )!,
+      RELIEF_UNCERTAINTY_NOTE,
+      resolutionNote(tile(() => 0)),
+    ].join(" ");
+    // Any mention of measuring at 5 m must be a negation ("not measured at 5 m"), never a claim.
+    for (const m of all.matchAll(
+      /measured at 5 m|measurements? at 5 m|5 m (heights|measurements)/gi,
+    )) {
+      const before = all.slice(Math.max(0, m.index - 12), m.index).toLowerCase();
+      expect(before, `unnegated claim near: ${all.slice(m.index - 20, m.index + 30)}`).toMatch(
+        /not $/,
+      );
+    }
+    expect(all).toMatch(/not measured at the grid spacing|not the spacing of real measurements/);
+  });
+  it("says what the plus or minus leaves out", () => {
+    expect(RELIEF_UNCERTAINTY_NOTE).toContain("does not include interpolation");
   });
 });

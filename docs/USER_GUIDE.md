@@ -76,14 +76,14 @@ Compares a site's longest dark spell and longest Earth outage with four lander a
 Lists every data source with publisher, credit text, usage statement and whether its terms are confirmed. "pending-source" means a person has not yet read and confirmed the terms.
 
 ## Reading uncertainty honestly
-1. **Terrain incomplete** is the biggest limit today. Check the terrain chip first.
+1. **Terrain incomplete** is the biggest limit today. The terrain now reaches about 146 to 300 km depending on the direction, but never the full 300 km in every direction, so the chip still says incomplete. Check it first.
 2. **The range in brackets** covers an assumed skyline error, not every error. The skyline error and the Moon orientation (frame) error used are assumptions in the specification, not measurements.
 3. **Derived points.** Curated PGDA sites are tile centres, which may sit on a crater floor or a wall shadow.
 4. **Line of sight only.** An "Earth link" is geometry, not a communications budget.
-5. **No validation yet.** No independent comparison with QuickMap or another tool has been recorded for these results. Treat results as planning-grade.
+5. **Validation is partial.** Sun direction was compared with NASA's printed Apollo landing values and illumination with a PGDA map on a few points, and the findings are in docs/validation/REPORT.md. Height, slope and lit or shadowed checks against QuickMap by a person are not yet recorded. Treat results as planning-grade.
 
 ## Keyboard and accessibility
-All controls are reachable with Tab. Controls have visible focus rings and labels. The scrubber answers to arrow and Page keys. Charts have text descriptions. An accessibility audit with fixes is still open (checklist row P7-01), so report problems as GitHub issues.
+All controls are reachable with Tab. Controls have visible focus rings and labels. The scrubber answers to arrow and Page keys. Charts have text descriptions. Automated accessibility checks (axe, WCAG 2 A and AA) pass on every page; no screen reader test has been done by a person, so report problems as GitHub issues.
 
 ## Glossary
 * **Azimuth**: compass direction, 0 degrees north, 90 east, 180 south, 270 west.
