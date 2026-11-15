@@ -206,53 +206,71 @@ export function Home() {
           </div>
           <figure className="m-0">
             <svg
-              viewBox="0 0 320 300"
+              viewBox="0 0 340 360"
               role="img"
-              aria-label="Diagram, not to scale of any one site: a circle of NASA elevation data around the south pole, and a 300 km look-out circle around a site away from the pole that sticks out past the edge of the data."
+              aria-label="Diagram, simplified: a blue circle of NASA elevation data around the south pole, and a dashed amber 300 km look-out circle around a landing site away from the pole. The part of the amber circle outside the blue circle has no data, so the result there is an upper bound."
               className="h-auto w-full"
             >
-              <circle cx="150" cy="150" r="110" fill="#14214a" stroke="#5ea2ff" strokeWidth="1.5" />
-              <circle cx="150" cy="150" r="3" fill="#e8eefc" />
-              <text x="150" y="168" textAnchor="middle" fill="#9fb0d6" fontSize="12">
-                south pole
-              </text>
+              <circle cx="120" cy="150" r="105" fill="#14214a" stroke="#5ea2ff" strokeWidth="2" />
+              <circle cx="120" cy="150" r="3.5" fill="#e8eefc" />
               <circle
-                cx="210"
-                cy="120"
+                cx="205"
+                cy="108"
                 r="100"
                 fill="#ffb454"
-                fillOpacity="0.12"
+                fillOpacity="0.1"
                 stroke="#ffb454"
-                strokeWidth="1.5"
-                strokeDasharray="6 4"
+                strokeWidth="2"
+                strokeDasharray="7 5"
               />
-              <circle cx="210" cy="120" r="5" fill="#ffb454" stroke="#fff3d6" strokeWidth="1.5" />
+              <circle cx="205" cy="108" r="6" fill="#ffb454" stroke="#fff3d6" strokeWidth="1.5" />
+              <line x1="205" y1="108" x2="276" y2="37" stroke="#ffb454" strokeWidth="2" />
+              <text x="283" y="30" fill="#ffb454" fontSize="14" fontWeight="700">
+                300 km
+              </text>
+              <text x="120" y="172" textAnchor="middle" fill="#e8eefc" fontSize="12">
+                pole
+              </text>
               <text
-                x="210"
-                y="106"
+                x="205"
+                y="132"
                 textAnchor="middle"
                 fill="#ffb454"
                 fontSize="13"
                 fontWeight="700"
               >
-                landing site
+                site
               </text>
-              <text x="62" y="60" textAnchor="middle" fill="#5ea2ff" fontSize="12">
-                NASA elevation
-              </text>
-              <text x="62" y="75" textAnchor="middle" fill="#5ea2ff" fontSize="12">
-                data
-              </text>
-              <text x="268" y="236" textAnchor="middle" fill="#ffb454" fontSize="12">
-                no data here:
-              </text>
-              <text x="268" y="251" textAnchor="middle" fill="#ffb454" fontSize="12">
-                upper bound
-              </text>
-              <line x1="210" y1="120" x2="298" y2="72" stroke="#ffb454" strokeWidth="1.5" />
-              <text x="262" y="82" fill="#ffb454" fontSize="12" transform="rotate(-28 262 82)">
-                300 km
-              </text>
+              <g fontSize="14" fontWeight="700">
+                <circle cx="18" cy="288" r="7" fill="#14214a" stroke="#5ea2ff" strokeWidth="2" />
+                <text x="34" y="293" fill="#5ea2ff">
+                  NASA elevation data
+                </text>
+                <circle
+                  cx="18"
+                  cy="316"
+                  r="7"
+                  fill="none"
+                  stroke="#ffb454"
+                  strokeWidth="2"
+                  strokeDasharray="3 2"
+                />
+                <text x="34" y="321" fill="#ffb454">
+                  300 km look-out circle
+                </text>
+                <circle
+                  cx="18"
+                  cy="344"
+                  r="7"
+                  fill="#ffb454"
+                  fillOpacity="0.35"
+                  stroke="#ffb454"
+                  strokeWidth="1"
+                />
+                <text x="34" y="349" fill="#ffb454">
+                  Outside the blue: no data
+                </text>
+              </g>
             </svg>
             <figcaption className="mt-2 text-sm text-muted">
               Simplified picture. Blue: where NASA elevation data exists. Amber dashes: the 300 km
