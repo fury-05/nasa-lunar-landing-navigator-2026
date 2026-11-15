@@ -1,4 +1,4 @@
-# Lunar Landing Site Navigator v1.0.0 (release notes, draft)
+# Lunar Landing Site Navigator v1.0.0, stable release
 
 Planning tool, not for flight operations. NASA Space Apps Challenge 2026, challenge "Lunar Landing Site Navigator". Live: https://13-52-97-105.sslip.io . Repository: https://github.com/fury-05/nasa-lunar-landing-navigator-2026 (Apache-2.0).
 
@@ -13,7 +13,7 @@ This is the first release. It was built on 14 and 15 November 2026 by Irfan, Afr
 ## What is real
 * Sun and Earth geometry from the JPL Horizons API for 2026-12-01 to 2029-12-01 at 10 minute steps.
 * Terrain from NASA GSFC PGDA LOLA products: 5 m site tiles, the 87S to 90S 5 m mosaic and the 20 m LDEM with its error layer (14.09 GB downloaded, checksums in `data/MANIFEST.far.json`). Skylines now reach 146 to 296 km at the shortest ray.
-* 510 Python tests, 140 web unit tests and 73 browser tests pass on the release commit; CI runs them on every pull request.
+* 510 Python tests, 172 web unit tests and 125 browser tests (including axe accessibility checks at 1280 and 375 px) pass on the release commit; `scripts/final-gate.sh` runs the whole release gate; CI runs the tests on every pull request.
 
 ## Honest limits
 * **No result is conclusive.** Terrain reaches the required 300 km in only 46 to 95 percent of directions (covered fraction 0.455 to 0.949) at the ten curated sites, so every verdict is shown as "Upper bound, terrain incomplete" in amber. Terrain beyond the data is not bounded.
@@ -21,7 +21,9 @@ This is the first release. It was built on 14 and 15 November 2026 by Irfan, Afr
 * **Thresholds are placeholders.** "Viable", "marginal" and "not viable" use team defaults that you can edit; they are not mission requirements.
 * **Lander values are placeholders** (`pending-source`); thermal is not assessed; no charging model.
 * **The 3D terrain view runs at about 20 frames per second** (measured, canvas painter, not WebGL) and does not drape imagery.
-* **Usage terms** were read and recorded on 2026-11-15 for most sources; Moon Trek and QuickMap stay `pending-source`.
+* **Usage terms** were read and recorded on 2026-11-15 for most sources; Moon Trek and QuickMap show no terms text and stay `pending-source`. NASA's media guidelines contain a section on AI ("Super Intelligence") products that the owner should review (todo/APPROVALS.md A11).
+* **Accessibility** was checked with axe and keyboard-only tests; no real screen reader was used.
+* **QuickMap comparison** was done by browser automation, not by a person. Height differences at the site centres are -0.9 to -2.4 m at four sites and +12.3 m at pgda-site04; all ten pre-registered lit-or-shadowed checks agreed, but all ten were cases where the app said the Sun was down.
 * Earth link is geometry only: no antennas, DSN stations or radio budget.
 * Cut at the feature freeze (ADR-0008): Moon globe, sky dome, objective presets, saved scenarios (see ROADMAP.md).
 
