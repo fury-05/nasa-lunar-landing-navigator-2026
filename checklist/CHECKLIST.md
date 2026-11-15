@@ -6,8 +6,8 @@
 | P1 | 10 | 1 | 0 | 11 |
 | P2 | 8 | 4 | 0 | 12 |
 | P3 | 9 | 0 | 0 | 9 |
-| P4 | 0 | 11 | 0 | 11 |
-| P5 | 0 | 5 | 0 | 5 |
+| P4 | 2 | 9 | 0 | 11 |
+| P5 | 1 | 4 | 0 | 5 |
 | P6 | 0 | 4 | 0 | 4 |
 | P7 | 0 | 9 | 0 | 9 |
 
@@ -59,18 +59,18 @@
 | P3-09 | Input validation and security review of the API | irfan | DONE | 62 hostile-input tests (traversal, encoded traversal, injection strings, malformed and huge JSON, bad numbers and times, size abuse, method and header abuse, CORS, header injection); 6 findings fixed (raw echo of caller text, site id alphabet and case aliasing, loose time parsing, booleans accepted as numbers, third party CDN on the docs page, no security headers on the API itself); mutation check shows each fix is guarded; written review with an explicit NOT covered list in docs/validation/api-security-review.md; developer review only, no penetration test; issue #65 |
 | P4-01 | Design system complete: tokens, glass components, motion, contrast checks | afreen | PENDING | issue #66 |
 | P4-02 | App shell, routes, URL state, mock API from OpenAPI | afreen | PENDING | first slice live: /command route with URL state (site, start, days), typed API calls, loading, error and warning states; mock-based browser tests; not yet a full mock API layer; issue #67 |
-| P4-03 | Site picker with search, filters, custom coordinates, validation | afreen | PENDING | issue #68 |
+| P4-03 | Site picker with search, filters, custom coordinates, validation | afreen | PENDING | partial, PR 138: custom coordinates + click on Trek polar map, validation, job progress via POST /sites/custom; live page https://13-52-97-105.sslip.io/sites/pick checked, no console errors; search and filters not built; issue #68, #129 |
 | P4-04 | Date control with lunar-day jumps and range presets | afreen | PENDING | issue #69 |
-| P4-05 | Sky view: polar plot and horizon strip with real skyline and discs | afreen | PENDING | first slice: polar sky plot with the real skyline, Sun and Earth discs (looking-up convention, text alternative); horizon strip not built yet; issue #70 |
-| P4-06 | Metrics panel and countdown chips with sensitivity band | afreen | PENDING | first slice: verdict, robust/fragile, bands for sunlight, dark spell, Earth share and outage; countdown chips not built yet; issue #71 |
-| P4-07 | Timeline strips with zoom and event markers | afreen | PENDING | first slice: four strips (Sun up, Earth link, Sun dark, Earth outage) with text alternatives; zoom and event markers not built yet; issue #72 |
+| P4-05 | Sky view: polar plot and horizon strip with real skyline and discs | afreen | DONE | PR 137: polar sky plot plus horizon strip (azimuth vs elevation 0 to 15 deg) with Sun and Earth, scrubber driven; vitest 26, e2e 14; live https://13-52-97-105.sslip.io/command; issue #70 |
+| P4-06 | Metrics panel and countdown chips with sensitivity band | afreen | DONE | PR 137: verdict states incl. amber upper bound, editable mission needs in URL, sunset and Earthset UTC chips, band basis incl. terrain incompleteness; live API returns upper_bound_terrain_incomplete for pgda-site04; issue #71, #126 |
+| P4-07 | Timeline strips with zoom and event markers | afreen | PENDING | first slice: four strips with text alternatives plus scrubber marker (PR 137); zoom and event markers not built; issue #72 |
 | P4-08 | Compare board and flip mode | afreen | PENDING | issue #73 |
 | P4-09 | Slip matrix and what-changes-if panel | afreen | PENDING | issue #74 |
 | P4-10 | Export CSV, PNG, permalink, scenario summary | afreen | PENDING | issue #75 |
 | P4-11 | Loading, error and degraded states; keyboard and screen reader pass | afreen | PENDING | issue #76 |
 | P5-01 | Terrain tile endpoint (heightfield) and slope layer in the API | irfan | PENDING | issue #77 |
-| P5-02 | 2D polar map with OpenLayers, proj4 and Trek SP tiles, site markers | afreen | PENDING | issue #78 |
-| P5-04 | Local 3D terrain with draped imagery, Sun light, shadows, exaggeration control | afreen | PENDING | issue #80 |
+| P5-02 | 2D polar map with OpenLayers, proj4 and Trek SP tiles, site markers | afreen | DONE | PR 138: OpenLayers + proj4 + Trek WAC polar WMTS, site markers, click to pick; projection unit-tested against QuickMap-verified pgda-site04; live page checked with real tiles; marker labels overlap near the pole; issue #78 |
+| P5-04 | Local 3D terrain with draped imagery, Sun light, shadows, exaggeration control | afreen | PENDING | partial, PR 139: TerrainView (2D shaded + oblique 3D, scrubber Sun, labelled exaggeration, uncertainty); needs GET /sites/{id}/terrain (P5-01, issue #77) before it shows real data; issue #80, #131 |
 | P5-06 | Shared mission clock and animation controls across all views | afreen | PENDING | issue #82 |
 | P5-07 | 3D performance, LOD, tile cache, reduced-motion and low-power fallback | member3 | PENDING | issue #83 |
 | P6-01 | Lander profile model: arrays, battery, loads, slope and thermal limits | irfan | PENDING | issue #84 |
