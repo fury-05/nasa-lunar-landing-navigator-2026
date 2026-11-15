@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 import {
   assessOut,
+  criteriaForRequest,
   json,
   mockApi,
   problem,
@@ -446,4 +447,38 @@ test("terrain view: relief is labelled plus or minus uncertainty and never claim
   await expect(page.getByText(/mostly interpolated/)).toBeVisible();
   await expect(page.getByText(/not the spacing of real measurements/)).toBeVisible();
   await expect(page.getByText(/are measured at 5 m/i)).toHaveCount(0);
+});
+
+test("verdict thresholds: placeholder defaults say so, in the card and in the exported summary", async ({
+  page,
+}) => {
+  await mock(page);
+  const seen: string[] = [];
+  await page.route("**/api/v1/sites/*/assess*", (r) => {
+    seen.push(r.request().url());
+    return json(r, { ...ASSESS, criteria: criteriaForRequest(r.request().url()) });
+  });
+  await page.goto("/command?site=alpha");
+  const card = page.getByRole("heading", { name: "Verdict" }).locator("..").locator("..");
+  await expect(card).toContainText("Thresholds: placeholder defaults, not mission requirements");
+  await expect(card).not.toContainText("chosen by you");
+  // The defaults are not sent at all, so the API cannot call them user-chosen (issue #179).
+  expect(seen.every((u) => !u.includes("min_sun_fraction") && !u.includes("max_dark_hours"))).toBe(
+    true,
+  );
+  const [d] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("button", { name: /Summary \(TXT file\)/ }).click(),
+  ]);
+  const txt = (await import("node:fs")).readFileSync((await d.path())!, "utf8");
+  expect(txt).toContain("Criteria: placeholder defaults, not mission requirements");
+  expect(txt).not.toMatch(/chosen by you|user-chosen/i);
+});
+
+test("verdict thresholds: a need the visitor changed is called chosen by you", async ({ page }) => {
+  await mock(page);
+  await page.goto("/command?site=alpha&earth=60");
+  const card = page.getByRole("heading", { name: "Verdict" }).locator("..").locator("..");
+  await expect(card).toContainText("Thresholds: chosen by you");
+  await expect(card).not.toContainText("placeholder defaults, not mission requirements");
 });

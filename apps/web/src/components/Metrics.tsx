@@ -1,7 +1,7 @@
 import { Chip } from "./Chip";
 import { fmtHours, type Assess } from "../lib/data";
 import { verdictLabel } from "../api/client";
-import { verdictView } from "../lib/verdict";
+import { thresholdsText, verdictView } from "../lib/verdict";
 
 type Band = { low: number; nominal: number; high: number };
 
@@ -67,8 +67,7 @@ export function Metrics({ a }: { a: Assess }) {
         </p>
       )}
       <p className="m-0 text-xs text-muted">
-        Thresholds: {a.criteria.source === "user-chosen" ? "chosen by you" : "default placeholders"}{" "}
-        ({a.criteria.status}).{" "}
+        Thresholds: {thresholdsText(a.criteria)}.{" "}
         {upper
           ? "No robust or fragile label is given while terrain is incomplete."
           : a.robust

@@ -41,11 +41,12 @@ export const terrainOut = (over: Partial<S["TerrainOut"]> = {}): S["TerrainOut"]
 
 export const criteriaOut = (over: Partial<S["CriteriaOut"]> = {}): S["CriteriaOut"] => ({
   min_sun_fraction: 0.5,
-  max_dark_hours: 100,
+  // The API's own placeholder criteria (lunar_engine.sensitivity.PLACEHOLDER_CRITERIA).
+  max_dark_hours: 120,
   min_earth_fraction: 0.5,
-  max_outage_hours: 1e9,
+  max_outage_hours: 120,
   source: "default-placeholder",
-  status: "pending-source: placeholder",
+  status: "pending-source: placeholder planning criteria, not mission requirements",
   ...over,
 });
 
@@ -90,7 +91,7 @@ export const assessOut = (over: Partial<S["AssessOut"]> = {}): S["AssessOut"] =>
   verdict_by_run: { pessimistic: "not viable", nominal: "marginal", optimistic: "viable" },
   robust: false,
   delta_deg: 0.2,
-  criteria_status: "pending-source: placeholder",
+  criteria_status: "pending-source: placeholder planning criteria, not mission requirements",
   criteria: criteriaOut(),
   terrain: terrainOut(),
   band_basis: ["Horizon shifted by 0.2 degrees (test basis)."],
@@ -105,6 +106,32 @@ export const assessOut = (over: Partial<S["AssessOut"]> = {}): S["AssessOut"] =>
   provenance: provenance({ warnings: ["Test warning: terrain ends early."] }),
   ...over,
 });
+
+/**
+ * What the real API does with the mission-need query parameters: criteria are `user-chosen` only
+ * when at least one need is present in the request, and fields not given keep the placeholders.
+ */
+export function criteriaForRequest(url: string): S["CriteriaOut"] {
+  const q = new URL(url).searchParams;
+  const get = (k: string) => (q.has(k) ? Number(q.get(k)) : undefined);
+  const asked = {
+    min_sun_fraction: get("min_sun_fraction"),
+    max_dark_hours: get("max_dark_hours"),
+    min_earth_fraction: get("min_earth_fraction"),
+    max_outage_hours: get("max_outage_hours"),
+  };
+  if (Object.values(asked).every((v) => v === undefined)) return criteriaOut();
+  const base = criteriaOut();
+  return criteriaOut({
+    min_sun_fraction: asked.min_sun_fraction ?? base.min_sun_fraction,
+    max_dark_hours: asked.max_dark_hours ?? base.max_dark_hours,
+    min_earth_fraction: asked.min_earth_fraction ?? base.min_earth_fraction,
+    max_outage_hours: asked.max_outage_hours ?? base.max_outage_hours,
+    source: "user-chosen",
+    status:
+      "user-chosen mission needs for this request; fields not given use the pending-source placeholder defaults",
+  });
+}
 
 /** The terrain-incomplete upper bound state: a green verdict must never come with it. */
 export const upperBound = (over: Partial<S["AssessOut"]> = {}): S["AssessOut"] =>
@@ -438,7 +465,9 @@ export async function mockApi(
   const sites = opts.sites ?? siteList([siteSummary("alpha"), siteSummary("beta")]);
   await page.route("**/api/v1/sites", (r) => json(r, sites));
   await page.route("**/api/v1/sites/*/skyline*", (r) => json(r, opts.skyline ?? skylineOut()));
-  await page.route("**/api/v1/sites/*/assess*", (r) => json(r, opts.assess ?? assessOut()));
+  await page.route("**/api/v1/sites/*/assess*", (r) =>
+    json(r, { ...(opts.assess ?? assessOut()), criteria: criteriaForRequest(r.request().url()) }),
+  );
   await page.route("**/api/v1/sites/*/timeline*", (r) => json(r, opts.timeline ?? timelineOut()));
   await page.route("**/api/v1/sites/*/terrain*", (r) => {
     const t =

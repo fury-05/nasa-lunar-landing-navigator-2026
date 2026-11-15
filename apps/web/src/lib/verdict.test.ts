@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Assess } from "./data";
-import { verdictView } from "./verdict";
+import { thresholdsText, verdictView } from "./verdict";
 
 const terrain = (over: Record<string, unknown> = {}) => ({
   available: true,
@@ -69,5 +69,14 @@ describe("verdictView", () => {
     );
     expect(v.state).toBe("not viable");
     expect(v.incomplete).toBe(true);
+  });
+});
+
+describe("thresholdsText", () => {
+  it("calls the defaults placeholders and only user-chosen needs the visitor's", () => {
+    expect(thresholdsText({ source: "default-placeholder", status: "pending-source" })).toBe(
+      "placeholder defaults, not mission requirements (pending-source)",
+    );
+    expect(thresholdsText({ source: "user-chosen", status: "mine" })).toBe("chosen by you (mine)");
   });
 });

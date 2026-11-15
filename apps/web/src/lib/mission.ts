@@ -14,13 +14,22 @@ export type MissionNeeds = {
   maxOutageH: number | null;
 };
 
-/** Placeholder defaults. Shown to the user as defaults, not as mission requirements. */
+/**
+ * Placeholder defaults, MIRRORING the API's own PLACEHOLDER_CRITERIA (sun 50%, dark spell 120 h,
+ * Earth link 50%, outage 120 h; all pending-source). They are shown in the form so a visitor can
+ * see what the verdict was judged against, and they are never sent, so the API labels the result
+ * `default-placeholder`. The outage default is 120 h on the API; here it is null ("not set by
+ * you") and the API's 120 h applies, which the form's hint says. If the API changes its
+ * placeholders, change them here too: the e2e test "placeholder defaults match the API" reads
+ * `criteria` from the response and fails when they drift.
+ */
 export const DEFAULT_NEEDS: MissionNeeds = {
   minSunPct: 50,
-  maxDarkH: 100,
+  maxDarkH: 120,
   minEarthPct: 50,
   maxOutageH: null,
 };
+export const API_DEFAULT_OUTAGE_H = 120;
 
 function num(v: string | null, lo: number, hi: number): number | null {
   if (v === null || v.trim() === "") return null;
@@ -63,18 +72,23 @@ export function needsToParams(p: URLSearchParams, n: MissionNeeds): URLSearchPar
 /**
  * Query parameters sent to /assess. The names follow the API's mission-need query parameters
  * (min_sun_fraction, max_dark_hours, min_earth_fraction, max_outage_hours; fractions 0..1).
+ *
+ * When every need is still at its placeholder default NOTHING is sent: the API then answers with
+ * `criteria.source = "default-placeholder"`. Sending the defaults explicitly makes the API call
+ * the request user-chosen, which would tell a visitor who never touched the form that the
+ * thresholds are theirs (issue #179). Only a changed need is a user choice, and even then the
+ * unchanged fields are left to the API's own defaults.
  */
 export function needsToQuery(n: MissionNeeds) {
   const q: {
-    min_sun_fraction: number;
-    max_dark_hours: number;
-    min_earth_fraction: number;
+    min_sun_fraction?: number;
+    max_dark_hours?: number;
+    min_earth_fraction?: number;
     max_outage_hours?: number;
-  } = {
-    min_sun_fraction: n.minSunPct / 100,
-    max_dark_hours: n.maxDarkH,
-    min_earth_fraction: n.minEarthPct / 100,
-  };
+  } = {};
+  if (n.minSunPct !== DEFAULT_NEEDS.minSunPct) q.min_sun_fraction = n.minSunPct / 100;
+  if (n.maxDarkH !== DEFAULT_NEEDS.maxDarkH) q.max_dark_hours = n.maxDarkH;
+  if (n.minEarthPct !== DEFAULT_NEEDS.minEarthPct) q.min_earth_fraction = n.minEarthPct / 100;
   if (n.maxOutageH !== null) q.max_outage_hours = n.maxOutageH;
   return q;
 }

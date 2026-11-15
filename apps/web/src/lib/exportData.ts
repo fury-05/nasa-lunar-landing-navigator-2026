@@ -1,4 +1,5 @@
 import type { Assess, SeriesRow, Timeline } from "./data";
+import { thresholdsText } from "./verdict";
 import { fmtLat, fmtLon, type SiteInfo } from "./site";
 
 export const LABEL = "Planning tool, not for flight operations.";
@@ -100,7 +101,7 @@ export function scenarioSummary(opts: {
   lines.push(
     `Verdict: ${verdict}${a.robust ? "" : " (fragile: changes inside the uncertainty range)"}`,
   );
-  lines.push(`Criteria: ${a.criteria.source}; ${a.criteria.status}`);
+  lines.push(`Criteria: ${thresholdsText(a.criteria)}`);
   lines.push(`Sunlight: ${range(a.sunlight_hours, h)}`);
   lines.push(`Longest dark spell: ${range(a.longest_dark_hours, h)}`);
   lines.push(`Earth link share (line of sight only): ${range(a.earth_share, p)}`);
