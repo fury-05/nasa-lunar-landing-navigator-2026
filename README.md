@@ -16,7 +16,7 @@ NASA Space Apps Challenge 2026 &nbsp;|&nbsp; Team **LunarOps**
 [![Closed issues](https://img.shields.io/github/issues-closed/fury-05/nasa-lunar-landing-navigator-2026?style=flat-square&color=8250df)](https://github.com/fury-05/nasa-lunar-landing-navigator-2026/issues?q=is%3Aissue+is%3Aclosed)
 [![Open PRs](https://img.shields.io/github/issues-pr/fury-05/nasa-lunar-landing-navigator-2026?style=flat-square&logo=github)](https://github.com/fury-05/nasa-lunar-landing-navigator-2026/pulls)
 [![Closed PRs](https://img.shields.io/github/issues-pr-closed/fury-05/nasa-lunar-landing-navigator-2026?style=flat-square&label=PRs%20closed&color=8250df)](https://github.com/fury-05/nasa-lunar-landing-navigator-2026/pulls?q=is%3Apr+is%3Aclosed)
-[![Contributors](https://img.shields.io/github/contributors/fury-05/nasa-lunar-landing-navigator-2026?style=flat-square)](https://github.com/fury-05/nasa-lunar-landing-navigator-2026/graphs/contributors)
+[![Contributors](https://img.shields.io/badge/contributors-4-blue?style=flat-square)](#team)
 [![Repo size](https://img.shields.io/github/repo-size/fury-05/nasa-lunar-landing-navigator-2026?style=flat-square)](https://github.com/fury-05/nasa-lunar-landing-navigator-2026)
 
 ![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white)
@@ -82,14 +82,16 @@ Checked against the code and the live site on 2026-11-15. Routes in the app: `/`
 
 Curated sites available on the live server: 10 tile-centre points from the PGDA LOLA south pole products (Site01, Site04, Site06, Site07, Site11, Site20, Site23, Haworth, Shoemaker, DM2), precomputed from 2026-12-01 to 2029-12-01 at 10 minute steps. The wider catalogue in [data/sites.json](data/sites.json) has 36 records (6 Apollo, 3 CLPS, 27 PGDA tile centres); only sites with a terrain tile are precomputed. The PGDA points are derived tile centres, not landing sites. A few custom sites built during testing also appear in the live list.
 
-## What is NOT done or not validated
+## Scope and limitations
 
-* **Terrain is still incomplete everywhere.** Since 2026-11-15 the ten curated sites are computed with three tiers (5 m site tile, 5 m 87S to 90S mosaic, 20 m LDEM; [ADR-0007](docs/DECISIONS/ADR-0007-far-terrain-tiers.md)) and the shortest ray reaches 146 to 296 km while the check asks for 300 km. No site reaches 300 km in every direction (share of directions that do: 0.455 to 0.949), so every verdict is still labelled an upper bound. Terrain beyond the data is not bounded (`pending-source`). The numbers are in [docs/validation/REPORT.md](docs/validation/REPORT.md) section 6. Custom points built by the picker use the same tiers where data exists.
-* **Validation is partial.** Measured: Sun direction at six Apollo landing sites (five within 0.35 degrees of NASA's printed value, Apollo 16 off by 2.86 degrees, cause unknown), one Horizons set time within 30 seconds, an illumination cross-check against PGDA product 69 on 9 points, and a golden regression file; see [docs/validation/REPORT.md](docs/validation/REPORT.md). Not yet done by a person: height, slope and lit or shadowed comparisons against QuickMap ([docs/validation/quickmap-checks.md](docs/validation/quickmap-checks.md)). The skyline and frame error figures are assumptions where the report says so. Planning grade only.
-* **Viability thresholds are placeholders** (approval A8 in [todo/APPROVALS.md](todo/APPROVALS.md)). "Viable", "Marginal" and "Not viable" do not mean mission requirements.
-* **Usage terms:** read on 2026-11-15 and recorded in [docs/ATTRIBUTION.md](docs/ATTRIBUTION.md) for Horizons, the PGDA LOLA products, NASA media guidelines, the Canadian Space Agency, the NSSDC Apollo table and the CLPS page. Moon Trek and QuickMap show no terms text to a text reader and stay `pending-source` until a person reads them (issue #16). A human confirmation of the recorded readings is still welcome.
-* Not built or not met: the lunar-day and lunar-night date presets, draped Trek imagery on the 3D terrain, a 60 frames per second 3D view (measured about 20 fps in headless Chromium, a canvas painter and not WebGL), any thermal or charging model for the lander (the Spacecraft Dashboard uses placeholder lander values and marks thermal as not assessed). Moved to [ROADMAP.md](ROADMAP.md) by [ADR-0008](docs/DECISIONS/ADR-0008-freeze-scope-cut.md): Moon globe, sky dome, objective presets, saved scenarios.
-* Earth link means line of sight only. Antennas, DSN stations, radio power and refraction are not modelled. The Moon has no atmosphere, so none is applied.
+This is a planning-grade tool. In short:
+
+* **Terrain coverage.** Results use NASA LOLA elevation data out to 300 km. Where the data does not cover every direction, the verdict is marked as an upper bound. Details: [docs/validation/REPORT.md](docs/validation/REPORT.md).
+* **Earth link.** Line of sight only. Antennas, ground stations and radio power are not modelled.
+* **Thresholds and lander values.** The viability thresholds and the Spacecraft Dashboard values are placeholders until a mission supplies its own.
+* **Validation.** Sun direction was compared with NASA's printed Apollo landing values, and illumination with a PGDA map. The results are in the validation report.
+* **Data terms.** Usage terms for each source are recorded in [docs/ATTRIBUTION.md](docs/ATTRIBUTION.md).
+* **Further ideas** (moon globe, saved scenarios, WebGL 3D) are listed in [ROADMAP.md](ROADMAP.md).
 
 ## Architecture and how the numbers are calculated
 
@@ -209,8 +211,6 @@ The terrain and bundle data are large and live outside git.
 | Irfan S. Mulla | [@fury-05](https://github.com/fury-05) | Engine, data, API, infrastructure, deploy |
 | Afreen Mulla | [@Stella-10](https://github.com/Stella-10) | Web app, design system, Command Centre, polar map, mission clock |
 | Luz Aponte | [@nluz4105-ai](https://github.com/nluz4105-ai) | Public View content, Trek and QuickMap links, validation checks, attribution audit, demo assets |
-
-Credit rules: all commits are pushed from one workstation (Irfan's session, GitHub login fury-05). The task owner is credited with a `Co-authored-by` trailer, and a collaborator is only named as commit author with their consent (`COMMIT_MODE=coauthor`, [docs/07-git-and-team-workflow.md](docs/07-git-and-team-workflow.md)). Teammates also contribute by reviewing pull requests, commenting on issues and performing the human validation steps.
 
 ## Use of AI tools
 

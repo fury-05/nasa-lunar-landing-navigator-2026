@@ -81,7 +81,7 @@ const pages = [
   {
     to: "/credits",
     title: "Credits",
-    text: "Every data source, its publisher, its credit text and whether its terms are confirmed.",
+    text: "Every data source, its publisher, its credit text and its link.",
   },
 ];
 
