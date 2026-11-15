@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { json, readyOut, versionOut } from "./fixtures";
 
 const routes = [
   { path: "/", heading: "Lunar Landing Site Navigator" },
@@ -34,13 +35,14 @@ test("keyboard: skip link is the first tab stop", async ({ page }) => {
 
 test("degraded: a not-ready service shows a banner naming the failed check", async ({ page }) => {
   await page.route("**/api/v1/ready", (r) =>
-    r.fulfill({
-      status: 503,
-      json: {
+    json(
+      r,
+      readyOut({
         status: "not-ready",
         checks: { redis: { ok: false, detail: "no connection" }, data: { ok: true, detail: "ok" } },
-      },
-    }),
+      }),
+      503,
+    ),
   );
   await page.goto("/");
   await expect(page.getByRole("status").filter({ hasText: "reduced state" })).toContainText(
@@ -55,7 +57,7 @@ test("degraded: an unreachable service is stated plainly", async ({ page }) => {
 });
 
 test("screen reader: focus moves to the page after a client-side navigation", async ({ page }) => {
-  await page.route("**/api/v1/ready", (r) => r.fulfill({ json: { status: "ready", checks: {} } }));
+  await page.route("**/api/v1/ready", (r) => json(r, readyOut()));
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await page.getByRole("link", { name: "Credits" }).first().click();
@@ -85,21 +87,26 @@ test("keyboard: every control on the Command Centre can be reached with Tab and 
   expect(bad).toEqual([]);
 });
 
+// `horizons_degraded` is NOT in the generated schema yet (issue #151): the web reads it as an
+// optional extra. It is added to a schema-typed ReadyOut or VersionOut here, in one place, so the
+// speculative part is visible and the rest still breaks the build if the schema changes.
+const withHorizons = <T extends object>(base: T, flag: unknown) => ({
+  ...base,
+  horizons_degraded: flag,
+});
+
 test("degraded: a Horizons flag on /ready shows the Horizons message even when ready", async ({
   page,
 }) => {
   await page.route("**/api/v1/ready", (r) =>
-    r.fulfill({
-      json: {
-        status: "ready",
-        checks: {},
-        horizons_degraded: {
-          since_utc: "2026-11-15T03:00:00Z",
-          reason: "Horizons unreachable",
-          using_cache: true,
-        },
-      },
-    }),
+    json(
+      r,
+      withHorizons(readyOut(), {
+        since_utc: "2026-11-15T03:00:00Z",
+        reason: "Horizons unreachable",
+        using_cache: true,
+      }),
+    ),
   );
   await page.goto("/");
   const banner = page.getByRole("status").filter({ hasText: "Horizons" });
@@ -109,16 +116,14 @@ test("degraded: a Horizons flag on /ready shows the Horizons message even when r
 });
 
 test("degraded: the flag is also read from /version", async ({ page }) => {
-  await page.route("**/api/v1/ready", (r) => r.fulfill({ json: { status: "ready", checks: {} } }));
-  await page.route("**/api/v1/version", (r) =>
-    r.fulfill({ json: { api: "1", engine: "1", horizons_degraded: true } }),
-  );
+  await page.route("**/api/v1/ready", (r) => json(r, readyOut()));
+  await page.route("**/api/v1/version", (r) => json(r, withHorizons(versionOut(), true)));
   await page.goto("/");
   await expect(page.getByText(/Horizons ephemeris service is not responding/)).toBeVisible();
 });
 
 test("degraded: no banner when the service is ready and reports no flag", async ({ page }) => {
-  await page.route("**/api/v1/ready", (r) => r.fulfill({ json: { status: "ready", checks: {} } }));
+  await page.route("**/api/v1/ready", (r) => json(r, readyOut()));
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect(page.getByText(/reduced state/)).toHaveCount(0);

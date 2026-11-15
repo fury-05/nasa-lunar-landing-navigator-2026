@@ -132,6 +132,28 @@ export function resolutionNote(t: TerrainTile): string {
   return `${spacing} ${interp} Small features and the heights shown are not measured at the grid spacing.`;
 }
 
+/**
+ * The 5 m caveat. The PGDA 5 m products are interpolated: ADR-0003 records the PGDA statement that
+ * about 90 percent of their pixels are interpolated. So a 5 m grid spacing must never be read as 5 m
+ * measurements. Returned only when a 5 m tier supplied part of the grid; null otherwise.
+ */
+export function fiveMetreCaveat(t: TerrainTile): string | null {
+  const used = Object.entries(t.tier_share).some(([k, v]) => v > 0 && /5m/i.test(k));
+  if (!used && t.native_resolution_m > 5) return null;
+  return (
+    "Part of this grid comes from a 5 m product. Those products are mostly interpolated (the data " +
+    "provider states about 90 percent of their pixels are, see ADR-0003), so 5 m is the grid " +
+    "spacing, not the spacing of real measurements, and individual crater rim heights and floor " +
+    "depths are not measured at 5 m."
+  );
+}
+
+/** What the plus or minus on the relief covers, and what it leaves out. */
+export const RELIEF_UNCERTAINTY_NOTE =
+  "The plus or minus is the data provider's stated height error for the difference of two heights. " +
+  "It does not include interpolation or smoothing, so the true uncertainty of a single crater " +
+  "height or depth can be larger.";
+
 /** Share of cells without data, as a percentage string. */
 export function missingPct(t: TerrainTile): string {
   return ((1 - t.finite_fraction) * 100).toFixed(0);

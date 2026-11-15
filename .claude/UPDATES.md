@@ -52,3 +52,11 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-15T04:53:05Z | irfan | P7-04 | resilience drills closed after retry fix and degraded flag | docs/todo-evidence-5
 2026-11-15T05:05:29Z | irfan | P7-03 | security hardening closed: Caddy, systemd, CI scan, verified on the VM | docs/todo-evidence-6
 2026-11-15T05:41:24Z | irfan | A1,attribution | usage terms read by Claude for Horizons, PGDA, NASA media, CSA, NSSDC, CLPS; registry and NOTICE updated; Luz and Afreen task file written; A11 NASA SI guideline flagged | docs/terms-reading
+2026-11-15T06:21:42Z | afreen+irfan | P4-02,P4-03,P4-04,P4-07,P5-04,P5-07 | date control, timeline zoom, filters, typed mocks, terrain performance numbers merged and deployed (PR 165) | docs/todo-evidence-7
+2026-11-15T06:52:36Z | afreen+irfan | P7-02 | Lighthouse audit, route splitting, robots.txt deployed (PR 168); live re-check recorded | docs/todo-evidence-8
+2026-11-15T07:07:33Z | irfan | P7-07 | submission draft updated to the delivered features, far terrain numbers and terms readings | docs/refresh-submission
+2026-11-15T07:05:53Z | irfan | P7-06 | README and user guide updated to the far terrain, validation and terms facts | docs/refresh-stale-claims
+2026-11-15T07:40:58Z | irfan | P7-05 | attribution audit written; no uncredited source found; two terms pending a person | docs/attribution-audit
+2026-11-15T07:45:12Z | irfan | P7-06 | SI_USAGE brought up to date with 77 commits, helper agents and what was not verified | docs/final-docs-check
+2026-11-15T07:50:14Z | irfan | P7-05,P7-06 | attribution audit and final docs recorded | docs/todo-evidence-9
+2026-11-15T08:02:51Z | irfan | P7-08 | release notes drafted for v1.0.0 (tag waits for the freeze checks) | docs/release-notes

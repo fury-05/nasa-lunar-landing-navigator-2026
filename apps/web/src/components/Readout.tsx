@@ -13,9 +13,9 @@ export function Readout({ data, t }: { data: TimelineData; t: number }) {
   const outage = longestSpan(data.earth_outages, t0, t1);
   return (
     <section aria-labelledby="readout-h" className="flex flex-col gap-3">
-      <h3 id="readout-h" className="m-0 text-base">
+      <h2 id="readout-h" className="m-0 text-base">
         What happens next (times in UTC)
-      </h3>
+      </h2>
       <div className="flex flex-col items-start gap-2">
         <Chip tone={sun.holdsNow ? "warn" : "neutral"} role="status">
           {sun.holdsNow ? "☀" : "●"} {countdownText(sun, t, "Sun")}

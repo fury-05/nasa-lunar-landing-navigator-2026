@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { canvasSize, median, shouldDraw, timeIt } from "../lib/renderBudget";
+import { useVisible } from "../lib/useVisible";
 import {
+  RELIEF_UNCERTAINTY_NOTE,
+  fiveMetreCaveat,
   illumination,
   missingPct,
   relief,
@@ -26,14 +30,16 @@ export function lowPowerHint(): boolean {
 
 const NO_DATA = "rgb(70 74 84)";
 
+/** 256 precomputed colours, so a quad costs an array lookup instead of building a string. */
+const PALETTE: string[] = Array.from({ length: 256 }, (_, i) => {
+  const k = i / 255;
+  // Dark side keeps a faint blue so shadow is still readable; lit side warms toward amber.
+  return `rgb(${Math.round(18 + 230 * k)} ${Math.round(24 + 190 * k)} ${Math.round(40 + 90 * k)})`;
+});
+
 function shade(v: number): string {
   if (Number.isNaN(v)) return NO_DATA; // no height here: drawn as grey, never as shadow
-  // Dark side keeps a faint blue so shadow is still readable; lit side warms toward amber.
-  const k = Math.min(1, Math.max(0, v));
-  const r = Math.round(18 + 230 * k);
-  const g = Math.round(24 + 190 * k);
-  const b = Math.round(40 + 90 * k);
-  return `rgb(${r} ${g} ${b})`;
+  return PALETTE[Math.round(Math.min(1, Math.max(0, v)) * 255)]!;
 }
 
 function drawMap(
@@ -55,7 +61,12 @@ function drawMap(
   }
 }
 
-/** Oblique view: rotate the grid by yaw, tilt it, and paint far quads first. */
+/**
+ * Oblique view: rotate the grid by yaw, tilt it, and paint far quads first.
+ * Vertex positions are computed once per grid point (not four times per quad), quads are painted
+ * with one fill each, and a hairline of the same colour hides seams. `step` skips grid lines on low
+ * power devices (2 means every second row and column, a quarter of the quads).
+ */
 function drawOblique(
   ctx: CanvasRenderingContext2D,
   w: number,
@@ -64,6 +75,7 @@ function drawOblique(
   il: Float32Array,
   yawDeg: number,
   exaggeration: number,
+  step = 1,
 ) {
   ctx.clearRect(0, 0, w, h);
   const yaw = (yawDeg * Math.PI) / 180;
@@ -72,49 +84,57 @@ function drawOblique(
   const tilt = 0.55; // sin of the camera pitch: how much depth shows as vertical offset
   const span = Math.max(t.rows, t.cols) * t.spacing_m;
   const scale = (Math.min(w, h) * 0.95) / (span * 1.1);
-  const px = (r: number, c: number) => {
-    const x = (c - (t.cols - 1) / 2) * t.spacing_m;
-    const y = ((t.rows - 1) / 2 - r) * t.spacing_m; // north is up
-    const xr = x * cy - y * sy;
-    const yr = x * sy + y * cy;
-    const z = (t.heights_m[r * t.cols + c] ?? 0) * exaggeration;
-    return {
-      x: w / 2 + xr * scale,
-      y: h * 0.62 - (yr * tilt + z * (1 - tilt * 0.4)) * scale,
-      depth: yr,
-    };
-  };
-  const quads: { d: number; r: number; c: number }[] = [];
-  const has = (r: number, c: number) => t.heights_m[r * t.cols + c] !== null;
-  for (let r = 0; r < t.rows - 1; r++) {
-    for (let c = 0; c < t.cols - 1; c++) {
-      // A quad with a missing corner is left out: a hole is honest, a made-up height is not.
-      if (!has(r, c) || !has(r, c + 1) || !has(r + 1, c) || !has(r + 1, c + 1)) continue;
-      const a = px(r, c);
-      const b = px(r + 1, c + 1);
-      quads.push({ d: (a.depth + b.depth) / 2, r, c });
+  const n = t.rows * t.cols;
+  const X = new Float32Array(n);
+  const Y = new Float32Array(n);
+  const D = new Float32Array(n);
+  for (let r = 0; r < t.rows; r++) {
+    for (let c = 0; c < t.cols; c++) {
+      const i = r * t.cols + c;
+      const x = (c - (t.cols - 1) / 2) * t.spacing_m;
+      const y = ((t.rows - 1) / 2 - r) * t.spacing_m; // north is up
+      const xr = x * cy - y * sy;
+      const yr = x * sy + y * cy;
+      const z = (t.heights_m[i] ?? 0) * exaggeration;
+      X[i] = w / 2 + xr * scale;
+      Y[i] = h * 0.62 - (yr * tilt + z * (1 - tilt * 0.4)) * scale;
+      D[i] = yr;
     }
   }
-  quads.sort((p, q) => q.d - p.d); // far (large depth) first
-  for (const q of quads) {
-    const p00 = px(q.r, q.c);
-    const p01 = px(q.r, q.c + 1);
-    const p11 = px(q.r + 1, q.c + 1);
-    const p10 = px(q.r + 1, q.c);
-    const v =
-      (il[q.r * t.cols + q.c]! +
-        il[q.r * t.cols + q.c + 1]! +
-        il[(q.r + 1) * t.cols + q.c + 1]! +
-        il[(q.r + 1) * t.cols + q.c]!) /
-      4;
-    ctx.fillStyle = shade(v);
-    ctx.strokeStyle = ctx.fillStyle;
-    ctx.lineWidth = 0.6;
+  const idx: number[] = [];
+  for (let r = 0; r + step < t.rows; r += step) {
+    for (let c = 0; c + step < t.cols; c += step) {
+      const a = r * t.cols + c;
+      const b = a + step;
+      const d = a + step * t.cols;
+      const e = d + step;
+      // A quad with a missing corner is left out: a hole is honest, a made-up height is not.
+      if (
+        t.heights_m[a] === null ||
+        t.heights_m[b] === null ||
+        t.heights_m[d] === null ||
+        t.heights_m[e] === null
+      )
+        continue;
+      idx.push(a);
+    }
+  }
+  const depth = (a: number) => (D[a]! + D[a + step * t.cols + step]!) / 2;
+  idx.sort((p, q) => depth(q) - depth(p)); // far (large depth) first
+  ctx.lineWidth = 0.5;
+  for (const a of idx) {
+    const b = a + step;
+    const d = a + step * t.cols;
+    const e = d + step;
+    const v = (il[a]! + il[b]! + il[e]! + il[d]!) / 4;
+    const colour = shade(v);
+    ctx.fillStyle = colour;
+    ctx.strokeStyle = colour;
     ctx.beginPath();
-    ctx.moveTo(p00.x, p00.y);
-    ctx.lineTo(p01.x, p01.y);
-    ctx.lineTo(p11.x, p11.y);
-    ctx.lineTo(p10.x, p10.y);
+    ctx.moveTo(X[a]!, Y[a]!);
+    ctx.lineTo(X[b]!, Y[b]!);
+    ctx.lineTo(X[e]!, Y[e]!);
+    ctx.lineTo(X[d]!, Y[d]!);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
@@ -143,15 +163,48 @@ export function TerrainView({ tile, sun }: { tile: TerrainTile; sun: SunDir | nu
   );
   const rel = useMemo(() => (ok ? relief(tile) : null), [ok, tile]);
 
+  // Drawing buffer: capped, and halved on low power devices. Follows the container up to the cap.
+  const [lowPower] = useState(() => lowPowerHint());
+  const [size, setSize] = useState<{ w: number; h: number }>(() => canvasSize(640, 1, lowPower));
+  const [wrapRef, visible] = useVisible<HTMLDivElement>();
+  const [frameMs, setFrameMs] = useState<number | null>(null);
+  const timings = useRef<number[]>([]);
+  const draws = useRef(0);
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const fit = () => {
+      const next = canvasSize(el.clientWidth || 640, window.devicePixelRatio || 1, lowPower);
+      setSize((cur) => (cur.w === next.w && cur.h === next.h ? cur : next));
+    };
+    fit();
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [lowPower, wrapRef]);
+
+  // Draw at most once per animation frame, and only while the view can be seen. A change that
+  // arrives while hidden is kept in the effect's inputs and drawn when the view is visible again.
   useEffect(() => {
     const el = canvas.current;
-    const ctx = el?.getContext("2d");
-    if (!el || !ctx || !ok) return;
-    const w = el.width;
-    const h = el.height;
-    if (mode === "map") drawMap(ctx, w, h, tile, il);
-    else drawOblique(ctx, w, h, tile, il, yaw, exag);
-  }, [mode, tile, il, yaw, exag, ok]);
+    if (!el || !ok || !shouldDraw(visible, true)) return;
+    const id = requestAnimationFrame(() => {
+      const ctx = el.getContext("2d");
+      if (!ctx) return;
+      const ms = timeIt(() => {
+        if (mode === "map") drawMap(ctx, size.w, size.h, tile, il);
+        else drawOblique(ctx, size.w, size.h, tile, il, yaw, exag, lowPower ? 2 : 1);
+      });
+      draws.current += 1;
+      el.dataset.draws = String(draws.current);
+      timings.current = [...timings.current.slice(-19), ms];
+      el.dataset.frameMs = ms.toFixed(2);
+      setFrameMs(median(timings.current));
+    });
+    return () => cancelAnimationFrame(id);
+  }, [mode, tile, il, yaw, exag, ok, size, visible, lowPower]);
 
   if (!ok) {
     return (
@@ -196,14 +249,21 @@ export function TerrainView({ tile, sun }: { tile: TerrainTile; sun: SunDir | nu
           3D view
         </button>
       </div>
-      <canvas
-        ref={canvas}
-        width={640}
-        height={400}
-        role="img"
-        aria-label={summary}
-        className="h-auto w-full max-w-[640px] rounded-cell border border-white/15 bg-void"
-      />
+      <div ref={wrapRef} className="w-full max-w-[640px]">
+        <canvas
+          ref={canvas}
+          width={size.w}
+          height={size.h}
+          role="img"
+          aria-label={summary}
+          className="h-auto w-full rounded-cell border border-white/15 bg-void"
+        />
+      </div>
+      <p className="m-0 text-xs text-muted">
+        Drawing {size.w} by {size.h} pixels{lowPower ? " (reduced for a low power device)" : ""}
+        {frameMs !== null && `; median draw time ${frameMs.toFixed(1)} ms`}
+        {!visible && "; paused while off screen"}.
+      </p>
       {mode === "oblique" && (
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="flex flex-col gap-1 text-sm text-muted">
@@ -234,15 +294,15 @@ export function TerrainView({ tile, sun }: { tile: TerrainTile; sun: SunDir | nu
       )}
       <dl className="m-0 grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
         <div>
-          <dt className="text-xs text-muted">Lowest point in tile</dt>
+          <dt className="text-xs text-muted">Lowest DEM value in tile</dt>
           <dd className="m-0 font-mono">{rel!.minM.toFixed(0)} m</dd>
         </div>
         <div>
-          <dt className="text-xs text-muted">Highest point in tile</dt>
+          <dt className="text-xs text-muted">Highest DEM value in tile</dt>
           <dd className="m-0 font-mono">{rel!.maxM.toFixed(0)} m</dd>
         </div>
         <div>
-          <dt className="text-xs text-muted">Relief (high minus low)</dt>
+          <dt className="text-xs text-muted">Relief ± uncertainty (high minus low)</dt>
           <dd className="m-0 font-mono">
             {rel!.reliefM.toFixed(0)} m{rel!.errorM !== null && ` ± ${rel!.errorM.toFixed(1)} m`}
           </dd>
@@ -256,6 +316,8 @@ export function TerrainView({ tile, sun }: { tile: TerrainTile; sun: SunDir | nu
       </dl>
       <ul className="m-0 list-disc pl-5 text-xs text-muted">
         <li>Height error: {tile.height_error_basis}.</li>
+        <li>{RELIEF_UNCERTAINTY_NOTE}</li>
+        {fiveMetreCaveat(tile) && <li>{fiveMetreCaveat(tile)}</li>}
         <li>Interpolation: {tile.interpolated_basis}.</li>
         <li>
           Coverage: {missingPct(tile)}% of cells have no height data (grey). Elevation tiers used:{" "}
