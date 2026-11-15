@@ -106,6 +106,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/lander/assess": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Lander Assess */
+        post: operations["post_lander_assess_api_v1_lander_assess_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/links/quickmap": {
         parameters: {
             query?: never;
@@ -390,6 +407,35 @@ export interface components {
             /** Nominal */
             nominal: number;
         };
+        /** CheckOut */
+        CheckOut: {
+            /** Available */
+            available: number | null;
+            /**
+             * Id
+             * @enum {string}
+             */
+            id: "power" | "communication" | "terrain_slope" | "thermal" | "mission_needs";
+            /** Margin Nominal */
+            margin_nominal: number | null;
+            /** Margin Pessimistic */
+            margin_pessimistic: number | null;
+            /** Reasoning */
+            reasoning: string;
+            /** Required Nominal */
+            required_nominal: number | null;
+            /** Required Pessimistic */
+            required_pessimistic: number | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pass" | "marginal" | "fail" | "not_assessed";
+            /** Title */
+            title: string;
+            /** Unit */
+            unit: string | null;
+        };
         /** CheckResult */
         CheckResult: {
             /** Detail */
@@ -621,6 +667,155 @@ export interface components {
             /** Updated At Utc */
             updated_at_utc: string;
         };
+        /** LanderAssessIn */
+        LanderAssessIn: {
+            /** End */
+            end: string;
+            lander: components["schemas"]["LanderIn"];
+            mission_needs?: components["schemas"]["MissionNeedsIn"] | null;
+            /** Site Id */
+            site_id: string;
+            /** Start */
+            start: string;
+        };
+        /** LanderAssessOut */
+        LanderAssessOut: {
+            /** Assumptions */
+            assumptions: string[];
+            /** Band Basis */
+            band_basis: string[];
+            /** Checks */
+            checks: components["schemas"]["CheckOut"][];
+            /** Conclusive */
+            conclusive: boolean;
+            /** End Utc */
+            end_utc: string;
+            /** Label */
+            label: string;
+            lander: components["schemas"]["LanderEcho"];
+            longest_dark_hours: components["schemas"]["Band"];
+            longest_outage_hours: components["schemas"]["Band"];
+            mission_needs: components["schemas"]["CriteriaOut"];
+            provenance: components["schemas"]["Provenance"];
+            /** Site Id */
+            site_id: string;
+            slope: components["schemas"]["SlopeOut"] | null;
+            /** Start Utc */
+            start_utc: string;
+            /** Summary */
+            summary: string;
+            terrain: components["schemas"]["TerrainOut"];
+            /**
+             * Verdict
+             * @enum {string}
+             */
+            verdict: "pass" | "marginal" | "fail" | "upper_bound_terrain_incomplete";
+            /** Warnings */
+            warnings: string[];
+        };
+        /** LanderEcho */
+        LanderEcho: {
+            /**
+             * Array Power W
+             * @description Echoed only, no charging model.
+             */
+            array_power_w?: number | null;
+            /**
+             * Autonomy Without Earth H
+             * @description Longest run without Earth contact, h.
+             */
+            autonomy_without_earth_h: number;
+            /**
+             * Battery Capacity Wh
+             * @description Battery energy, Wh.
+             */
+            battery_capacity_wh: number;
+            /** Dark Survival Hours */
+            dark_survival_hours: number | null;
+            /**
+             * Max Survival Temp C
+             * @description Echoed only, no thermal model.
+             */
+            max_survival_temp_c?: number | null;
+            /**
+             * Min Survival Temp C
+             * @description Echoed only, no thermal model.
+             */
+            min_survival_temp_c?: number | null;
+            /**
+             * Reserve Fraction
+             * @description Unused share of the capacity.
+             */
+            reserve_fraction: number;
+            /**
+             * Slope Limit Deg
+             * @description Enables the slope check.
+             */
+            slope_limit_deg?: number | null;
+            /**
+             * Source
+             * @description Where these numbers come from, or a placeholder label.
+             */
+            source: string;
+            /**
+             * Survival Load W
+             * @description Constant night load, W.
+             */
+            survival_load_w: number;
+            /** Usable Energy Wh */
+            usable_energy_wh: number;
+        };
+        /**
+         * LanderIn
+         * @description Lander profile. Units and ranges mirror `lunar_engine.lander.LANDER_FIELDS`.
+         */
+        LanderIn: {
+            /**
+             * Array Power W
+             * @description Echoed only, no charging model.
+             */
+            array_power_w?: number | null;
+            /**
+             * Autonomy Without Earth H
+             * @description Longest run without Earth contact, h.
+             */
+            autonomy_without_earth_h: number;
+            /**
+             * Battery Capacity Wh
+             * @description Battery energy, Wh.
+             */
+            battery_capacity_wh: number;
+            /**
+             * Max Survival Temp C
+             * @description Echoed only, no thermal model.
+             */
+            max_survival_temp_c?: number | null;
+            /**
+             * Min Survival Temp C
+             * @description Echoed only, no thermal model.
+             */
+            min_survival_temp_c?: number | null;
+            /**
+             * Reserve Fraction
+             * @description Unused share of the capacity.
+             */
+            reserve_fraction: number;
+            /**
+             * Slope Limit Deg
+             * @description Enables the slope check.
+             */
+            slope_limit_deg?: number | null;
+            /**
+             * Source
+             * @description Where these numbers come from, or a placeholder label.
+             */
+            source: string;
+            /**
+             * Survival Load W
+             * @description Constant night load, W.
+             */
+            survival_load_w: number;
+        };
         /** Metrics */
         Metrics: {
             /** Assumptions */
@@ -663,6 +858,20 @@ export interface components {
              * @enum {string}
              */
             verdict_state: "viable" | "marginal" | "not_viable" | "upper_bound_terrain_incomplete";
+        };
+        /**
+         * MissionNeedsIn
+         * @description Same names and meaning as the optional query parameters of GET /sites/{id}/assess.
+         */
+        MissionNeedsIn: {
+            /** Max Dark Hours */
+            max_dark_hours?: number | null;
+            /** Max Outage Hours */
+            max_outage_hours?: number | null;
+            /** Min Earth Fraction */
+            min_earth_fraction?: number | null;
+            /** Min Sun Fraction */
+            min_sun_fraction?: number | null;
         };
         /** Pairwise */
         Pairwise: {
@@ -913,6 +1122,27 @@ export interface components {
             provenance: components["schemas"]["Provenance"];
             /** Sites */
             sites: string[];
+        };
+        /** SlopeOut */
+        SlopeOut: {
+            /** Baseline M */
+            baseline_m: number;
+            /** Height Error M */
+            height_error_m: number | null;
+            /** Max Slope Deg */
+            max_slope_deg: number;
+            /** Mean Slope Deg */
+            mean_slope_deg: number;
+            /** Native Resolution M */
+            native_resolution_m: number;
+            /** Patch M */
+            patch_m: number;
+            /** Pessimistic Deg */
+            pessimistic_deg: number;
+            /** Slope Error Deg */
+            slope_error_deg: number | null;
+            /** Valid Fraction */
+            valid_fraction: number;
         };
         /** Source */
         Source: {
@@ -1312,6 +1542,48 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    post_lander_assess_api_v1_lander_assess_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LanderAssessIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LanderAssessOut"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Invalid input */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
                 };
             };
         };

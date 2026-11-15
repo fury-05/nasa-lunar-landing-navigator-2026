@@ -59,3 +59,9 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* The page container takes focus after navigation so screen readers announce the new page.
+   It is not a control, so it gets no ring. */
+main:focus {
+  outline: none;
+}

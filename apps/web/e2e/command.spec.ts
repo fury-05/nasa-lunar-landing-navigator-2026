@@ -351,3 +351,49 @@ test("export: CSV, PNG, summary text and permalink copy", async ({ page, context
     "/command?site=alpha",
   );
 });
+
+test("mission clock: the time in the link is restored and shown in every view", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.goto("/command?site=alpha&t=2026-12-13T00:00:00Z");
+  await expect(page.getByText("2026-12-13 00:00 UTC").first()).toBeVisible();
+  await expect(page.getByLabel("Time shown in the sky views (UTC)")).toHaveValue("2");
+  // The sky view text alternative and the horizon strip describe the same moment.
+  await expect(page.getByRole("img", { name: /Sky from the site/ })).toBeVisible();
+});
+
+test("mission clock: scrubbing writes the time to the link; play advances and pause keeps it", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.goto("/command?site=alpha");
+  const slider = page.getByLabel("Time shown in the sky views (UTC)");
+  await slider.focus();
+  await page.keyboard.press("Home");
+  await expect(page).toHaveURL(/t=2026-12-11T00%3A00%3A00Z/);
+  await page.getByLabel("Speed").selectOption("72");
+  await expect(page).toHaveURL(/sp=72/);
+  await page.getByRole("button", { name: "Play" }).click();
+  await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
+  await expect(slider).not.toHaveValue("0");
+  await page.getByRole("button", { name: "Pause" }).click();
+  await expect(page.getByRole("button", { name: "Play" })).toBeVisible();
+  const after = await slider.inputValue();
+  await page.waitForTimeout(700);
+  expect(await slider.inputValue()).toBe(after);
+  await expect(page).not.toHaveURL(/t=2026-12-11T00%3A00%3A00Z/);
+});
+
+test("mission clock: reduced motion turns playback off and says why", async ({ browser }) => {
+  const ctx = await browser.newContext({ reducedMotion: "reduce" });
+  const page = await ctx.newPage();
+  await mock(page);
+  await page.goto("http://127.0.0.1:4173/command?site=alpha");
+  await expect(page.getByRole("button", { name: "Play" })).toBeDisabled();
+  await expect(page.getByText(/reduced motion/)).toBeVisible();
+  await page.getByLabel("Time shown in the sky views (UTC)").focus();
+  await page.keyboard.press("End");
+  await expect(page).toHaveURL(/t=2026-12-13/);
+  await ctx.close();
+});

@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { SPEEDS, type Clock } from "../lib/clock";
 import { fmtUtc } from "../lib/events";
 
 /** Time scrubber over the timeline samples. Arrow keys step one sample, Page keys step a day. */
@@ -6,10 +7,12 @@ export function Scrubber({
   times,
   index,
   onChange,
+  clock,
 }: {
   times: number[];
   index: number;
   onChange: (i: number) => void;
+  clock?: Clock;
 }) {
   const id = useId();
   const last = times.length - 1;
@@ -60,6 +63,38 @@ export function Scrubber({
           +
         </button>
       </div>
+      {clock && (
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={clock.playing ? clock.pause : clock.play}
+            disabled={clock.reduced || times.length < 2}
+            aria-pressed={clock.playing}
+            className="min-h-11 min-w-24 rounded-cell border border-earth/60 px-4 text-sm text-earth hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {clock.playing ? "Pause" : "Play"}
+          </button>
+          <label className="flex items-center gap-2 text-sm text-muted">
+            Speed
+            <select
+              value={clock.speed.id}
+              onChange={(e) => clock.setSpeed(e.target.value)}
+              className="min-h-11 rounded-cell border border-white/20 bg-void px-2 text-ink"
+            >
+              {SPEEDS.map((sp) => (
+                <option key={sp.id} value={sp.id}>
+                  {sp.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          {clock.reduced && (
+            <span className="text-xs text-muted">
+              Playback is off because your system asks for reduced motion. Use the slider.
+            </span>
+          )}
+        </div>
+      )}
       <output htmlFor={id} className="font-mono text-sm text-ink">
         {fmtUtc(t)}
       </output>
