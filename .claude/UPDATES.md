@@ -52,3 +52,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-15T04:53:05Z | irfan | P7-04 | resilience drills closed after retry fix and degraded flag | docs/todo-evidence-5
 2026-11-15T05:05:29Z | irfan | P7-03 | security hardening closed: Caddy, systemd, CI scan, verified on the VM | docs/todo-evidence-6
 2026-11-15T05:41:24Z | irfan | A1,attribution | usage terms read by Claude for Horizons, PGDA, NASA media, CSA, NSSDC, CLPS; registry and NOTICE updated; Luz and Afreen task file written; A11 NASA SI guideline flagged | docs/terms-reading
+2026-11-15T06:21:42Z | afreen+irfan | P4-02,P4-03,P4-04,P4-07,P5-04,P5-07 | date control, timeline zoom, filters, typed mocks, terrain performance numbers merged and deployed (PR 165) | docs/todo-evidence-7
