@@ -1,152 +1,32 @@
 import { expect, test, type Page } from "@playwright/test";
 
-const SITES = {
-  count: 2,
-  notice: "Planning tool, not for flight operations.",
-  sites: [
-    {
-      id: "alpha",
-      lat_deg: -89.5,
-      lon_east_deg: 40,
-      coordinate_status: "derived-tile-centre",
-      window: {},
-      built_at_utc: "2026-11-14T00:00:00Z",
-      terrain_coverage: { covered_fraction: 1, min_reach_m: 8000, max_reach_m: 8000 },
-    },
-    {
-      id: "beta",
-      lat_deg: -89.4,
-      lon_east_deg: 41,
-      coordinate_status: "derived-tile-centre",
-      window: {},
-      built_at_utc: "2026-11-14T00:00:00Z",
-      terrain_coverage: { covered_fraction: 1, min_reach_m: 8000, max_reach_m: 8000 },
-    },
-  ],
-};
-const band = (n: number) => ({ low: n * 0.9, nominal: n, high: n * 1.1 });
-const PROV = {
-  sources: [],
-  engine_version: "0",
-  frame_note: "",
-  assumptions: [],
-  warnings: ["Test warning: terrain ends early."],
-  uncertainty: {},
-  reproduce: {},
-};
-const ASSESS = {
-  site_id: "alpha",
-  start_utc: "2026-12-11T00:00:00Z",
-  end_utc: "2026-12-19T00:00:00Z",
-  verdict: "marginal",
-  verdict_by_run: { pessimistic: "not viable", nominal: "marginal", optimistic: "viable" },
-  robust: false,
-  delta_deg: 0.2,
-  criteria_status: "pending-source: placeholder",
-  verdict_state: "marginal",
-  verdict_conclusive: true,
-  criteria: {
-    min_sun_fraction: 0.5,
-    max_dark_hours: 100,
-    min_earth_fraction: 0.5,
-    max_outage_hours: 1e9,
-    source: "default-placeholder",
-    status: "pending-source: placeholder",
-  },
-  terrain: {
-    available: true,
-    complete: true,
-    covered_fraction: 1,
-    reach_km_min: 8,
-    reach_km_median: 8,
-    reach_km_max: 8,
-    required_km: 8,
-  },
-  band_basis: ["Horizon shifted by 0.2 degrees (test basis)."],
-  sunlight_hours: band(100),
-  sun_share: band(0.5),
-  earth_share: band(0.4),
-  longest_dark_hours: band(30),
-  longest_outage_hours: band(40),
-  elevation_deg: { min: 0.5, mean: 1, max: 1.5 },
-  power_index_w_m2: { horizontal: 1, tracking: 1 },
-  assumptions: [],
-  provenance: PROV,
-};
-const az = Array.from({ length: 36 }, (_, i) => i * 10);
-const SKY = {
-  site_id: "alpha",
-  eye_height_m: 1,
-  azimuth_step_deg: 10,
-  azimuth_deg: az,
-  elevation_deg: az.map(() => 3),
-  reach_m: az.map(() => 8000),
-  requested_range_m: 8000,
-  covered_fraction: 1,
-  coverage_note: "",
-  provenance: PROV,
-};
-const TL = {
-  site_id: "alpha",
-  start_utc: "2026-12-11T00:00:00Z",
-  end_utc: "2026-12-19T00:00:00Z",
-  step_min: 60,
-  count: 3,
-  series: [0, 1, 2].map((i) => ({
-    t: `2026-12-1${i + 1}T00:00:00Z`,
-    sun: { az_deg: 90, el_deg: 1.5, visible_fraction: 1 },
-    earth: { az_deg: 180, el_deg: -2, margin_deg: -5 },
-  })),
-  sun_intervals: [
-    {
-      start: "2026-12-11T00:00:00Z",
-      end: "2026-12-15T00:00:00Z",
-      open_start: true,
-      open_end: false,
-    },
-  ],
-  dark_intervals: [],
-  earth_windows: [],
-  earth_outages: [
-    {
-      start: "2026-12-11T00:00:00Z",
-      end: "2026-12-19T00:00:00Z",
-      open_start: true,
-      open_end: true,
-    },
-  ],
-  metrics: ASSESS,
-  provenance: PROV,
-};
+import {
+  assessOut,
+  json,
+  mockApi,
+  problem,
+  quickmapOut,
+  siteList,
+  siteSummary,
+  span,
+  terrainTile,
+  timelineOut,
+  upperBound,
+} from "./fixtures";
 
+const SITES = siteList([siteSummary("alpha"), siteSummary("beta")]);
+const ASSESS = assessOut();
+
+/** The default Command Centre mock: two sites, no terrain tile (404), the marginal assessment. */
 async function mock(page: Page) {
-  await page.route("**/api/v1/sites", (r) => r.fulfill({ json: SITES }));
-  await page.route("**/api/v1/sites/*/skyline*", (r) => r.fulfill({ json: SKY }));
-  await page.route("**/api/v1/sites/*/assess*", (r) => r.fulfill({ json: ASSESS }));
-  await page.route("**/api/v1/sites/*/timeline*", (r) => r.fulfill({ json: TL }));
-  await page.route("**/api/v1/sites/*/terrain", (r) =>
-    r.fulfill({
-      status: 404,
-      contentType: "application/problem+json",
-      json: {
-        type: "x",
-        title: "Terrain unavailable",
-        status: 404,
-        detail: "No elevation data covers site 'alpha'. No terrain is invented.",
-        instance: "/",
-        request_id: "r",
-        errors: [],
-      },
-    }),
-  );
+  await mockApi(page, { sites: SITES });
   await page.route("**/api/v1/links/quickmap*", (r) =>
-    r.fulfill({
-      json: {
-        site_id: "alpha",
+    json(
+      r,
+      quickmapOut({
         url: "https://quickmap.lroc.im-ldi.com/?proj=27&time=2026-12-13T00%3A00%3A00Z",
-        note: "x",
-      },
-    }),
+      }),
+    ),
   );
 }
 
@@ -175,19 +55,11 @@ test("choices live in the URL so a view can be shared", async ({ page }) => {
 test("an API error is shown as a readable message, not a blank page", async ({ page }) => {
   await mock(page);
   await page.route("**/api/v1/sites/*/assess*", (r) =>
-    r.fulfill({
-      status: 422,
-      contentType: "application/problem+json",
-      json: {
-        type: "x",
-        title: "Outside precomputed coverage",
-        status: 422,
-        detail: "This site is precomputed from 2026 to 2029.",
-        instance: "/",
-        request_id: "r",
-        errors: [],
-      },
-    }),
+    json(
+      r,
+      problem(422, "Outside precomputed coverage", "This site is precomputed from 2026 to 2029."),
+      422,
+    ),
   );
   await page.goto("/command");
   await expect(page.getByRole("alert")).toContainText("Outside precomputed coverage");
@@ -223,28 +95,9 @@ test("a viable verdict with incomplete terrain is shown as an amber upper bound"
   page,
 }) => {
   await mock(page);
-  await page.route("**/api/v1/sites/*/assess*", (r) =>
-    r.fulfill({
-      json: {
-        ...ASSESS,
-        verdict: "viable",
-        robust: true,
-        verdict_state: "upper_bound_terrain_incomplete",
-        verdict_conclusive: false,
-        terrain: { ...ASSESS.terrain, complete: false, covered_fraction: 0.5, reach_km_min: 2 },
-      },
-    }),
-  );
+  await page.route("**/api/v1/sites/*/assess*", (r) => json(r, upperBound()));
   await page.route("**/api/v1/sites", (r) =>
-    r.fulfill({
-      json: {
-        ...SITES,
-        sites: SITES.sites.map((s) => ({
-          ...s,
-          terrain_coverage: { covered_fraction: 0.5, min_reach_m: 2000, max_reach_m: 8000 },
-        })),
-      },
-    }),
+    json(r, siteList([siteSummary("alpha", {}, 0.5), siteSummary("beta", {}, 0.5)])),
   );
   await page.goto("/command");
   await expect(page.getByText("Upper bound, terrain incomplete")).toBeVisible();
@@ -256,7 +109,7 @@ test("mission needs are applied to the request and saved in the link", async ({ 
   const seen: string[] = [];
   await page.route("**/api/v1/sites/*/assess*", (r) => {
     seen.push(r.request().url());
-    return r.fulfill({ json: ASSESS });
+    return json(r, ASSESS);
   });
   await page.goto("/command");
   await expect(page.getByText("placeholder defaults")).toBeVisible();
@@ -295,27 +148,20 @@ test("terrain view: a real tile shows null cells, tier mix, null figures and the
 }) => {
   await mock(page);
   const n = 9;
-  await page.route("**/api/v1/sites/*/terrain", (r) =>
-    r.fulfill({
-      json: {
-        site_id: "alpha",
-        rows: n,
-        cols: n,
-        spacing_m: 20,
-        window_m: 180,
-        native_resolution_m: 20,
-        interpolated_fraction: null,
-        interpolated_basis: "BASIS-INTERP: no EFFRES product covers this tier",
-        height_error_m: null,
-        height_error_basis: "BASIS-ERR: no ERR product covers this site",
-        finite_fraction: 0.9,
-        heights_m: Array.from({ length: n * n }, (_, i) => (i % 10 === 0 ? null : (i % n) * 5)),
-        tier_share: { "ldem-20m": 0.75, "site-tile-5m": 0.25 },
-        source: "test tile",
-        centre: { lat_deg: -89.5, lon_east_deg: 40 },
-        provenance: {},
-      },
-    }),
+  await page.route("**/api/v1/sites/*/terrain*", (r) =>
+    json(
+      r,
+      terrainTile(
+        {
+          interpolated_basis: "BASIS-INTERP: no EFFRES product covers this tier",
+          height_error_basis: "BASIS-ERR: no ERR product covers this site",
+          finite_fraction: 0.9,
+          heights_m: Array.from({ length: n * n }, (_, i) => (i % 10 === 0 ? null : (i % n) * 5)),
+          tier_share: { "ldem-20m": 0.75, "site-tile-5m": 0.25 },
+        },
+        n,
+      ),
+    ),
   );
   await page.goto("/command?site=alpha");
   await expect(page.getByText(/BASIS-INTERP/).first()).toBeVisible();
@@ -331,20 +177,8 @@ test("terrain view: a real tile shows null cells, tier mix, null figures and the
 
 test("terrain view: an API failure other than 404 is shown as an error", async ({ page }) => {
   await mock(page);
-  await page.route("**/api/v1/sites/*/terrain", (r) =>
-    r.fulfill({
-      status: 500,
-      contentType: "application/problem+json",
-      json: {
-        type: "x",
-        title: "Server error",
-        status: 500,
-        detail: "Try again later.",
-        instance: "/",
-        request_id: "r",
-        errors: [],
-      },
-    }),
+  await page.route("**/api/v1/sites/*/terrain*", (r) =>
+    json(r, problem(500, "Server error", "Try again later."), 500),
   );
   await page.goto("/command?site=alpha");
   await expect(page.getByRole("alert").filter({ hasText: "Server error" })).toBeVisible();
@@ -497,37 +331,19 @@ test("date control: reachable and operable with the keyboard alone", async ({ pa
   await expect(page).toHaveURL(/start=2026-12-13/);
 });
 
-const EVENT_TL = {
-  ...TL,
+const EVENT_TL = timelineOut({
   sun_intervals: [
-    {
-      start: "2026-12-11T00:00:00Z",
-      end: "2026-12-14T06:00:00Z",
-      open_start: true,
-      open_end: false,
-    },
-    {
-      start: "2026-12-16T09:30:00Z",
-      end: "2026-12-19T00:00:00Z",
-      open_start: false,
-      open_end: true,
-    },
+    span("2026-12-11T00:00:00Z", "2026-12-14T06:00:00Z", true, false),
+    span("2026-12-16T09:30:00Z", "2026-12-19T00:00:00Z", false, true),
   ],
-  earth_windows: [
-    {
-      start: "2026-12-12T00:00:00Z",
-      end: "2026-12-13T12:00:00Z",
-      open_start: false,
-      open_end: false,
-    },
-  ],
-};
+  earth_windows: [span("2026-12-12T00:00:00Z", "2026-12-13T12:00:00Z")],
+});
 
 test("timeline: events come from the strip edges and have a text alternative and a list", async ({
   page,
 }) => {
   await mock(page);
-  await page.route("**/api/v1/sites/*/timeline*", (r) => r.fulfill({ json: EVENT_TL }));
+  await page.route("**/api/v1/sites/*/timeline*", (r) => json(r, EVENT_TL));
   await page.goto("/command?site=alpha");
   const events = page.getByRole("img", { name: /event.* in view:/ });
   await expect(events).toHaveAttribute("aria-label", /4 events in view/);
@@ -545,7 +361,7 @@ test("timeline: zoom and pan with buttons narrow the window and the event list f
   page,
 }) => {
   await mock(page);
-  await page.route("**/api/v1/sites/*/timeline*", (r) => r.fulfill({ json: EVENT_TL }));
+  await page.route("**/api/v1/sites/*/timeline*", (r) => json(r, EVENT_TL));
   await page.goto("/command?site=alpha");
   await expect(page.getByRole("button", { name: "Zoom out" })).toBeDisabled();
   await expect(page.getByText(/\(8\.0 days\)/)).toBeVisible();
@@ -566,7 +382,7 @@ test("timeline: zoom and pan with buttons narrow the window and the event list f
 
 test("timeline: keyboard zoom and pan work on the focused timeline", async ({ page }) => {
   await mock(page);
-  await page.route("**/api/v1/sites/*/timeline*", (r) => r.fulfill({ json: EVENT_TL }));
+  await page.route("**/api/v1/sites/*/timeline*", (r) => json(r, EVENT_TL));
   await page.goto("/command?site=alpha");
   const region = page.getByRole("group", { name: /Use plus and minus to zoom/ });
   await region.focus();
@@ -586,15 +402,13 @@ test("command centre: site search narrows the select and keeps the chosen site",
 }) => {
   await mock(page);
   await page.route("**/api/v1/sites", (r) =>
-    r.fulfill({
-      json: {
-        ...SITES,
-        sites: [
-          { ...SITES.sites[0]!, name: "Alpha rim", source: "lola-dem" },
-          { ...SITES.sites[1]!, name: "Beta ridge", source: "lola-dem" },
-        ],
-      },
-    }),
+    json(
+      r,
+      siteList([
+        siteSummary("alpha", { name: "Alpha rim" }),
+        siteSummary("beta", { name: "Beta ridge" }),
+      ]),
+    ),
   );
   await page.goto("/command?site=alpha");
   const select = page.getByRole("combobox", { name: "Site" });

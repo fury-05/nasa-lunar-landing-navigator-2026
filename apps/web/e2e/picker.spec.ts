@@ -1,68 +1,45 @@
 import { expect, test, type Page } from "@playwright/test";
+import type { components } from "../src/api/schema";
+import { jobAccepted, jobOut, json, siteList, siteSummary } from "./fixtures";
 
-const SITES = {
-  count: 1,
-  notice: "Planning tool, not for flight operations.",
-  sites: [
-    {
-      id: "alpha",
-      lat_deg: -89.5,
-      lon_east_deg: 40,
-      coordinate_status: "derived-tile-centre",
-      window: {},
-      built_at_utc: "2026-11-14T00:00:00Z",
-      terrain_coverage: { covered_fraction: 1, min_reach_m: 8000, max_reach_m: 8000 },
-    },
-  ],
-};
+type S = components["schemas"];
+
+const SITES = siteList([siteSummary("alpha")]);
+
+const PIXEL = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+  "base64",
+);
 
 async function mock(page: Page, flat = false) {
-  await page.route("**/api/v1/sites", (r) => r.fulfill({ json: SITES }));
+  await page.route("**/api/v1/sites", (r) => json(r, SITES));
   // Map tiles are not fetched in tests: answer with an empty 1x1 transparent png.
   await page.route("https://trek.nasa.gov/**", (r) =>
     r.fulfill({
       contentType: "image/png",
-      body: Buffer.from(
-        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
-        "base64",
-      ),
+      body: PIXEL,
       headers: { "access-control-allow-origin": "*" },
     }),
   );
   let polls = 0;
-  await page.route("**/api/v1/sites/custom", (r) =>
-    r.fulfill({
-      status: 202,
-      json: {
-        site_id: "custom-abc",
-        job_id: "job-abc",
-        status: "queued",
-        cached: false,
-        status_url: "/api/v1/jobs/job-abc",
-      },
-    }),
-  );
+  await page.route("**/api/v1/sites/custom", (r) => json(r, jobAccepted(), 202));
   await page.route("**/api/v1/jobs/job-abc", (r) => {
     polls += 1;
     const done = polls >= 2;
-    return r.fulfill({
-      json: {
-        job_id: "job-abc",
-        site_id: "custom-abc",
+    return json(
+      r,
+      jobOut({
         status: done ? "done" : "running",
         progress: done ? 1 : 0.4,
         message: done ? "finished" : "fetching Sun and Earth positions from Horizons",
-        reason: null,
         result: done
           ? {
               terrain_unavailable: flat,
               warnings: flat ? ["No terrain data covers this point."] : [],
             }
           : {},
-        created_at_utc: "x",
-        updated_at_utc: "x",
-      },
-    });
+      }),
+    );
   });
 }
 
@@ -119,41 +96,31 @@ test("picker: clicking the map fills the coordinates; the nav links to the picke
   expect(lat).toBeLessThan(-80);
 });
 
-async function mockFailing(page: Page, over: Record<string, unknown> = {}, failTimes = 1) {
+async function mockFailing(page: Page, over: Partial<S["JobOut"]> = {}, failTimes = 1) {
   await mock(page);
   let posts = 0;
   await page.unroute("**/api/v1/sites/custom");
   await page.unroute("**/api/v1/jobs/job-abc");
   await page.route("**/api/v1/sites/custom", (r) => {
     posts += 1;
-    return r.fulfill({
-      status: 202,
-      json: {
-        site_id: "custom-abc",
-        job_id: "job-abc",
-        status: "queued",
-        cached: false,
-        status_url: "/api/v1/jobs/job-abc",
-      },
-    });
+    return json(r, jobAccepted(), 202);
   });
   await page.route("**/api/v1/jobs/job-abc", (r) => {
     const fails = posts <= failTimes;
-    return r.fulfill({
-      json: {
-        job_id: "job-abc",
-        site_id: "custom-abc",
-        status: fails ? "failed" : "done",
-        progress: fails ? 0.4 : 1,
-        message: fails ? "failed" : "finished",
-        reason: fails ? "HorizonsError: Horizons timed out after 30 s" : null,
-        retry: fails ? "POST the same coordinates to /api/v1/sites/custom to try again." : null,
-        result: fails ? {} : { terrain_unavailable: false, warnings: [] },
-        created_at_utc: "x",
-        updated_at_utc: "x",
-        ...(fails ? over : {}),
-      },
-    });
+    return json(
+      r,
+      fails
+        ? jobOut({
+            status: "failed",
+            progress: 0.4,
+            message: "failed",
+            reason: "HorizonsError: Horizons timed out after 30 s",
+            retry: "POST the same coordinates to /api/v1/sites/custom to try again.",
+            result: {},
+            ...over,
+          })
+        : jobOut(),
+    );
   });
   return () => posts;
 }
@@ -181,10 +148,8 @@ test("picker: a failed job shows the server's text and Try again builds it again
   await expect(page.getByRole("button", { name: "Try again" })).toHaveCount(0);
 });
 
-test("picker: an error string from a newer API wins, and retryable false hides Try again", async ({
-  page,
-}) => {
-  await mockFailing(page, { error: "Horizons is down for maintenance", retryable: false }, 99);
+test("picker: retryable false hides Try again and says why", async ({ page }) => {
+  await mockFailing(page, { reason: "Horizons is down for maintenance", retryable: false }, 99);
   await page.goto("/sites/pick");
   await fill(page);
   await expect(page.getByRole("alert")).toContainText("Horizons is down for maintenance");
@@ -232,40 +197,18 @@ test("picker: hovering the marker on the map names it", async ({ page }) => {
   expect(named).toBe(true);
 });
 
-const FILTER_SITES = {
-  count: 4,
-  notice: "x",
-  sites: [
-    ["pgda-site04", "Shackleton rim", "lola-dem", 1],
-    ["pgda-haworth", "Haworth", "lola-dem", 0.5],
-    ["pgda-dm2", "Nobile rim 2", "lola-dem", 0],
-    ["custom-16c5b0f303b9", "Custom point -85.4137,23.7719", "custom", 1],
-  ].map(([id, name, source, f]) => ({
-    id,
-    name,
-    source,
-    lat_deg: -89.5,
-    lon_east_deg: 40,
-    coordinate_status: "derived-tile-centre",
-    window: {},
-    built_at_utc: "x",
-    terrain_coverage: {
-      covered_fraction: f,
-      min_reach_m: f ? 100000 : 0,
-      max_reach_m: f ? 100000 : 0,
-    },
-    terrain_available: Number(f) > 0,
-    reach_km: f ? 100 : 0,
-    reach_km_max: f ? 100 : 0,
-    quickmap: "",
-  })),
-};
+const FILTER_SITES = siteList([
+  siteSummary("pgda-site04", { name: "Shackleton rim" }),
+  siteSummary("pgda-haworth", { name: "Haworth" }, 0.5),
+  siteSummary("pgda-dm2", { name: "Nobile rim 2" }, 0),
+  siteSummary("custom-16c5b0f303b9", { name: "Custom point -85.4137,23.7719", source: "custom" }),
+]);
 
 test("site list: search, kind and terrain filters narrow the list, with a count", async ({
   page,
 }) => {
   await mock(page);
-  await page.route("**/api/v1/sites", (r) => r.fulfill({ json: FILTER_SITES }));
+  await page.route("**/api/v1/sites", (r) => json(r, FILTER_SITES));
   await page.goto("/sites/pick");
   // The Existing sites panel is the stable anchor; the rows inside it change as the filter does.
   const list = page
@@ -289,7 +232,7 @@ test("site list: search, kind and terrain filters narrow the list, with a count"
 
 test("site list: the filter is fully keyboard operable", async ({ page }) => {
   await mock(page);
-  await page.route("**/api/v1/sites", (r) => r.fulfill({ json: FILTER_SITES }));
+  await page.route("**/api/v1/sites", (r) => json(r, FILTER_SITES));
   await page.goto("/sites/pick");
   await page.getByLabel("Search by name or id").focus();
   await page.keyboard.type("haw");

@@ -1,43 +1,29 @@
 import { expect, test, type Page } from "@playwright/test";
+import type { components } from "../src/api/schema";
+import { json, mockApi, siteList, siteSummary, slipCell, slipOut } from "./fixtures";
 
-const site = (id: string, f: number) => ({
-  id,
-  lat_deg: -89.5,
-  lon_east_deg: 40,
-  coordinate_status: "derived-tile-centre",
-  window: {},
-  built_at_utc: "2026-11-14T00:00:00Z",
-  terrain_coverage: { covered_fraction: f, min_reach_m: 8000, max_reach_m: 8000 },
-});
-const SITES = { count: 2, notice: "x", sites: [site("alpha", 1), site("beta", 0.5)] };
-const cell = (o: number, verdict: string, sun: number, robust = true) => ({
-  offset_days: o,
-  start_utc: `2026-12-${11 + o}T00:00:00Z`,
-  end_utc: "2026-12-30T00:00:00Z",
-  verdict,
-  glyph: "check",
-  robust,
-  sunlight_hours: sun,
-  earth_share: 0.5,
-});
+type S = components["schemas"];
+
+// alpha has complete terrain, beta only half: its cells must be amber upper bounds.
+const SITES = siteList([siteSummary("alpha"), siteSummary("beta", {}, 0.5)]);
 
 async function mock(page: Page) {
-  await page.route("**/api/v1/sites", (r) => r.fulfill({ json: SITES }));
+  await mockApi(page, { sites: SITES });
   await page.route("**/api/v1/slip-matrix", (r) => {
-    const body = r.request().postDataJSON() as { sites: string[]; offsets_days: number[] };
-    return r.fulfill({
-      json: {
+    const body = r.request().postDataJSON() as S["SlipIn"];
+    return json(
+      r,
+      slipOut({
         sites: body.sites,
         offsets_days: body.offsets_days,
         cells: body.sites.map(() => [
-          cell(0, "viable", 100),
-          cell(1, "viable", 95),
-          cell(3, "marginal", 80, false),
-          cell(7, "not viable", 40),
+          slipCell(0, "viable", 100),
+          slipCell(1, "viable", 95),
+          slipCell(3, "marginal", 80, false),
+          slipCell(7, "not viable", 40),
         ]),
-        provenance: {},
-      },
-    });
+      }),
+    );
   });
 }
 

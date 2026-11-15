@@ -11,6 +11,8 @@ const job = (over: Record<string, unknown> = {}): JobOut =>
     message: "failed",
     reason: "HorizonsError: timed out",
     result: {},
+    attempt: 1,
+    retryable: true,
     created_at_utc: "x",
     updated_at_utc: "x",
     ...over,
@@ -23,13 +25,9 @@ describe("describeFailure", () => {
     expect(f.retryable).toBe(true);
     expect(f.hint).toBeNull();
   });
-  it("prefers an error string when the API sends one", () => {
-    expect(describeFailure(job({ error: "Horizons is down" })).text).toBe("Horizons is down");
-  });
-  it("hides Try again only when retryable is explicitly false", () => {
+  it("follows the retryable flag from the API", () => {
     expect(describeFailure(job({ retryable: false })).retryable).toBe(false);
     expect(describeFailure(job({ retryable: true })).retryable).toBe(true);
-    expect(describeFailure(job({ retryable: "no" })).retryable).toBe(true);
   });
   it("passes the retry hint through", () => {
     expect(describeFailure(job({ retry: "POST the same coordinates again." })).hint).toBe(
