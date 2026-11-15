@@ -191,3 +191,43 @@ test("picker: an error string from a newer API wins, and retryable false hides T
   await expect(page.getByRole("button", { name: "Try again" })).toHaveCount(0);
   await expect(page.getByText(/cannot be retried as it is/)).toBeVisible();
 });
+
+test("picker: a site name appears only for the active marker, and the list stays reachable", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.goto("/sites/pick");
+  // Nothing is named at rest, so crowded markers cannot overprint each other.
+  await expect(page.getByText(/: click to open in the Command Centre/)).toHaveCount(0);
+  // Keyboard users reach the same information through the list: focusing a site names it.
+  const link = page.getByRole("link", { name: "alpha" });
+  await link.focus();
+  await expect(page.getByText("alpha: click to open in the Command Centre")).toBeVisible();
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await expect(page.getByText(/: click to open in the Command Centre/)).toHaveCount(0);
+  // Hovering a list row names its marker too, and leaving clears it.
+  await link.hover();
+  await expect(page.getByText("alpha: click to open in the Command Centre")).toBeVisible();
+  // Focus also names the site, so leave the list with both pointer and focus.
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await page.mouse.move(2, 2);
+  await expect(page.getByText(/: click to open in the Command Centre/)).toHaveCount(0);
+});
+
+test("picker: hovering the marker on the map names it", async ({ page }) => {
+  await mock(page);
+  await page.goto("/sites/pick");
+  const map = page.getByRole("application", { name: /South polar map/ });
+  await expect(map.locator("canvas")).toBeVisible();
+  const box = (await map.boundingBox())!;
+  // alpha is at -89.5, 40 E: a few km from the pole, so near the centre of the default view.
+  // Scan a small neighbourhood of the centre for the marker, as exact pixels depend on zoom.
+  let named = false;
+  for (let dx = -30; dx <= 30 && !named; dx += 6) {
+    for (let dy = -30; dy <= 30 && !named; dy += 6) {
+      await page.mouse.move(box.x + box.width / 2 + dx, box.y + box.height / 2 + dy);
+      named = await page.getByText("alpha: click to open in the Command Centre").isVisible();
+    }
+  }
+  expect(named).toBe(true);
+});

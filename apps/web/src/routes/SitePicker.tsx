@@ -26,6 +26,8 @@ export function SitePicker() {
   const [lon, setLon] = useState("");
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const [imageryDown, setImageryDown] = useState(false);
+  // Site whose name the map shows: hovered on the map, or hovered or focused in the list.
+  const [activeId, setActiveId] = useState<string | null>(null);
   const abort = useRef<AbortController | null>(null);
 
   useEffect(() => () => abort.current?.abort(), []);
@@ -126,6 +128,8 @@ export function SitePicker() {
               }}
               onSelectSite={go}
               onImageryError={() => setImageryDown(true)}
+              activeId={activeId}
+              onHover={setActiveId}
             />
           </Suspense>
           {imageryDown && (
@@ -133,10 +137,16 @@ export function SitePicker() {
               Some Moon Trek map tiles did not load. You can still enter coordinates in the form.
             </p>
           )}
+          <p aria-live="polite" className="mb-0 mt-2 min-h-5 text-sm text-ink">
+            {activeId
+              ? `${infos.find((i) => i.id === activeId)?.name ?? activeId}: click to open in the Command Centre`
+              : ""}
+          </p>
           <p className="mb-0 mt-2 text-xs text-muted">
             Map: south polar stereographic view of the LROC wide angle mosaic from NASA Moon Trek
-            (60 S to the pole, scale 1 at the pole). Click an existing site to open it; click empty
-            ground to choose a new point.
+            (60 S to the pole, scale 1 at the pole). Teal dots are existing sites; point at one or
+            use the list below to see its name. Click a dot to open it; click empty ground to choose
+            a new point.
           </p>
         </Glass>
 
@@ -277,7 +287,13 @@ export function SitePicker() {
           {infos.map((i) => (
             <li
               key={i.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-cell border border-white/10 p-3"
+              onMouseEnter={() => setActiveId(i.id)}
+              onMouseLeave={() => setActiveId(null)}
+              onFocus={() => setActiveId(i.id)}
+              onBlur={() => setActiveId(null)}
+              className={`flex flex-wrap items-center justify-between gap-2 rounded-cell border p-3 ${
+                activeId === i.id ? "border-good/70 bg-white/[0.06]" : "border-white/10"
+              }`}
             >
               <span className="text-sm">
                 <Link
