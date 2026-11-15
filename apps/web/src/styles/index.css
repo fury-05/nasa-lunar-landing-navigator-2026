@@ -49,6 +49,15 @@ body {
   outline-offset: 2px;
 }
 
+/* A date input has four tab stops: month, day, year and the calendar button. The first three
+   are the input itself (:focus-visible above). The fourth is the browser's own calendar button
+   inside the input: while it has focus the input is :focus-within but NOT :focus, so the rule
+   above does not match and the stop showed no ring. */
+input[type="date"]:focus-within {
+  outline: 2px solid var(--color-blue-pale);
+  outline-offset: 2px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
