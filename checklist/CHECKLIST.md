@@ -7,8 +7,8 @@
 | P2 | 8 | 4 | 0 | 12 |
 | P3 | 9 | 0 | 0 | 9 |
 | P4 | 0 | 11 | 0 | 11 |
-| P5 | 0 | 7 | 0 | 7 |
-| P6 | 0 | 6 | 0 | 6 |
+| P5 | 0 | 5 | 0 | 5 |
+| P6 | 0 | 4 | 0 | 4 |
 | P7 | 0 | 9 | 0 | 9 |
 
 | ID | Task | Owner | Status | Evidence / Notes |
@@ -70,17 +70,13 @@
 | P4-11 | Loading, error and degraded states; keyboard and screen reader pass | afreen | PENDING | issue #76 |
 | P5-01 | Terrain tile endpoint (heightfield) and slope layer in the API | irfan | PENDING | issue #77 |
 | P5-02 | 2D polar map with OpenLayers, proj4 and Trek SP tiles, site markers | afreen | PENDING | issue #78 |
-| P5-03 | Moon globe with Trek equirectangular tiles and real Sun and Earth directions | member3 | PENDING | issue #79 |
 | P5-04 | Local 3D terrain with draped imagery, Sun light, shadows, exaggeration control | afreen | PENDING | issue #80 |
-| P5-05 | Sky dome first-person view with skyline and discs | member3 | PENDING | issue #81 |
 | P5-06 | Shared mission clock and animation controls across all views | afreen | PENDING | issue #82 |
 | P5-07 | 3D performance, LOD, tile cache, reduced-motion and low-power fallback | member3 | PENDING | issue #83 |
 | P6-01 | Lander profile model: arrays, battery, loads, slope and thermal limits | irfan | PENDING | issue #84 |
 | P6-02 | Suitability engine and /lander/assess with tests | irfan | PENDING | issue #85 |
 | P6-03 | Spacecraft Dashboard UI | afreen | PENDING | issue #86 |
 | P6-04 | Public View guided story, glossary, simple and detailed modes, CSA and NASA links with attribution | member3 | PENDING | issue #87 |
-| P6-05 | Mission objective presets (science versus engineering constraints) | member3 | PENDING | issue #88 |
-| P6-06 | Saved scenarios and brief export (permalink, PNG, summary text) | irfan | PENDING | issue #89 |
 | P7-01 | Accessibility audit and fixes (axe, keyboard, contrast, reduced motion) | afreen | PENDING | issue #90 |
 | P7-02 | Performance audit and fixes (Lighthouse, bundle, 3D) | afreen | PENDING | issue #91 |
 | P7-03 | Security hardening, dependency audit, secret scan, headers | irfan | PENDING | issue #92 |
