@@ -301,6 +301,8 @@ class JobOut(BaseModel):
     result: dict[str, Any]
     site_url: str | None = None
     retry: str | None = None
+    retryable: bool = False
+    attempt: int = 0
 
 
 class RegistryRow(BaseModel):
