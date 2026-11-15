@@ -212,8 +212,6 @@ The terrain and bundle data are large and live outside git.
 | Afreen Mulla | [@Stella-10](https://github.com/Stella-10) | Web app, design system, Command Centre, polar map, mission clock |
 | Luz Aponte | [@nluz4105-ai](https://github.com/nluz4105-ai) | Public View content, Trek and QuickMap links, validation checks, attribution audit, demo assets |
 
-Credit rules: all commits are pushed from one workstation (Irfan's session, GitHub login fury-05). The task owner is credited with a `Co-authored-by` trailer, and a collaborator is only named as commit author with their consent (`COMMIT_MODE=coauthor`, [docs/07-git-and-team-workflow.md](docs/07-git-and-team-workflow.md)). Teammates also contribute by reviewing pull requests, commenting on issues and performing the human validation steps.
-
 ## Use of AI tools
 
 Claude (Anthropic) assists with code, tests and docs, under human direction and review. Commits carry a `SI-Assisted: Claude` trailer. There is no AI in any calculated number at run time. Details: [docs/SI_USAGE.md](docs/SI_USAGE.md).
