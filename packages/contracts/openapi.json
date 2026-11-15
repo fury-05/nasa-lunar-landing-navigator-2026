@@ -1316,8 +1316,43 @@
             "title": "Lon East Deg",
             "type": "number"
           },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "quickmap": {
+            "title": "Quickmap",
+            "type": "string"
+          },
+          "reach_km": {
+            "title": "Reach Km",
+            "type": "number"
+          },
+          "reach_km_max": {
+            "title": "Reach Km Max",
+            "type": "number"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "terrain_available": {
+            "title": "Terrain Available",
+            "type": "boolean"
+          },
           "terrain_coverage": {
             "$ref": "#/components/schemas/TerrainCoverage"
+          },
+          "tile_radius_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tile Radius Km"
           },
           "window": {
             "additionalProperties": true,
@@ -1332,7 +1367,13 @@
           "coordinate_status",
           "window",
           "built_at_utc",
-          "terrain_coverage"
+          "terrain_coverage",
+          "name",
+          "source",
+          "terrain_available",
+          "reach_km",
+          "reach_km_max",
+          "quickmap"
         ],
         "title": "SiteSummary",
         "type": "object"
@@ -1847,6 +1888,124 @@
           "covered_fraction"
         ],
         "title": "TerrainOut",
+        "type": "object"
+      },
+      "TerrainTileOut": {
+        "description": "Local height grid around a site, row 0 = north edge, column 0 = west edge.",
+        "properties": {
+          "centre": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Centre",
+            "type": "object"
+          },
+          "cols": {
+            "title": "Cols",
+            "type": "integer"
+          },
+          "finite_fraction": {
+            "title": "Finite Fraction",
+            "type": "number"
+          },
+          "height_error_basis": {
+            "title": "Height Error Basis",
+            "type": "string"
+          },
+          "height_error_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height Error M"
+          },
+          "heights_m": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Heights M",
+            "type": "array"
+          },
+          "interpolated_basis": {
+            "title": "Interpolated Basis",
+            "type": "string"
+          },
+          "interpolated_fraction": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Interpolated Fraction"
+          },
+          "native_resolution_m": {
+            "title": "Native Resolution M",
+            "type": "number"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/Provenance"
+          },
+          "rows": {
+            "title": "Rows",
+            "type": "integer"
+          },
+          "site_id": {
+            "title": "Site Id",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "spacing_m": {
+            "title": "Spacing M",
+            "type": "number"
+          },
+          "tier_share": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Tier Share",
+            "type": "object"
+          },
+          "window_m": {
+            "title": "Window M",
+            "type": "number"
+          }
+        },
+        "required": [
+          "site_id",
+          "rows",
+          "cols",
+          "spacing_m",
+          "window_m",
+          "native_resolution_m",
+          "interpolated_fraction",
+          "interpolated_basis",
+          "height_error_m",
+          "height_error_basis",
+          "finite_fraction",
+          "heights_m",
+          "centre",
+          "tier_share",
+          "source",
+          "provenance"
+        ],
+        "title": "TerrainTileOut",
         "type": "object"
       },
       "TimelineOut": {
@@ -2767,6 +2926,79 @@
           }
         },
         "summary": "Get State"
+      }
+    },
+    "/api/v1/sites/{site_id}/terrain": {
+      "get": {
+        "operationId": "get_terrain_api_v1_sites__site_id__terrain_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "site_id",
+            "required": true,
+            "schema": {
+              "title": "Site Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "window_m",
+            "required": false,
+            "schema": {
+              "default": 4000.0,
+              "maximum": 8000.0,
+              "minimum": 500.0,
+              "title": "Window M",
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "max_n",
+            "required": false,
+            "schema": {
+              "default": 128,
+              "maximum": 128,
+              "minimum": 16,
+              "title": "Max N",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TerrainTileOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Invalid input"
+          }
+        },
+        "summary": "Get Terrain"
       }
     },
     "/api/v1/sites/{site_id}/timeline": {

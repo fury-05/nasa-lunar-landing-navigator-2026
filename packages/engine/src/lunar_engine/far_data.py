@@ -51,6 +51,8 @@ def load_far_tiers(
     lon_east_deg: float,
     max_range_m: float,
     allow_80m_fallback: bool = True,
+    mosaic_half_m: float = NEAR_LIMIT_M + 1_000.0,
+    err_reduce: int = ERR_REDUCE,
 ) -> FarTiers:
     """Tiers for one site, finest first: site tile, 5 m mosaic window, 20 m (or 80 m) LDEM."""
     cx, cy = south_polar_xy(lat_deg, lon_east_deg)
@@ -60,7 +62,7 @@ def load_far_tiers(
     missing: list[str] = []
     if site_tile is not None:
         tiers.append(DemTier("site-tile-5m", site_tile, NEAR_LIMIT_M))
-    mosaic = _try(far_dir / MOSAIC_5M, cx, cy, NEAR_LIMIT_M + 1_000.0)
+    mosaic = _try(far_dir / MOSAIC_5M, cx, cy, mosaic_half_m)
     if mosaic is not None:
         tiers.append(DemTier("mosaic-87s-5m", mosaic, NEAR_LIMIT_M))
         files.append(MOSAIC_5M)
@@ -71,8 +73,8 @@ def load_far_tiers(
     if wide is not None:
         tiers.append(DemTier("ldem-20m", wide))
         files.append(LDEM_20M)
-        err = _try(far_dir / ERR_20M, cx, cy, half, ERR_REDUCE)
-        effres = _try(far_dir / EFFRES_20M, cx, cy, half, ERR_REDUCE)
+        err = _try(far_dir / ERR_20M, cx, cy, half, err_reduce)
+        effres = _try(far_dir / EFFRES_20M, cx, cy, half, err_reduce)
         files += [f for f, t in ((ERR_20M, err), (EFFRES_20M, effres)) if t is not None]
         missing += [f for f, t in ((ERR_20M, err), (EFFRES_20M, effres)) if t is None]
     else:

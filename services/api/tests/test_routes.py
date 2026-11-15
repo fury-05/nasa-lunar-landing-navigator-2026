@@ -502,3 +502,40 @@ def test_old_bundles_report_no_tiers_and_no_error_rather_than_inventing_them(
     b = client.get("/api/v1/sites/alpha/skyline?step_deg=10").json()
     assert b["tiers"] == [] and set(b["tier"]) == {None}
     assert b["dem_error_deg"] is None and b["effective_resolution_m"] is None
+
+
+# ---- /sites exposes name, source, coverage radius and reach (issues #127, #129) ----------------
+
+
+def test_sites_list_has_name_source_radius_and_reach_for_every_site(client: TestClient) -> None:
+    body = client.get("/api/v1/sites").json()
+    for s in body["sites"]:
+        assert s["terrain_available"] is True and s["name"] and s["source"]
+        assert s["reach_km"] == pytest.approx(2.5) and s["reach_km_max"] >= s["reach_km"]
+        assert s["quickmap"].startswith("https://quickmap.lroc.im-ldi.com/?proj=27")
+    # the test bundles are not catalogue ids, so they are named by id and no radius is invented
+    alpha = next(s for s in body["sites"] if s["id"] == "alpha")
+    assert alpha["name"] == "alpha" and alpha["source"] == "bundle"
+    assert alpha["tile_radius_km"] is None
+
+
+def test_catalogue_sites_get_their_catalogue_name_and_real_tile_radius() -> None:
+    from lunar_api.routes import site_facts
+
+    meta = {
+        "lat_deg": -84.2287, "lon_east_deg": 69.444,
+        "skyline": {"min_reach_m": 8000.0, "max_reach_m": 11000.0},
+    }
+    f = site_facts("pgda-dm1", meta)
+    assert f["name"] == "PGDA tile DM1" and f["source"] == "lola-dem"
+    assert f["tile_radius_km"] == 10.0  # 4000 px x 5 m / 2
+    assert f["reach_km"] == 8.0 and f["reach_km_max"] == 11.0 and f["terrain_available"]
+
+
+def test_custom_points_are_named_by_their_coordinates_and_flat_ones_say_no_terrain() -> None:
+    from lunar_api.routes import site_facts
+
+    meta = {"lat_deg": -89.5, "lon_east_deg": 40.0, "terrain_unavailable": True, "skyline": {}}
+    f = site_facts("custom-abcdef123456", meta)
+    assert f["name"] == "Custom point -89.5000,40.0000" and f["source"] == "custom"
+    assert f["terrain_available"] is False and f["reach_km"] == 0.0 and f["tile_radius_km"] is None

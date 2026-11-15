@@ -332,6 +332,60 @@ def criteria_of(c: CriteriaIn | None) -> Criteria:
 # ---- sites ------------------------------------------------------------------------------------
 
 
+CATALOGUE_PATHS = (
+    Path(__file__).resolve().parents[4] / "data" / "sites.json",  # repository checkout
+    Path("/opt/lunar/current/data/sites.json"),  # deployed release
+)
+_CATALOGUE: dict[str, dict[str, Any]] | None = None
+
+
+def catalogue() -> dict[str, dict[str, Any]]:
+    """Catalogue records by id (data/sites.json). Empty when the file is not shipped."""
+    global _CATALOGUE
+    if _CATALOGUE is None:
+        found: dict[str, dict[str, Any]] = {}
+        for p in CATALOGUE_PATHS:
+            if p.exists():
+                doc = json.loads(p.read_text(encoding="utf8"))
+                found = {r["id"]: r for r in doc.get("sites", [])}
+                break
+        _CATALOGUE = found
+    return _CATALOGUE
+
+
+def site_facts(site_id: str, m: dict[str, Any]) -> dict[str, Any]:
+    """Name, source, coverage radius and reach for one site. Nothing is made up.
+
+    `name` comes from the catalogue; a custom point is named by its coordinates. `tile_radius_km`
+    is half the width of the site's own DEM tile (catalogue geometry), else null. `reach_km` is the
+    shortest distance the skyline could read in any direction (the radius that is certain).
+    """
+    rec = catalogue().get(site_id)
+    lat, lon = m["lat_deg"], m["lon_east_deg"]
+    custom = site_id.startswith("custom-")
+    if rec is not None:
+        name, source = rec["name"], rec.get("source_id", "catalogue")
+    elif custom:
+        name, source = f"Custom point {lat:.4f},{lon:.4f}", "custom"
+    else:
+        name, source = site_id, "bundle"
+    radius: float | None = None
+    tile = (rec or {}).get("tile")
+    if tile:
+        radius = round(min(tile["width_px"], tile["height_px"]) * tile["pixel_m"] / 2000.0, 3)
+    unavailable = bool(m.get("terrain_unavailable"))
+    reach = 0.0 if unavailable else m["skyline"].get("min_reach_m", 0.0) / 1000.0
+    return {
+        "name": name,
+        "source": source,
+        "tile_radius_km": None if unavailable else radius,
+        "terrain_available": not unavailable,
+        "reach_km": reach,
+        "reach_km_max": 0.0 if unavailable else m["skyline"].get("max_reach_m", 0.0) / 1000.0,
+        "quickmap": quickmap_link(lat, lon),
+    }
+
+
 @router.get("/sites", response_model=SiteList, responses=ERRORS)
 def list_sites(store: Annotated[SiteStore, Depends(get_store)]) -> dict[str, Any]:
     items = []
@@ -346,6 +400,7 @@ def list_sites(store: Annotated[SiteStore, Depends(get_store)]) -> dict[str, Any
                 "window": m["window"],
                 "built_at_utc": m["built_at_utc"],
                 "terrain_coverage": effective_coverage(m),
+                **site_facts(sid, m),
             }
         )
     return clean(

@@ -142,7 +142,8 @@ def far_main(argv: list[str]) -> int:
         download_resumable(e["url"], dest, size)
         e["sha256"] = sha256_of(dest)
         e["retrieved_at_utc"] = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
-        FAR_MANIFEST.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf8")
+        with FAR_MANIFEST.open("w", encoding="utf8", newline="\n") as fh:  # LF on Windows too
+            fh.write(json.dumps(doc, indent=2) + "\n")
         print(f"  saved, sha256 {e['sha256'][:16]}...")
     print(f"total {total / 1e9:.2f} GB")
     return 0
