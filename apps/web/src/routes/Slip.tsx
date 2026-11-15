@@ -5,6 +5,7 @@ import { Glass } from "../components/Glass";
 import { MAX_SITES, parseSites, toggleSite } from "../lib/compare";
 import { fmtHours, iso, loadSites, loadSlip } from "../lib/data";
 import { toSiteInfo } from "../lib/site";
+import { sortSites } from "../lib/siteFilter";
 import { cellView, SLIP_OFFSETS, signed, whatChanges, type CellView } from "../lib/slip";
 import { useAsync } from "../lib/useAsync";
 
@@ -70,7 +71,7 @@ export function Slip() {
           </legend>
           <div className="flex flex-wrap gap-2">
             {sites.state === "ok" &&
-              sites.data.sites.map((s) => {
+              sortSites(sites.data.sites.map(toSiteInfo)).map((s) => {
                 const on = sel.includes(s.id);
                 const full = !on && sel.length >= MAX_SITES;
                 return (
@@ -86,7 +87,7 @@ export function Slip() {
                       disabled={full}
                       onChange={() => put("sites", toggleSite(sel, s.id).join(","))}
                     />
-                    {toSiteInfo(s).name}
+                    {s.name}
                   </label>
                 );
               })}

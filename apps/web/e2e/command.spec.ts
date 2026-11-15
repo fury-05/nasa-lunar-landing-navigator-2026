@@ -482,3 +482,66 @@ test("verdict thresholds: a need the visitor changed is called chosen by you", a
   await expect(card).toContainText("Thresholds: chosen by you");
   await expect(card).not.toContainText("placeholder defaults, not mission requirements");
 });
+
+// A list shaped like the live one: custom points first (API order), flat first, catalogue later.
+const LIVE_SHAPED = siteList([
+  siteSummary(
+    "custom-16c5b0f303b9",
+    { name: "Custom point -85.4137,23.7719", source: "custom" },
+    0,
+  ),
+  siteSummary(
+    "custom-20f36b9edc26",
+    { name: "Custom point -86.2137,12.3071", source: "custom" },
+    1,
+  ),
+  siteSummary("pgda-haworth", { name: "Haworth" }, 0.5),
+  siteSummary("pgda-site04", { name: "Shackleton rim" }, 1),
+]);
+
+test("default site: a catalogue site with terrain, Shackleton rim first, not the first list entry", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.route("**/api/v1/sites", (r) => json(r, LIVE_SHAPED));
+  await page.goto("/command");
+  const select = page.getByRole("combobox", { name: "Site" });
+  await expect(select).toHaveValue("pgda-site04");
+  await expect(page.getByRole("heading", { name: "Shackleton rim" })).toBeVisible();
+  await expect(page.getByText("Flat horizon, not terrain aware")).toHaveCount(0);
+  // catalogue first, custom after
+  const names = await select.locator("option").allTextContents();
+  expect(names).toEqual([
+    "Haworth",
+    "Shackleton rim",
+    "Custom point -85.4137,23.7719",
+    "Custom point -86.2137,12.3071",
+  ]);
+});
+
+test("default site: Spacecraft and Public View use the same site and the same terrain wording", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.route("**/api/v1/sites", (r) => json(r, LIVE_SHAPED));
+  await page.goto("/spacecraft");
+  await expect(page.getByRole("combobox", { name: "Site" })).toHaveValue("pgda-site04");
+  await page.goto("/public");
+  await expect(page.getByRole("heading", { name: "Live example: Shackleton rim" })).toBeVisible();
+  await expect(page.getByText(/Terrain available, extends/).first()).toBeVisible();
+  // Same sentence as the Command Centre for a site with partial terrain.
+  await page.route("**/api/v1/sites", (r) =>
+    json(r, siteList([siteSummary("pgda-haworth", { name: "Haworth" }, 0.5)])),
+  );
+  await page.goto("/public");
+  await expect(page.getByText(/Terrain incomplete: covers 50% of directions/)).toBeVisible();
+  await expect(page.getByText("Upper bound, terrain incomplete for this site")).toHaveCount(0);
+});
+
+test("default site: a link that names a site is never replaced", async ({ page }) => {
+  await mock(page);
+  await page.route("**/api/v1/sites", (r) => json(r, LIVE_SHAPED));
+  await page.goto("/command?site=custom-16c5b0f303b9");
+  await expect(page.getByRole("combobox", { name: "Site" })).toHaveValue("custom-16c5b0f303b9");
+  await expect(page.getByText("Flat horizon, not terrain aware").first()).toBeVisible();
+});

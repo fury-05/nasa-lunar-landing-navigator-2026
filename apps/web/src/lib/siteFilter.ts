@@ -60,3 +60,36 @@ export function resultText(shown: number, total: number): string {
   if (shown === 0) return `No sites match. ${total} sites in the list.`;
   return `${shown} of ${total} sites match.`;
 }
+
+const KIND_ORDER: Record<Kind, number> = { catalogue: 0, other: 1, custom: 2 };
+
+/**
+ * Catalogue sites first, then others, then custom points. Within a group the API order is kept
+ * (a stable sort), so nothing is reshuffled for no reason.
+ */
+export function sortSites<T extends SiteInfo>(infos: T[]): T[] {
+  return infos
+    .map((s, i) => ({ s, i }))
+    .sort((a, b) => KIND_ORDER[kindOf(a.s)] - KIND_ORDER[kindOf(b.s)] || a.i - b.i)
+    .map((x) => x.s);
+}
+
+/** The site a visitor lands on when the address names none: a point with terrain, never a guess. */
+export const PREFERRED_SITE = "pgda-site04"; // Shackleton rim
+
+export function defaultSite(infos: SiteInfo[]): SiteInfo | null {
+  if (infos.length === 0) return null;
+  const sorted = sortSites(infos);
+  const preferred = sorted.find((s) => s.id === PREFERRED_SITE && s.terrain !== "none");
+  if (preferred) return preferred;
+  // Prefer complete terrain over partial, catalogue over custom (the order is already catalogue
+  // first), and only then fall back to a site with no terrain at all.
+  return (
+    sorted.find((s) => kindOf(s) === "catalogue" && s.terrain === "full") ??
+    sorted.find((s) => kindOf(s) === "catalogue" && s.terrain === "partial") ??
+    sorted.find((s) => s.terrain === "full") ??
+    sorted.find((s) => s.terrain !== "none") ??
+    sorted[0] ??
+    null
+  );
+}

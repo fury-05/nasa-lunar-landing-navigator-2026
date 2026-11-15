@@ -26,7 +26,14 @@ import {
 import { NeedsForm } from "../components/NeedsForm";
 import { needsFromParams, needsToParams, needsToQuery } from "../lib/mission";
 import { toSiteInfo } from "../lib/site";
-import { applyFilter, kindsPresent, NO_FILTER, type Filter } from "../lib/siteFilter";
+import {
+  applyFilter,
+  defaultSite,
+  kindsPresent,
+  NO_FILTER,
+  sortSites,
+  type Filter,
+} from "../lib/siteFilter";
 import { SiteFilter } from "../components/SiteFilter";
 import { useAsync } from "../lib/useAsync";
 
@@ -74,7 +81,10 @@ export function Command() {
   const [siteFilter, setSiteFilter] = useState<Filter>(NO_FILTER);
   const [showFilter, setShowFilter] = useState(false);
   const sites = useAsync(loadSites, "sites");
-  const first = sites.state === "ok" ? sites.data.sites[0]?.id : undefined;
+  const first = useMemo(
+    () => (sites.state === "ok" ? defaultSite(sites.data.sites.map(toSiteInfo))?.id : undefined),
+    [sites],
+  );
   const id = site || first || "";
   const unknownSite =
     sites.state === "ok" && site !== "" && !sites.data.sites.some((s) => s.id === site);
@@ -86,7 +96,7 @@ export function Command() {
   }, [sites, id]);
 
   const allInfos = useMemo(
-    () => (sites.state === "ok" ? sites.data.sites.map(toSiteInfo) : []),
+    () => (sites.state === "ok" ? sortSites(sites.data.sites.map(toSiteInfo)) : []),
     [sites],
   );
   // The chosen site always stays in the list, even when the filter would hide it.

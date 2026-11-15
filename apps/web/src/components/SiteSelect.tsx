@@ -1,6 +1,7 @@
 import { useId } from "react";
 import type { SiteList } from "../lib/data";
 import { toSiteInfo } from "../lib/site";
+import { sortSites } from "../lib/siteFilter";
 
 export function SiteSelect({
   sites,
@@ -21,9 +22,9 @@ export function SiteSelect({
         value={value}
         onChange={(e) => onChange(e.target.value)}
       >
-        {sites.sites.map((s) => (
+        {sortSites(sites.sites.map(toSiteInfo)).map((s) => (
           <option key={s.id} value={s.id}>
-            {toSiteInfo(s).name}
+            {s.name}
           </option>
         ))}
       </select>

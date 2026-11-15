@@ -7,7 +7,7 @@ import { createCustomSite, loadSites, pollJob, type JobOut } from "../lib/data";
 import { validateCoords } from "../lib/polar";
 import { describeFailure } from "../lib/jobFailure";
 import { fmtLat, fmtLon, terrainSentence, toSiteInfo } from "../lib/site";
-import { applyFilter, kindsPresent, NO_FILTER, type Filter } from "../lib/siteFilter";
+import { applyFilter, kindsPresent, NO_FILTER, sortSites, type Filter } from "../lib/siteFilter";
 import { useAsync } from "../lib/useAsync";
 import { SiteFilter } from "../components/SiteFilter";
 
@@ -39,7 +39,7 @@ export function SitePicker() {
   const picked = check.ok ? { lat: check.lat, lon: check.lon } : null;
   const touched = lat !== "" || lon !== "";
   const infos = useMemo(
-    () => (sites.state === "ok" ? sites.data.sites.map(toSiteInfo) : []),
+    () => (sites.state === "ok" ? sortSites(sites.data.sites.map(toSiteInfo)) : []),
     [sites],
   );
   const listed = useMemo(() => applyFilter(infos, filter), [infos, filter]);
