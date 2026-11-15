@@ -97,3 +97,6 @@ Against the budget in `docs/06-frontend-spec.md` ("route chunks under 250 KB gzi
 * Fonts: no change was made. Lighthouse's `font-display` insight passed (score 1) on the live home page, so there is no finding to act on.
 * One render-blocking stylesheet (6 KiB gzipped, score 0.5 on the render-blocking insight) was reported on the live home page and left alone; inlining it was not tried.
 * Total Blocking Time on `/command` (about 120 to 460 ms across runs) is unaddressed.
+
+## Live re-check after the deploy of PR 168 (2026-11-15, 12:20 IST, coordinator)
+Lighthouse 13.6.0, mobile, `https://13-52-97-105.sslip.io/`, three runs. Performance could not be scored in any run (`NO_NAVSTART`, the same environment fault described above, not a site result). The three categories that were scored in all three runs: accessibility 100, best practices 100, SEO 100. SEO was 91 before the deploy because `/robots.txt` returned the app page; it now returns the real file (`User-agent: *`, `Allow: /`, `Disallow: /api/`). No new performance number is claimed.
