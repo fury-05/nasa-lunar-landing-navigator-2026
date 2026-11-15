@@ -1,5 +1,7 @@
 # User guide
 
+A picture guide with marked screenshots is [HOW-TO-USE.md](HOW-TO-USE.md). This file explains every control and term.
+
 Live app: https://13-52-97-105.sslip.io
 
 **Planning tool, not for flight operations.** Read every number together with its uncertainty and its terrain warning.
@@ -52,7 +54,7 @@ Drag the scrubber, or focus it and use the arrow keys (one timeline sample, whic
 A polar plot looking up: north at the top, east on the left (as when you lie on your back and look at the sky). Grey is terrain. The amber disc is the Sun and the blue disc is Earth, both drawn larger than true size. A faded disc is hidden behind terrain. Rings are at 10 and 20 degrees of elevation.
 
 ### Horizon strip
-Azimuth (compass direction) runs left to right: north, east, south, west. Elevation is shown from 0 to 15 degrees. The grey shape is the skyline. The amber line is the Sun's track and the dashed blue line is Earth's track over the whole window; the discs mark the selected time. Where a track runs below the grey shape, that body is hidden. This is the most direct picture of why a site gets or loses light.
+Azimuth (compass direction) runs left to right: north, east, south, west. Elevation is shown from -6 to 15 degrees, with the flat horizon (0 degrees) labelled and a band below it. The grey shape is the skyline. The amber line is the Sun's track and the dashed blue line is Earth's track over the whole window; the discs mark the selected time. Where a track runs below the grey shape, that body is hidden. This is the most direct picture of why a site gets or loses light.
 
 ### Local terrain
 A tile of height data around the site, shaded by the real Sun direction at the scrubber time. Two modes: "2D shaded map" and "3D view" (a tilted drawing on a canvas, with a rotation control). Vertical exaggeration is labelled ("heights drawn N times too tall") and exists only to make relief visible. If no tile exists for the site you see a message instead, and an optional preview of a synthetic surface that is clearly marked as not real terrain and not to be used for any decision.

@@ -1,10 +1,61 @@
+<div align="center">
+
 # Lunar Landing Site Navigator
 
-A planning tool for comparing lunar south pole landing sites and dates by where the Sun and Earth sit relative to the real local horizon. Built for the NASA Space Apps Challenge 2026.
+**Compare lunar south pole landing sites and dates by where the Sun and Earth sit against the real local horizon.**
 
-**Live: https://13-52-97-105.sslip.io**
+NASA Space Apps Challenge 2026 &nbsp;|&nbsp; Team **LunarOps**
+
+[![Live site](https://img.shields.io/website?url=https%3A%2F%2F13-52-97-105.sslip.io&label=live%20site&up_message=online&down_message=offline&style=flat-square)](https://13-52-97-105.sslip.io)
+[![CI](https://img.shields.io/github/actions/workflow/status/fury-05/nasa-lunar-landing-navigator-2026/ci.yml?branch=main&label=CI&style=flat-square&logo=githubactions&logoColor=white)](https://github.com/fury-05/nasa-lunar-landing-navigator-2026/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/fury-05/nasa-lunar-landing-navigator-2026?style=flat-square&logo=github)](https://github.com/fury-05/nasa-lunar-landing-navigator-2026/releases)
+[![License](https://img.shields.io/github/license/fury-05/nasa-lunar-landing-navigator-2026?style=flat-square)](LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/fury-05/nasa-lunar-landing-navigator-2026?style=flat-square)](https://github.com/fury-05/nasa-lunar-landing-navigator-2026/commits/main)
+
+[![Open issues](https://img.shields.io/github/issues/fury-05/nasa-lunar-landing-navigator-2026?style=flat-square&logo=github)](https://github.com/fury-05/nasa-lunar-landing-navigator-2026/issues)
+[![Closed issues](https://img.shields.io/github/issues-closed/fury-05/nasa-lunar-landing-navigator-2026?style=flat-square&color=8250df)](https://github.com/fury-05/nasa-lunar-landing-navigator-2026/issues?q=is%3Aissue+is%3Aclosed)
+[![Open PRs](https://img.shields.io/github/issues-pr/fury-05/nasa-lunar-landing-navigator-2026?style=flat-square&logo=github)](https://github.com/fury-05/nasa-lunar-landing-navigator-2026/pulls)
+[![Closed PRs](https://img.shields.io/github/issues-pr-closed/fury-05/nasa-lunar-landing-navigator-2026?style=flat-square&label=PRs%20closed&color=8250df)](https://github.com/fury-05/nasa-lunar-landing-navigator-2026/pulls?q=is%3Apr+is%3Aclosed)
+[![Contributors](https://img.shields.io/github/contributors/fury-05/nasa-lunar-landing-navigator-2026?style=flat-square)](https://github.com/fury-05/nasa-lunar-landing-navigator-2026/graphs/contributors)
+[![Repo size](https://img.shields.io/github/repo-size/fury-05/nasa-lunar-landing-navigator-2026?style=flat-square)](https://github.com/fury-05/nasa-lunar-landing-navigator-2026)
+
+![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white)
+![numba](https://img.shields.io/badge/numba-00A3E0?style=flat-square&logo=numba&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![React 19](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=redis&logoColor=white)
+![Playwright](https://img.shields.io/badge/tested%20with-Playwright-45BA4B?style=flat-square&logo=playwright&logoColor=white)
+![Accessibility](https://img.shields.io/badge/axe-WCAG%202%20A%2FAA%20checked-005A9C?style=flat-square)
+![Deterministic](https://img.shields.io/badge/numbers-deterministic%2C%20no%20ML-lightgrey?style=flat-square)
+
+**[Open the live site](https://13-52-97-105.sslip.io)** &nbsp;|&nbsp; **[How to use it, with pictures](docs/HOW-TO-USE.md)** &nbsp;|&nbsp; **[Architecture and formulas](#architecture-and-how-the-numbers-are-calculated)**
+
+</div>
 
 > **Planning tool, not for flight operations.** Every result shows its sources, assumptions and uncertainty. Nothing here replaces mission-grade analysis.
+
+## Start here
+
+| I want to... | Go to |
+|---|---|
+| Try it now | [13-52-97-105.sslip.io](https://13-52-97-105.sslip.io), press **Open the Command Centre** |
+| Learn the screens step by step, with marked screenshots | [docs/HOW-TO-USE.md](docs/HOW-TO-USE.md) |
+| See how the numbers are calculated | [Architecture and how the numbers are calculated](#architecture-and-how-the-numbers-are-calculated) |
+| Read every control and term | [docs/USER_GUIDE.md](docs/USER_GUIDE.md) |
+| Check the validation results | [docs/validation/REPORT.md](docs/validation/REPORT.md) |
+| See sources and credits | [Data sources and attribution](#data-sources-and-attribution) |
+
+## See the light and shadow move
+
+The animation is real. Each frame below is a capture of the live site at a different time on the time slider (Shackleton rim, `pgda-site04`, one frame every 10 hours from 2026-12-12 06:00 UTC). The sky view shows the Sun (amber) and Earth (blue) against the real horizon. The 2D map and the 3D view are lit by the real Sun direction for that time, and the dark patches are true cast shadows. On the live site the same views run smoothly with the **Play** button.
+
+![Sky view, 2D terrain map and 3D terrain view changing as the Sun moves](docs/howto/img/anim-all.gif)
+
+<p align="center"><a href="docs/HOW-TO-USE.md"><img src="docs/demo-assets/31-command-1440.jpg" alt="Command Centre on a 1440 pixel screen" width="900"></a></p>
 
 ## The challenge
 
@@ -14,11 +65,12 @@ Landing near the lunar south pole is hard because the Sun skims the horizon, ter
 
 ## What works today
 
-Checked against the code and the live site on 2026-11-15. Routes in the app: `/`, `/command`, `/sites/pick`, `/public`, `/spacecraft`, `/credits`.
+Checked against the code and the live site on 2026-11-15. Routes in the app: `/`, `/command`, `/compare`, `/slip`, `/sites/pick`, `/public`, `/spacecraft`, `/credits`.
 
 | Feature | What it really does |
 |---|---|
-| **Command Centre** (`/command`) | Pick a site, a start date (2026-12-01 to 2029-11-01, UTC) and a length (3, 8, 15 or 30 days). Shows a verdict with an uncertainty range, sunlight and Earth link metrics, a polar sky view with the Sun and Earth against the terrain skyline, a horizon strip, local terrain (a shaded 2D map and an oblique pseudo-3D canvas view), four timeline strips, sunset and Earthset countdowns, and a time scrubber. The link state lives in the URL, so a link reproduces a view. |
+| **Command Centre** (`/command`) | Pick a site, a start date (2026-12-01 to 2029-11-01, UTC) and a length (3, 8, 15 or 30 days). Shows a verdict with an uncertainty range, sunlight and Earth link metrics, a polar sky view with the Sun and Earth against the terrain skyline, a horizon strip, local terrain (a shaded 2D map and an oblique pseudo-3D canvas view), four timeline strips, sunset and Earthset countdowns, and a time scrubber with a Play button and a speed control that moves every view together. The link state lives in the URL, so a link reproduces a view. |
+| **Compare** (`/compare`) and **Slip matrix** (`/slip`) | Compare two to four sites side by side, and see how the result changes when the landing date slips by a few days. Same engine, same upper-bound labels. |
 | **Mission needs** | Editable thresholds (minimum sunlight share, longest dark spell, minimum Earth link share, optional longest outage). The defaults are placeholders and are labelled as such until mission criteria are approved. |
 | **Honesty states** | When terrain data does not reach as far as the required distance, the verdict is shown as an amber "Upper bound, terrain incomplete" instead of a green result, with the covered share and reach. A "Not viable" result stays as is, because missing terrain can only make it worse. |
 | **Site picker** (`/sites/pick`) | Moon Trek polar map (OpenLayers, south polar stereographic) with site markers; click a marker to open it. Custom coordinates (south of 60 S, east-positive longitude) start a background job that builds the Sun and Earth series, with progress shown. |
@@ -39,11 +91,70 @@ Curated sites available on the live server: 10 tile-centre points from the PGDA 
 * Not built or not met: the lunar-day and lunar-night date presets, draped Trek imagery on the 3D terrain, a 60 frames per second 3D view (measured about 20 fps in headless Chromium, a canvas painter and not WebGL), any thermal or charging model for the lander (the Spacecraft Dashboard uses placeholder lander values and marks thermal as not assessed). Moved to [ROADMAP.md](ROADMAP.md) by [ADR-0008](docs/DECISIONS/ADR-0008-freeze-scope-cut.md): Moon globe, sky dome, objective presets, saved scenarios.
 * Earth link means line of sight only. Antennas, DSN stations, radio power and refraction are not modelled. The Moon has no atmosphere, so none is applied.
 
-## How it works, briefly
+## Architecture and how the numbers are calculated
 
-A deterministic Python engine (no machine learning in any number) takes Sun and Earth azimuth and elevation seen from each site from NASA JPL Horizons, casts rays over a LOLA elevation model with lunar curvature to build the skyline, integrates how much of each disc is above the skyline, finds sunrise, sunset, Earthrise and Earthset, and repeats the calculation with the skyline moved up and down to produce the uncertainty range. A FastAPI service serves precomputed results; a React app presents them. Details and a diagram: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). How to read the screens: [docs/USER_GUIDE.md](docs/USER_GUIDE.md).
+A deterministic Python engine (no machine learning in any number) takes the Sun and Earth direction seen from a site from NASA JPL Horizons, casts rays over a NASA LOLA elevation model with lunar curvature to build the skyline (the real horizon), measures how much of each disc is above it, finds sunrise, sunset, Earthrise and Earthset, and repeats the whole calculation with the skyline moved up and down to give an uncertainty range. A FastAPI service serves the results and a React app draws them.
 
-Stack: Python 3.12, FastAPI, SQLAlchemy and Alembic on PostgreSQL, Redis with arq, numpy and numba, rasterio and pyproj; React 19, TypeScript, Vite, Tailwind, OpenLayers and proj4, canvas drawing for the terrain views (no WebGL library); Caddy on one AWS VM.
+### The system
+
+![System architecture: NASA data feeds the engine, FastAPI serves bundles to the React app](docs/architecture/system.svg)
+
+| Part | Where | Role |
+|---|---|---|
+| Web app | `apps/web` | React 19, TypeScript, Vite, Tailwind. OpenLayers for the polar map. The terrain views are drawn on a 2D canvas (no WebGL library), so they run on modest hardware |
+| API | `services/api` | FastAPI, read only. Serves precomputed bundles, computes metrics for a requested window, runs custom-site jobs. Adds ETags, request ids, rate limits and RFC 7807 errors |
+| Worker | `lunar_api.worker` | arq on Redis. Builds a custom site (Horizons plus terrain) with progress over server-sent events |
+| Engine | `packages/engine` | Pure Python plus numba: ephemeris client, DEM sampler, skyline ray caster, disc visibility, events, metrics, sensitivity, compare and slip |
+| Data | `data/`, VM disk | Site catalogue, manifests with sha256, attribution registry. Large rasters and bundles live outside git |
+| Hosting | one AWS VM | Caddy (TLS, static files, `/api` proxy), systemd units, PostgreSQL 16, Redis 7 |
+
+Full detail, caching, deploy and failure behaviour: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+### The calculation, step by step
+
+![Six stages from ephemeris to sensitivity band with the formula at each stage](docs/architecture/pipeline.svg)
+
+**1. Sun and Earth positions.** For each site the engine asks JPL Horizons for the apparent azimuth and elevation of the Sun and Earth, their distance and angular size, every 10 minutes (observer at `coord@301`, airless, Moon mean-Earth frame; [ADR-0004](docs/DECISIONS/ADR-0004-horizons-conventions.md)). Requests are polite (one per second), cached by sha256, and the API version is checked. Azimuth is measured clockwise from north. The angular radius of a disc is `rho = asin(body radius / distance)`.
+
+**2. The skyline by ray casting.** From the site the engine walks outward along 1,440 directions (every 0.25 degrees). At each step it finds the ground point, reads its height from the elevation model and computes the angle at which that point is seen. The Moon is a sphere of radius `R = 1,737,400 m`, so the curvature drop is part of the formula, not a correction added afterwards:
+
+```
+theta = d / R
+e     = atan2( (R + z) * cos(theta) - (R + h0),  (R + z) * sin(theta) )
+skyline(azimuth) = max over d of e, never lower than the bare-sphere dip  -acos( R_site / (R_site + h_eye) )
+```
+
+`d` is the ground distance, `z` the height of the terrain sample above the reference sphere, `h0` the eye height above the sphere at the site. Sample points are placed by great-circle destination and then projected to south polar stereographic metres, so curvature is honoured at 16 km as at 300 km. Heights come from bilinear sampling. The kernel is compiled with numba and runs the azimuths in parallel.
+
+![One ray over a curved Moon: the observer, the local horizontal, the line of sight and the angle e](docs/architecture/raycast.svg)
+
+**3. Three terrain tiers.** At every step the engine uses the finest valid data: a 5 m site tile and a 5 m mosaic (87S to 90S) within 20 km, then the 20 m LDEM out to the required 300 km ([ADR-0007](docs/DECISIONS/ADR-0007-far-terrain-tiers.md)). A ray only ends when no tier has data. Each azimuth records how far it reached, plus the height error (ERR product) and effective resolution (EFFRES) at the sample that sets the horizon.
+
+![The three terrain tiers around a site and the rays that cross them](docs/architecture/tiers.svg)
+
+**4. How much of the Sun is visible.** The Sun and Earth are discs, not points. Each disc is cut into 65 vertical strips (placed by the substitution `x = rho sin t`, so a horizon through the centre gives exactly one half). For a strip at offset `x` with half height `s`, the visible part is `clamp((el + s) - max(skyline, el - s), 0, 2s)`, and the visible share `F` is the sum of strip areas over the disc area `pi * rho^2`. **The Sun counts as up when `F >= 0.5`**, which means the disc centre is on the skyline. **Earth link is available when the centre of Earth is above the skyline** (plus an optional mask angle). There is no refraction because the Moon has no atmosphere.
+
+![A Sun disc cut into strips against a jagged skyline](docs/architecture/disc-visibility.svg)
+
+**5. Events and metrics.** The series are interpolated with a cubic Hermite spline (Catmull-Rom slopes) and level crossings are refined by bisection to one second. That gives sunrise, sunset, Earthrise and Earthset, then sunlight hours, Sun share of the window, longest dark spell, Earth link share and longest outage. Spans that touch the edge of the window are flagged as "at least this long". A relative power index is `F * max(sin el, 0) * 1361 W/m^2 * (1 AU / distance)^2`; it is an index on the array plane, not a lander power budget.
+
+**6. Uncertainty and the verdict.** Every metric is computed three times with the skyline moved by `-delta`, `0` and `+delta`, where `delta = max(0.1 deg, sqrt(dem_error^2 + frame_error^2))`. The DEM error comes from the ERR product where it was measured; the Moon frame error is an assumed 0.03 degrees. The verdict (Viable, Marginal, Not viable) compares the metrics with the mission needs, and is tagged **robust** only if all three runs agree and **fragile** otherwise.
+
+**7. Honesty about missing terrain.** If the terrain does not reach 300 km in every direction, the missing relief can only raise the true horizon, so every result is an upper bound. The API then returns `upper_bound_terrain_incomplete` with the share of directions that reached 300 km and the reach range. A "Not viable" result stays conclusive. The size of the unseen relief is `pending-source`, so it is never guessed.
+
+### How the light and shadow views work
+
+The terrain views receive the real height grid around the site from the API. For the time on the slider the page takes the Sun direction (azimuth and elevation). For every cell it computes the surface normal from the four neighbours and a Lambert term `max(0, n . sun)`. It then marches from the cell toward the Sun and marks the cell as shadowed if any cell on the way is higher than the line of sight to the Sun. Cells without height data are drawn grey, never as shadow. The 2D view paints that grid as a map; the 3D view rotates and tilts the same grid and paints the quads from far to near. Moving the slider or pressing Play redraws both, so the shadows move with the Sun. See [How to use it, step 5](docs/HOW-TO-USE.md#step-5-watch-light-and-shadow-on-the-terrain-it-is-real).
+
+### Accuracy, in numbers
+
+* Sun direction at six Apollo landing sites: five within 0.35 degrees of NASA's printed value, Apollo 16 off by 2.86 degrees (cause unknown).
+* Terrain reaches the full 300 km in 46% to 95% of directions across the ten curated sites, so no verdict is conclusive yet.
+* The Earth link is line of sight only; antennas, DSN stations and radio power are not modelled.
+
+Every measured number: [docs/validation/REPORT.md](docs/validation/REPORT.md).
+
+Stack: Python 3.12, FastAPI, SQLAlchemy and Alembic on PostgreSQL, Redis with arq, numpy and numba, rasterio and pyproj; React 19, TypeScript, Vite, Tailwind, OpenLayers and proj4; Caddy on one AWS VM. Tests: pytest and hypothesis, Vitest, Playwright with axe accessibility, keyboard and 375 px overflow checks, a CI workflow, and a deploy script that rolls back when the health check fails.
 
 ## Data sources and attribution
 
@@ -59,6 +170,15 @@ We use the four official Space Apps resources, plus NASA public data documented 
 | NASA NSSDCA Apollo table (`nssdc-apollo`), NASA CLPS deliveries (`nasa-clps`) | Site coordinates in the catalogue |
 
 Third-party software licences: [docs/THIRD_PARTY_LICENSES.md](docs/THIRD_PARTY_LICENSES.md), generated by `python scripts/gen_licenses.py`.
+
+## Screenshots
+
+| | |
+|---|---|
+| [![Home](docs/demo-assets/32-home.jpg)](docs/HOW-TO-USE.md) **Home**: four steps, colour key, the 300 km explanation | [![Command Centre at 1920 px](docs/demo-assets/30-command-1920.jpg)](docs/HOW-TO-USE.md) **Command Centre** on a wide screen |
+| [![Site picker](docs/demo-assets/12-site-picker.jpg)](docs/HOW-TO-USE.md#step-7-pick-a-custom-site) **Site picker**: NASA Moon Trek polar map | [![Public View](docs/demo-assets/14-public-top.jpg)](docs/demo-assets/README.md) **Public View**: the story for non-experts |
+
+All screenshots: [docs/demo-assets/README.md](docs/demo-assets/README.md). They show upper bounds (terrain incomplete), not verified landing conditions.
 
 ## Run it locally
 
@@ -105,8 +225,9 @@ packages/engine/     lunar_engine: ephemeris, terrain, skyline, visibility, even
 packages/contracts/  OpenAPI spec exported from the API code
 data/                Site catalogue, manifests, attribution registry, CSA content
 infra/               Caddy, systemd units, env template
-scripts/             Automation (start gate, commits, checklist, deploy, data, audits)
-docs/ todo/ checklist/  Specs, decisions, validation notes, task tables, generated checklist
+scripts/             Automation (start gate, commits, checklist, deploy, data, audits, build_doc_images.py)
+docs/                Specs, decisions, validation notes, HOW-TO-USE.md, architecture/ and howto/ pictures
+todo/ checklist/     Task tables and the generated checklist
 ```
 
 ## Security
