@@ -1,141 +1,66 @@
 import { expect, test, type Page } from "@playwright/test";
 
-const SITES = {
-  count: 1,
-  notice: "Planning tool, not for flight operations.",
-  sites: [
-    {
-      id: "alpha",
-      lat_deg: -89.5,
-      lon_east_deg: 40,
-      coordinate_status: "derived-tile-centre",
-      window: {},
-      built_at_utc: "2026-11-14T00:00:00Z",
-      terrain_coverage: { covered_fraction: 1, min_reach_m: 8000, max_reach_m: 8000 },
-    },
-  ],
-};
-const band = (n: number) => ({ low: n * 0.9, nominal: n, high: n * 1.1 });
-const ASSESS = {
-  site_id: "alpha",
-  start_utc: "2026-12-11T00:00:00Z",
-  end_utc: "2026-12-26T00:00:00Z",
-  verdict: "marginal",
-  verdict_state: "marginal",
-  verdict_conclusive: true,
-  robust: true,
-  delta_deg: 0.2,
-  criteria_status: "pending-source",
-  criteria: {
-    min_sun_fraction: 0.5,
-    max_dark_hours: 100,
-    min_earth_fraction: 0.5,
-    max_outage_hours: 1e9,
-    source: "default-placeholder",
-    status: "pending-source: placeholder",
-  },
-  terrain: {
-    available: true,
-    complete: true,
-    covered_fraction: 1,
-    reach_km_min: 8,
-    reach_km_median: 8,
-    reach_km_max: 8,
-    required_km: 8,
-  },
-  band_basis: ["test basis"],
-  sunlight_hours: band(100),
-  sun_share: band(0.5),
-  earth_share: band(0.4),
-  longest_dark_hours: band(60),
-  longest_outage_hours: band(40),
-  elevation_deg: { min: 0.5, mean: 1, max: 1.5 },
-  power_index_w_m2: { horizontal: 1, tracking: 1 },
-  assumptions: [],
-  provenance: {
-    sources: [],
-    engine_version: "0",
-    frame_note: "",
-    assumptions: [],
-    warnings: [],
-    uncertainty: {},
-    reproduce: {},
-  },
-};
-const CREDITS = {
-  notice: "x",
-  unconfirmed_terms: [],
-  sources: [
-    {
-      id: "trek-moon",
-      name: "Moon Trek WMTS",
-      publisher: "NASA/JPL Solar System Treks",
-      url: "https://trek.nasa.gov/moon/",
-      credit: "c",
-      usage_statement: "u",
-      terms_confirmed: false,
-    },
-    {
-      id: "csa-moon",
-      name: "Moon exploration",
-      publisher: "Canadian Space Agency",
-      url: "https://www.asc-csa.gc.ca/eng/astronomy/moon-exploration/",
-      credit: "Credit: Canadian Space Agency (from the API).",
-      usage_statement: "u",
-      terms_confirmed: false,
-    },
-  ],
-};
+import type { components } from "../src/api/schema";
+import {
+  assessOut,
+  attributionOut,
+  creditOut,
+  landerCheck,
+  landerOut,
+  json,
+  mockApi,
+  provenance,
+  siteList,
+  siteSummary,
+  slipCell,
+  slipOut,
+  terrainOut,
+} from "./fixtures";
+
+type S = components["schemas"];
+
+const SITES = siteList([siteSummary("alpha")]);
+const LONG_WINDOW = { end_utc: "2026-12-26T00:00:00Z" };
+
+const CREDITS = attributionOut([
+  creditOut("trek-moon", {
+    name: "Moon Trek WMTS",
+    publisher: "NASA/JPL Solar System Treks",
+    url: "https://trek.nasa.gov/moon/",
+    credit: "c",
+  }),
+  creditOut("csa-moon", {
+    name: "Moon exploration",
+    publisher: "Canadian Space Agency",
+    url: "https://www.asc-csa.gc.ca/eng/astronomy/moon-exploration/",
+    credit: "Credit: Canadian Space Agency (from the API).",
+  }),
+]);
 
 async function mock(page: Page) {
-  await page.route("**/api/v1/sites", (r) => r.fulfill({ json: SITES }));
-  await page.route("**/api/v1/sites/*/assess*", (r) => r.fulfill({ json: ASSESS }));
-  await page.route("**/api/v1/attribution", (r) => r.fulfill({ json: CREDITS }));
+  await mockApi(page, { sites: SITES, assess: assessOut({ ...LONG_WINDOW, robust: true }) });
+  await page.route("**/api/v1/attribution", (r) => json(r, CREDITS));
   await page.route("**/api/v1/slip-matrix", (r) =>
-    r.fulfill({
-      json: {
-        sites: ["alpha"],
+    json(
+      r,
+      slipOut({
         offsets_days: [0, 3],
-        cells: [
-          [
-            { sunlight_hours: 120, offset_days: 0 },
-            { sunlight_hours: 80, offset_days: 3 },
-          ],
-        ],
-        provenance: ASSESS.provenance,
-      },
-    }),
+        cells: [[slipCell(0, "viable", 120), slipCell(3, "marginal", 80)]],
+        provenance: provenance(),
+      }),
+    ),
   );
 }
 
-const check = (id: string, title: string, status: string, over: Record<string, unknown> = {}) => ({
-  id,
-  title,
-  status,
-  reasoning: `${title} reasoning from the API.`,
-  unit: null,
-  available: null,
-  required_nominal: null,
-  required_pessimistic: null,
-  margin_nominal: null,
-  margin_pessimistic: null,
-  ...over,
-});
-
-function landerResult(
-  body: { lander: Record<string, unknown> },
-  over: Record<string, unknown> = {},
-) {
-  const heavy = (body.lander.survival_load_w as number) > 15;
-  return {
-    site_id: "alpha",
-    start_utc: "2026-12-11T00:00:00Z",
-    end_utc: "2026-12-26T00:00:00Z",
+/** The API's lander result for a request body; a heavy load fails the power check. */
+function landerResult(body: { lander: S["LanderIn"] }, over: Partial<S["LanderAssessOut"]> = {}) {
+  const heavy = body.lander.survival_load_w > 15;
+  const base = landerOut(body.lander);
+  return landerOut(body.lander, {
     verdict: heavy ? "fail" : "pass",
-    conclusive: true,
     summary: heavy ? "API summary: the battery does not last." : "API summary: survives.",
     checks: [
-      check("power", "Power through the longest dark spell", heavy ? "fail" : "pass", {
+      landerCheck("power", "Power through the longest dark spell", heavy ? "fail" : "pass", {
         unit: "Wh",
         available: 800,
         required_nominal: 600,
@@ -143,37 +68,21 @@ function landerResult(
         margin_nominal: 200,
         margin_pessimistic: 140,
       }),
-      check("communication", "Autonomy through the longest Earth outage", "pass"),
-      check("terrain_slope", "Landing slope", "not_assessed"),
-      check("thermal", "Thermal survival", "not_assessed", {
-        reasoning: "No thermal model exists in this tool.",
-      }),
-      check("mission_needs", "Mission needs", "pass"),
+      ...base.checks.filter((c) => c.id !== "power"),
     ],
-    lander: { ...body.lander, usable_energy_wh: 800, dark_survival_hours: 80 },
-    terrain: ASSESS.terrain,
-    band_basis: ["Lander basis line from the API."],
-    longest_dark_hours: band(60),
-    longest_outage_hours: band(40),
-    slope: null,
-    mission_needs: ASSESS.criteria,
-    warnings: ["Lander warning from the API."],
-    assumptions: ["Lander assumption from the API."],
-    label: "Planning tool, not for flight operations.",
-    provenance: ASSESS.provenance,
     ...over,
-  };
+  });
 }
 
 async function mockLander(
   page: Page,
   seen: Record<string, unknown>[] = [],
-  over: Record<string, unknown> = {},
+  over: Partial<S["LanderAssessOut"]> = {},
 ) {
   await page.route("**/api/v1/lander/assess", (r) => {
-    const body = r.request().postDataJSON() as { lander: Record<string, unknown> };
-    seen.push(body as Record<string, unknown>);
-    return r.fulfill({ json: landerResult(body, over) });
+    const body = r.request().postDataJSON() as { lander: S["LanderIn"] };
+    seen.push(body as unknown as Record<string, unknown>);
+    return json(r, landerResult(body, over));
   });
 }
 
@@ -216,7 +125,7 @@ test("spacecraft: an incomplete terrain verdict is an amber upper bound", async 
   await mockLander(page, [], {
     verdict: "upper_bound_terrain_incomplete",
     conclusive: false,
-    terrain: { ...ASSESS.terrain, complete: false, covered_fraction: 0.5, reach_km_min: 2 },
+    terrain: terrainOut({ complete: false, covered_fraction: 0.5, reach_km_min: 2 }),
   });
   await page.goto("/spacecraft?site=alpha");
   await expect(page.getByText("! Upper bound, terrain incomplete").first()).toBeVisible();
