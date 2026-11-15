@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Chip } from "../components/Chip";
 import { Glass } from "../components/Glass";
@@ -9,12 +9,14 @@ import { HorizonStrip } from "../components/HorizonStrip";
 import { Readout } from "../components/Readout";
 import { Scrubber } from "../components/Scrubber";
 import { Timeline } from "../components/Timeline";
+import { syntheticDemoTile } from "../lib/terrain";
 import {
   addDays,
   iso,
   loadAssess,
   loadSites,
   loadSkyline,
+  loadTerrainTile,
   loadTimeline,
   type SeriesRow,
 } from "../lib/data";
@@ -22,6 +24,10 @@ import { NeedsForm } from "../components/NeedsForm";
 import { needsFromParams, needsToParams, needsToQuery } from "../lib/mission";
 import { toSiteInfo } from "../lib/site";
 import { useAsync } from "../lib/useAsync";
+
+const TerrainView = lazy(() =>
+  import("../components/TerrainView").then((m) => ({ default: m.TerrainView })),
+);
 
 const DEFAULT_START = "2026-12-11";
 const DAY_CHOICES = [3, 8, 15, 30];
@@ -87,6 +93,9 @@ export function Command() {
     id && valid ? () => loadTimeline(id, iso(a), iso(b), 60) : null,
     `t|${key}`,
   );
+
+  const terrain = useAsync(usable ? () => loadTerrainTile(id) : null, `terr|${id}`);
+  const [demo, setDemo] = useState(false);
 
   const rows = useMemo(
     () => (timeline.state === "ok" ? (timeline.data.series as unknown as SeriesRow[]) : []),
@@ -225,6 +234,44 @@ export function Command() {
           <HorizonStrip skyline={skyline.data} rows={rows} now={midpoint} />
         ) : (
           <Loading what="horizon strip" />
+        )}
+      </Glass>
+
+      <Glass>
+        <h2 className="mt-0 text-xl">Local terrain</h2>
+        {terrain.state === "loading" && <Loading what="terrain tile" />}
+        {terrain.state === "error" && <Problem message={terrain.message} />}
+        {terrain.state === "ok" && terrain.data !== null && (
+          <Suspense fallback={<Loading what="terrain view" />}>
+            <TerrainView
+              tile={terrain.data}
+              sun={midpoint ? { azDeg: midpoint.sun.az_deg, elDeg: midpoint.sun.el_deg } : null}
+            />
+          </Suspense>
+        )}
+        {terrain.state === "ok" && terrain.data === null && (
+          <div className="flex flex-col gap-3 text-sm">
+            <p className="m-0 text-muted">
+              No terrain tile is available for this site yet, so no local relief is shown. The
+              horizon strip above still uses the real skyline. A terrain tile service is planned.
+            </p>
+            {!demo ? (
+              <button
+                type="button"
+                onClick={() => setDemo(true)}
+                className="min-h-11 w-fit rounded-cell border border-white/20 px-4 text-sm text-muted hover:text-ink"
+              >
+                Preview the viewer with a synthetic surface (not real terrain)
+              </button>
+            ) : (
+              <Suspense fallback={<Loading what="terrain view" />}>
+                <TerrainView
+                  tile={syntheticDemoTile()}
+                  sun={midpoint ? { azDeg: midpoint.sun.az_deg, elDeg: midpoint.sun.el_deg } : null}
+                />
+              </Suspense>
+            )}
+          </div>
         )}
       </Glass>
 

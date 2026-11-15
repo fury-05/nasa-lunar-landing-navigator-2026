@@ -111,3 +111,17 @@ export async function pollJob(
   }
   return null;
 }
+
+/**
+ * Terrain tile for the local 3D view. The route is a proposal (todo P5-01) and is not in the
+ * generated schema, so this uses fetch directly. A 404 or other failure means "no terrain tile
+ * available" and is reported to the caller as null, never replaced by invented data.
+ */
+export async function loadTerrainTile(id: string): Promise<import("./terrain").TerrainTile | null> {
+  const r = await fetch(`/api/v1/sites/${encodeURIComponent(id)}/terrain`, {
+    headers: { accept: "application/json" },
+  });
+  if (!r.ok || !(r.headers.get("content-type") ?? "").includes("json")) return null;
+  const j: unknown = await r.json();
+  return j as import("./terrain").TerrainTile;
+}
