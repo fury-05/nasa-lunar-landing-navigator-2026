@@ -1,0 +1,157 @@
+{
+  "schema": 1,
+  "purpose": "docs/04 section 8 item 8. Drift in any value below needs an ADR.",
+  "engine_version_when_recorded": "0.0.1",
+  "adr": "initial",
+  "adr_history": [
+    "initial"
+  ],
+  "golden": {
+    "inputs": {
+      "sun": {
+        "request_sha256": "8df3f8571bd4e5693af0844217216d096635fc6cfea23921a6921ec8a95e479d",
+        "response_result_sha256": "37bd01be01e64a9b864568a2232030abe4218975457a4ad5feb1032ad11ae6fd",
+        "api_version": "1.2",
+        "rows": 433,
+        "frame": "MEAN_ME (high precision)        {East-longitude positive}"
+      },
+      "earth": {
+        "request_sha256": "a32b48e9ddc1fedb7957c4ab354611edce33fdf5c3de8d2d4662998d77ab4c53",
+        "response_result_sha256": "8c10a38fab20ab673f0cbeb9184c841a4f4f431786e469de11471bd7991684b4",
+        "api_version": "1.2",
+        "rows": 433,
+        "frame": "MEAN_ME (high precision)        {East-longitude positive}"
+      },
+      "site": {
+        "lon_east_deg": 0.0,
+        "lat_deg": -85.0,
+        "alt_km": 0.0
+      },
+      "window_utc": [
+        "2026-12-01 00:00",
+        "2026-12-04 00:00",
+        "10m"
+      ]
+    },
+    "skyline": "synthetic wavy skyline, see golden_support.synthetic_skyline",
+    "sun_metrics": {
+      "sunlight_hours": 12.680078125,
+      "visible_share": 0.17611219618055557,
+      "longest_dark_hours": 59.319921875,
+      "elevation_min_deg": -0.771239,
+      "elevation_mean_deg": 0.7588386849224715,
+      "elevation_max_deg": 2.337353,
+      "power_horizontal_w_m2": 8.854029013659812,
+      "power_tracking_w_m2": 247.1305901492571,
+      "sun_intervals": [
+        [
+          "2026-12-01T00:00:00Z",
+          "2026-12-01T12:40:48Z"
+        ]
+      ],
+      "dark_intervals": [
+        [
+          "2026-12-01T12:40:48Z",
+          "2026-12-04T00:00:00Z"
+        ]
+      ]
+    },
+    "earth_metrics": {
+      "visible_hours": 30.207942708333334,
+      "visible_share": 0.419554759837963,
+      "longest_outage_hours": 41.792057291666666,
+      "windows": [
+        [
+          "2026-12-01T00:00:00Z",
+          "2026-12-02T06:12:28Z"
+        ]
+      ]
+    },
+    "combined": {
+      "both_intervals": [
+        [
+          "2026-12-01T00:00:00Z",
+          "2026-12-01T12:40:48Z"
+        ]
+      ],
+      "neither_intervals": [
+        [
+          "2026-12-02T06:12:28Z",
+          "2026-12-04T00:00:00Z"
+        ]
+      ]
+    },
+    "sun_fraction_samples": {
+      "sample_indices": [
+        0,
+        36,
+        72,
+        108,
+        144,
+        180,
+        216,
+        252,
+        288,
+        324,
+        360,
+        396,
+        432
+      ],
+      "times_utc": [
+        "2026-12-01T00:00:00Z",
+        "2026-12-01T06:00:00Z",
+        "2026-12-01T12:00:00Z",
+        "2026-12-01T18:00:00Z",
+        "2026-12-02T00:00:00Z",
+        "2026-12-02T06:00:00Z",
+        "2026-12-02T12:00:00Z",
+        "2026-12-02T18:00:00Z",
+        "2026-12-03T00:00:00Z",
+        "2026-12-03T06:00:00Z",
+        "2026-12-03T12:00:00Z",
+        "2026-12-03T18:00:00Z",
+        "2026-12-04T00:00:00Z"
+      ],
+      "fraction": [
+        0.9999999999999998,
+        0.9999999999999999,
+        0.6165224376099626,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "synthetic_dem_skyline": {
+      "description": "200 m cone 3 km east and 120 m disc 2 km south, 10 m pixels, eye 1 m",
+      "azimuths_deg": [
+        0,
+        45,
+        90,
+        135,
+        180,
+        225,
+        270,
+        315
+      ],
+      "skyline_deg": [
+        -0.061473,
+        -0.061473,
+        3.696553,
+        -0.061473,
+        3.629912,
+        -0.061473,
+        -0.061473,
+        -0.061473
+      ],
+      "max_deg": 3.696553,
+      "mean_deg": 0.13066
+    }
+  }
+}
