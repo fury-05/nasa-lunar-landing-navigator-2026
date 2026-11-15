@@ -1,0 +1,42 @@
+{
+  "site": {
+    "id": "pgda-site04",
+    "lat_deg": -89.7668,
+    "lon_east_deg": -171.8699
+  },
+  "resolution": {
+    "dem": "Site04_final_adj_5mpp_surf.tif",
+    "dem_sha256": "38ff70dbdf2f066c2cfa94a646c3a59d653ce7f6b4528b15fc1b43ee397ce758",
+    "range_m": 8000.0,
+    "base_pixel_m": 5.0,
+    "skyline_5m_mean_deg": 12.2352,
+    "20m_minus_5m": {
+      "mean_abs_deg": 0.1183,
+      "p95_abs_deg": 0.7344,
+      "max_abs_deg": 0.9108,
+      "mean_signed_deg": -0.1183
+    },
+    "80m_minus_5m": {
+      "mean_abs_deg": 0.3433,
+      "p95_abs_deg": 1.6721,
+      "max_abs_deg": 2.2459,
+      "mean_signed_deg": -0.3432
+    }
+  },
+  "err_80m": {
+    "ldem_sha256": "82030dcbdd7c4bb0c7d858e9b4b293b9f2cda5a543ba31ec0f42784bd6beee5a",
+    "err_sha256": "e89306914bb209143f61ba66d341703d75221339424b774c6a1eb3c6c370ffc6",
+    "range_m": 15000.0,
+    "azimuths_with_error": 1139,
+    "azimuths": 1440,
+    "median_deg": 0.0096,
+    "p95_deg": 0.1264,
+    "max_deg": 0.1494,
+    "effective_dem_error_deg": 0.1264,
+    "tier_share": {
+      "site-tile-5m": 0.599,
+      "ldem-80m": 0.192
+    },
+    "note": "ERR is in metres and is divided by the distance of the controlling sample"
+  }
+}

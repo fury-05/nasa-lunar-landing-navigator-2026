@@ -1,0 +1,90 @@
+{
+  "source": {
+    "url": "https://www.nasa.gov/wp-content/uploads/2023/04/sp-4029.pdf",
+    "location": "table \"LM Lunar Landing\", row \"Sun Angle (deg)\", printed page 294 (PDF page 304)"
+  },
+  "generated_at_utc": "2026-11-15T03:54:32Z",
+  "results": [
+    {
+      "id": "apollo-11",
+      "lat_deg": 0.674,
+      "lon_east_deg": 23.473,
+      "landing_gmt": "1969-07-20T20:17:39Z",
+      "nasa_sun_angle_deg": 10.8,
+      "ours_deg": 10.703,
+      "diff_deg": -0.097,
+      "request_sha256": "229b9b1a7e40a87f83c086f52a62dac9dae7c7058b4932cef0ceead97738b4ef",
+      "api_version": "1.2",
+      "rows": 61
+    },
+    {
+      "id": "apollo-12",
+      "lat_deg": -3.013,
+      "lon_east_deg": -23.422,
+      "landing_gmt": "1969-11-19T06:54:36Z",
+      "nasa_sun_angle_deg": 5.1,
+      "ours_deg": 5.148,
+      "diff_deg": 0.048,
+      "request_sha256": "f85b5e8e5ea14288924859d6e4e9a857abc8f15c7af1fb9ae2d23d776dbd7b57",
+      "api_version": "1.2",
+      "rows": 61
+    },
+    {
+      "id": "apollo-14",
+      "lat_deg": -3.646,
+      "lon_east_deg": -17.472,
+      "landing_gmt": "1971-02-05T09:18:13Z",
+      "nasa_sun_angle_deg": 10.3,
+      "ours_deg": 10.349,
+      "diff_deg": 0.049,
+      "request_sha256": "80a7ca16b981c2ee7aff0bbae27bb5d922800c301ed00f3fc6515467f784c4d7",
+      "api_version": "1.2",
+      "rows": 61
+    },
+    {
+      "id": "apollo-15",
+      "lat_deg": 26.132,
+      "lon_east_deg": 3.633,
+      "landing_gmt": "1971-07-30T22:16:29Z",
+      "nasa_sun_angle_deg": 12.2,
+      "ours_deg": 12.024,
+      "diff_deg": -0.176,
+      "request_sha256": "a78cd93dee9e61efb36d5571ab6983dc8b7af648ef9bf1c5750bbd7fc2d5db66",
+      "api_version": "1.2",
+      "rows": 61
+    },
+    {
+      "id": "apollo-16",
+      "lat_deg": -8.973,
+      "lon_east_deg": 15.501,
+      "landing_gmt": "1972-04-21T02:23:35Z",
+      "nasa_sun_angle_deg": 11.9,
+      "ours_deg": 14.761,
+      "diff_deg": 2.861,
+      "request_sha256": "82a333305c3971797aa45778eb0cca67aaa4b6d301e1b1ddbdd76e3840eb0859",
+      "api_version": "1.2",
+      "rows": 61
+    },
+    {
+      "id": "apollo-17",
+      "lat_deg": 20.191,
+      "lon_east_deg": 30.772,
+      "landing_gmt": "1972-12-11T19:54:58Z",
+      "nasa_sun_angle_deg": 13.0,
+      "ours_deg": 13.35,
+      "diff_deg": 0.35,
+      "request_sha256": "880a63b9fab0a3e09843df6857b1759a36873234ca0201eefb51f5c7dc92ee2e",
+      "api_version": "1.2",
+      "rows": 61
+    }
+  ],
+  "apollo16_diagnostic": {
+    "nasa_value_deg": 11.9,
+    "crossings": [
+      "1972-04-20T20:40:56Z"
+    ],
+    "planned_touchdown_utc": "1972-04-20T19:36:00Z",
+    "ours_at_planned_deg": 11.358,
+    "diff_at_planned_deg": -0.542
+  }
+}
