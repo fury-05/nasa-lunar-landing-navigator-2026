@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, type Ref } from "react";
 import type { Skyline, SeriesRow } from "../lib/data";
 
 const W = 720;
@@ -37,10 +37,12 @@ export function HorizonStrip({
   skyline,
   rows,
   now,
+  svgRef,
 }: {
   skyline: Skyline;
   rows: SeriesRow[];
   now: SeriesRow | null;
+  svgRef?: Ref<SVGSVGElement>;
 }) {
   const terrain = useMemo(() => {
     const pts = skyline.azimuth_deg.map((az, i) => [az, skyline.elevation_deg[i] ?? 0] as const);
@@ -64,7 +66,13 @@ export function HorizonStrip({
 
   return (
     <figure className="m-0">
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={summary} className="h-auto w-full">
+      <svg
+        ref={svgRef}
+        viewBox={`0 0 ${W} ${H}`}
+        role="img"
+        aria-label={summary}
+        className="h-auto w-full"
+      >
         <rect x={L} y={T} width={W - L - R} height={H - T - B} fill="#0b1530" stroke="#ffffff22" />
         {[0, 5, 10, 15].map((e) => (
           <g key={e}>
