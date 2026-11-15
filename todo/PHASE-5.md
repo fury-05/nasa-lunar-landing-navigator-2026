@@ -5,10 +5,8 @@ Window: +16 to +28h. Statuses: DONE, PENDING, POSTPONED. Update this table in th
 | ID | Task | Owner | Status | Evidence / Notes |
 |---|---|---|---|---|
 | P5-01 | Terrain tile endpoint (heightfield) and slope layer in the API | irfan | PENDING | issue #77 |
-| P5-02 | 2D polar map with OpenLayers, proj4 and Trek SP tiles, site markers | afreen | PENDING | issue #78 |
-| P5-03 | Moon globe with Trek equirectangular tiles and real Sun and Earth directions | member3 | PENDING | issue #79 |
-| P5-04 | Local 3D terrain with draped imagery, Sun light, shadows, exaggeration control | afreen | PENDING | issue #80 |
-| P5-05 | Sky dome first-person view with skyline and discs | member3 | PENDING | issue #81 |
+| P5-02 | 2D polar map with OpenLayers, proj4 and Trek SP tiles, site markers | afreen | DONE | PR 138: OpenLayers + proj4 + Trek WAC polar WMTS, site markers, click to pick; projection unit-tested against QuickMap-verified pgda-site04; live page checked with real tiles; marker labels overlap near the pole; issue #78 |
+| P5-04 | Local 3D terrain with draped imagery, Sun light, shadows, exaggeration control | afreen | PENDING | partial, PR 139: TerrainView (2D shaded + oblique 3D, scrubber Sun, labelled exaggeration, uncertainty); needs GET /sites/{id}/terrain (P5-01, issue #77) before it shows real data; issue #80, #131 |
 | P5-06 | Shared mission clock and animation controls across all views | afreen | PENDING | issue #82 |
 | P5-07 | 3D performance, LOD, tile cache, reduced-motion and low-power fallback | member3 | PENDING | issue #83 |
 

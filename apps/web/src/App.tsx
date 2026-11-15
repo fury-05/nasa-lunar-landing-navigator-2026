@@ -13,6 +13,11 @@ const SitePicker = lazy(() =>
   import("./routes/SitePicker").then((m) => ({ default: m.SitePicker })),
 );
 
+// The picker pulls in OpenLayers and proj4, so it loads only when someone opens the route.
+const SitePicker = lazy(() =>
+  import("./routes/SitePicker").then((m) => ({ default: m.SitePicker })),
+);
+
 export function App() {
   return (
     <Routes>
