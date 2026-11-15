@@ -172,7 +172,7 @@ export function Slip() {
         <>
           <Glass>
             <h2 className="mt-0 text-xl">Slip by site</h2>
-            <div className="overflow-x-auto">
+            <div className="relative overflow-x-auto">
               <table className="w-full border-collapse text-left">
                 <caption className="pb-2 text-left text-xs text-muted">
                   Rows are sites, columns are days of slip after {start} (UTC), each a {days} day

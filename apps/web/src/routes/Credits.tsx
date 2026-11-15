@@ -25,17 +25,17 @@ export function Credits() {
         </p>
       )}
       {c.state === "ok" && (
-        <ul className="m-0 grid list-none gap-4 p-0 md:grid-cols-2">
+        <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 md:grid-cols-2">
           {c.data.sources.map((s) => (
-            <li key={s.id}>
-              <Glass className="h-full">
+            <li key={s.id} className="min-w-0">
+              <Glass className="h-full [overflow-wrap:anywhere]">
                 <h2 className="mt-0 text-lg">{s.name}</h2>
                 <p className="m-0 text-sm text-muted">{s.publisher}</p>
                 <p className="mb-2 mt-3 text-sm">{s.credit}</p>
                 <Chip tone={s.terms_confirmed ? "good" : "warn"}>
                   {s.terms_confirmed ? "terms confirmed" : "terms not yet confirmed"}
                 </Chip>
-                <p className="mb-0 mt-3 break-words text-xs">
+                <p className="mb-0 mt-3 text-xs [overflow-wrap:anywhere]">
                   <a className="text-earth underline" href={s.url} rel="noreferrer noopener">
                     {s.url}
                   </a>
