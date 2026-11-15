@@ -539,3 +539,25 @@ def test_custom_points_are_named_by_their_coordinates_and_flat_ones_say_no_terra
     f = site_facts("custom-abcdef123456", meta)
     assert f["name"] == "Custom point -89.5000,40.0000" and f["source"] == "custom"
     assert f["terrain_available"] is False and f["reach_km"] == 0.0 and f["tile_radius_km"] is None
+
+
+def test_slip_cells_and_compare_rows_carry_the_same_terrain_and_state_as_assess(
+    client: TestClient,
+) -> None:
+    ref = client.get("/api/v1/sites/alpha/assess", params=W).json()
+    # slip cell for the same window: offset 0 from W.start with a 5 day duration
+    r = client.post(
+        "/api/v1/slip-matrix",
+        json={"sites": ["alpha"], "start": W["start"], "offsets_days": [0], "duration_days": 5},
+    )
+    assert r.status_code == 200, r.text
+    cell = r.json()["cells"][0][0]
+    assert cell["terrain"] == ref["terrain"]
+    assert cell["verdict_state"] == ref["verdict_state"]
+    assert cell["verdict_conclusive"] == ref["verdict_conclusive"]
+    assert cell["verdict"] == ref["verdict"]
+    # the amber state: the fixture bundle reaches only 2.5 km, so the cell is an upper bound
+    assert cell["terrain"]["complete"] is False
+    cmp_ = client.post("/api/v1/compare", json={"sites": ["alpha"], "windows": [W]}).json()
+    row = cmp_["rows"][0]
+    assert row["terrain"] == ref["terrain"] and row["verdict_state"] == ref["verdict_state"]

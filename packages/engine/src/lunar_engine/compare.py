@@ -17,6 +17,7 @@ import numpy as np
 from lunar_engine.metrics import BodySeries
 from lunar_engine.sensitivity import PLACEHOLDER_CRITERIA, Assessment, Criteria, assess
 from lunar_engine.skyline import Skyline
+from lunar_engine.terrain_status import TerrainStatus
 
 GLYPHS = {"viable": "check", "marginal": "tilde", "not viable": "cross"}
 
@@ -125,6 +126,10 @@ class SlipCell:
     robust: bool  # False draws the cell outlined (fragile)
     sunlight_hours: float
     earth_share: float
+    # same fields as Assessment, so a cell can show the upper-bound state without another call
+    terrain: TerrainStatus
+    verdict_state: str
+    verdict_conclusive: bool
 
 
 def slip_matrix(
@@ -147,6 +152,7 @@ def slip_matrix(
                 SlipCell(
                     s.site_id, off, a, b, res.nominal_verdict, GLYPHS[res.nominal_verdict],
                     res.robust, res.sunlight_hours.nominal, res.earth_share.nominal,
+                    res.terrain, res.verdict_state, res.verdict_conclusive,
                 )
             )
         rows.append(row)

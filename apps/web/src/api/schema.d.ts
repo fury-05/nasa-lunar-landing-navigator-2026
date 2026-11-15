@@ -620,6 +620,19 @@ export interface components {
              */
             status: "ok";
         };
+        /**
+         * HorizonsDegraded
+         * @description Set while the last Horizons call from the API or worker failed (clears on success or after
+         *     10 minutes). Stored bundles are still served, `using_cache` says whether any exist.
+         */
+        HorizonsDegraded: {
+            /** Reason */
+            reason: string;
+            /** Since Utc */
+            since_utc: string;
+            /** Using Cache */
+            using_cache: boolean;
+        };
         /** JobAccepted */
         JobAccepted: {
             /** Cached */
@@ -948,6 +961,7 @@ export interface components {
             checks: {
                 [key: string]: components["schemas"]["CheckResult"];
             };
+            horizons_degraded?: components["schemas"]["HorizonsDegraded"] | null;
             /**
              * Status
              * @enum {string}
@@ -1105,11 +1119,19 @@ export interface components {
             start_utc: string;
             /** Sunlight Hours */
             sunlight_hours: number;
+            terrain: components["schemas"]["TerrainOut"];
             /**
              * Verdict
              * @enum {string}
              */
             verdict: "viable" | "marginal" | "not viable";
+            /** Verdict Conclusive */
+            verdict_conclusive: boolean;
+            /**
+             * Verdict State
+             * @enum {string}
+             */
+            verdict_state: "viable" | "marginal" | "not_viable" | "upper_bound_terrain_incomplete";
         };
         /** SlipIn */
         SlipIn: {
@@ -1319,6 +1341,7 @@ export interface components {
             disclaimer: string;
             /** Engine */
             engine: string;
+            horizons_degraded?: components["schemas"]["HorizonsDegraded"] | null;
         };
         /** WindowIn */
         WindowIn: {
