@@ -71,3 +71,43 @@ export const loadCompare = (sites: string[], windows: { start: string; end: stri
 export const iso = (d: Date) => d.toISOString().replace(/\.\d{3}Z$/, "Z");
 export const addDays = (d: Date, n: number) => new Date(d.getTime() + n * 86_400_000);
 export const fmtHours = (h: number) => (h >= 48 ? `${(h / 24).toFixed(1)} d` : `${h.toFixed(1)} h`);
+
+export type JobOut = components["schemas"]["JobOut"];
+export type JobAccepted = components["schemas"]["JobAccepted"];
+
+export const createCustomSite = (lat: number, lon: number) =>
+  ok(api.POST("/api/v1/sites/custom", { body: { lat, lon, alt_m: 0 } }));
+
+export const loadJob = (jobId: string) =>
+  ok(api.GET("/api/v1/jobs/{job_id}", { params: { path: { job_id: jobId } } }));
+
+const sleep = (ms: number, signal: AbortSignal) =>
+  new Promise<void>((resolve) => {
+    const h = setTimeout(resolve, ms);
+    signal.addEventListener("abort", () => {
+      clearTimeout(h);
+      resolve();
+    });
+  });
+
+/**
+ * Poll a job until it is done or failed, reporting every state. Gives up after maxMs so a stuck
+ * job cannot spin forever; the caller shows the last state and a retry hint.
+ */
+export async function pollJob(
+  jobId: string,
+  onUpdate: (j: JobOut) => void,
+  signal: AbortSignal,
+  intervalMs = 1000,
+  maxMs = 180_000,
+): Promise<JobOut | null> {
+  const t0 = Date.now();
+  while (!signal.aborted && Date.now() - t0 < maxMs) {
+    const j = await loadJob(jobId);
+    if (signal.aborted) return null;
+    onUpdate(j);
+    if (j.status === "done" || j.status === "failed") return j;
+    await sleep(intervalMs, signal);
+  }
+  return null;
+}

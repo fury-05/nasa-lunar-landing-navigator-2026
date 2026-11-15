@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Chip } from "../components/Chip";
 import { Glass } from "../components/Glass";
 import { Metrics } from "../components/Metrics";
@@ -155,6 +155,12 @@ export function Command() {
             ))}
           </select>
         </label>
+        <Link
+          to="/sites/pick"
+          className="inline-flex min-h-11 items-center rounded-cell border border-white/20 px-4 text-sm text-earth no-underline hover:bg-white/10"
+        >
+          Pick another site on the map
+        </Link>
         <Chip tone="warn">Planning tool, not for flight operations</Chip>
       </Glass>
 
