@@ -57,27 +57,46 @@ test("picker: coordinates are validated before anything is sent", async ({ page 
   await expect(build).toBeEnabled();
 });
 
-test("picker: builds a site, shows progress, then opens the Command Centre", async ({ page }) => {
+test("picker: builds a site, shows progress, then opens the Command Centre by itself", async ({
+  page,
+}) => {
   await mock(page);
   await page.goto("/sites/pick");
   await page.getByLabel(/Latitude/).fill("-89.5");
   await page.getByLabel(/Longitude/).fill("12");
   await page.getByRole("button", { name: /Build site/ }).click();
   await expect(page.getByRole("progressbar", { name: "Site build progress" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Open in Command Centre" })).toBeVisible({
-    timeout: 10_000,
-  });
-  await page.getByRole("button", { name: "Open in Command Centre" }).click();
-  await expect(page).toHaveURL(/\/command\?site=custom-abc/);
+  // No second click: when the job is done the new site opens (issue #177).
+  await expect(page).toHaveURL(/\/command\?site=custom-abc/, { timeout: 10_000 });
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Command Centre");
 });
 
-test("picker: a point with no terrain says flat horizon, not terrain aware", async ({ page }) => {
+test("picker: a point built before opens straight away", async ({ page }) => {
+  await mock(page);
+  await page.unroute("**/api/v1/sites/custom");
+  await page.route("**/api/v1/sites/custom", (r) =>
+    json(r, jobAccepted({ job_id: null, status: "done", cached: true }), 200),
+  );
+  await page.goto("/sites/pick");
+  await page.getByLabel(/Latitude/).fill("-89.5");
+  await page.getByLabel(/Longitude/).fill("12");
+  await page.getByRole("button", { name: /Build site/ }).click();
+  await expect(page).toHaveURL(/\/command\?site=custom-abc/, { timeout: 10_000 });
+});
+
+test("picker: a point with no terrain opens the Command Centre, which says flat horizon", async ({
+  page,
+}) => {
   await mock(page, true);
+  await page.route("**/api/v1/sites", (r) =>
+    json(r, siteList([siteSummary("custom-abc", { name: "Custom point", source: "custom" }, 0)])),
+  );
   await page.goto("/sites/pick");
   await page.getByLabel(/Latitude/).fill("-80");
   await page.getByLabel(/Longitude/).fill("0");
   await page.getByRole("button", { name: /Build site/ }).click();
-  await expect(page.getByText("Flat horizon, not terrain aware")).toBeVisible({ timeout: 10_000 });
+  await expect(page).toHaveURL(/\/command\?site=custom-abc/, { timeout: 10_000 });
+  await expect(page.getByText("Flat horizon, not terrain aware").first()).toBeVisible();
 });
 
 test("picker: clicking the map fills the coordinates; the nav links to the picker", async ({
@@ -141,11 +160,8 @@ test("picker: a failed job shows the server's text and Try again builds it again
   await expect(alert).toContainText("HorizonsError: Horizons timed out after 30 s");
   await expect(alert).toContainText("POST the same coordinates");
   await page.getByRole("button", { name: "Try again" }).click();
-  await expect(page.getByRole("button", { name: "Open in Command Centre" })).toBeVisible({
-    timeout: 10_000,
-  });
+  await expect(page).toHaveURL(/\/command\?site=custom-abc/, { timeout: 10_000 });
   expect(posts()).toBe(2);
-  await expect(page.getByRole("button", { name: "Try again" })).toHaveCount(0);
 });
 
 test("picker: retryable false hides Try again and says why", async ({ page }) => {
