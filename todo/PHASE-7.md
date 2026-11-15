@@ -12,6 +12,6 @@ Window: +30h to end. Statuses: DONE, PENDING, POSTPONED. Update this table in th
 | P7-06 | Docs: README, user guide, architecture, validation report, SI_USAGE final | member3 | DONE | README, docs/USER_GUIDE.md, docs/ARCHITECTURE.md, docs/validation/REPORT.md, docs/SI_USAGE.md (77 commits, helper agents, what was not verified) all current as of 2026-11-15 13:15 IST (PRs 146, 158, 170, 180); issue #95 |
 | P7-07 | Demo assets: 3 minute script, screenshots, submission text draft | member3 | PENDING | partial (PR 146): docs/submission-draft.md and docs/demo-shotlist.md; demo script drafted 2026-11-15 by Claude from a browser walkthrough (docs/demo-script.md, task 4), for Luz to review and edit; screenshots of the shot list not captured; submission text draft still to finish; issue #96 |
 | P7-08 | Final deploy, uptime check, tag v1.0.0, release notes, START_PROOF export | irfan | PENDING | issue #97 |
-| P7-09 | Feature freeze and final gate: checklist all DONE (--require-complete) | irfan | PENDING | issue #98 |
+| P7-09 | Feature freeze and final gate: checklist all DONE (--require-complete) | irfan | PENDING | scripts/final-gate.sh (PR 188) runs the whole freeze gate in one command; a dry run on 2026-11-15 passed every step before the tests step, where one timing-sensitive SSE test failed once under load and was made load-proof (PR 187); full run and the checklist step happen at the freeze; issue #98 |
 
 Phase gate: all rows DONE, CI green, build deployed to the VM, tag v0.7.0 pushed.
