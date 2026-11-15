@@ -64,6 +64,13 @@ class SiteSummary(BaseModel):
     window: dict[str, Any]
     built_at_utc: str
     terrain_coverage: TerrainCoverage
+    name: str
+    source: str
+    tile_radius_km: float | None = None
+    terrain_available: bool
+    reach_km: float
+    reach_km_max: float
+    quickmap: str
 
 
 class SiteList(BaseModel):
@@ -94,6 +101,12 @@ class SkylineOut(BaseModel):
     azimuth_deg: list[float]
     elevation_deg: list[float]
     reach_m: list[float]
+    reach_km: list[float]
+    tier: list[str | None]
+    tiers: list[str]
+    dem_error_deg: list[float | None] | None = None
+    effective_resolution_m: list[float | None] | None = None
+    required_range_km: float
     requested_range_m: float
     covered_fraction: float
     coverage_note: str
@@ -320,3 +333,24 @@ class VersionOut(BaseModel):
     api: str
     engine: str
     disclaimer: str
+
+
+class TerrainTileOut(BaseModel):
+    """Local height grid around a site, row 0 = north edge, column 0 = west edge."""
+
+    site_id: str
+    rows: int
+    cols: int
+    spacing_m: float
+    window_m: float
+    native_resolution_m: float
+    interpolated_fraction: float | None
+    interpolated_basis: str
+    height_error_m: float | None
+    height_error_basis: str
+    finite_fraction: float
+    heights_m: list[float | None]
+    centre: dict[str, float]
+    tier_share: dict[str, float]
+    source: str
+    provenance: Provenance

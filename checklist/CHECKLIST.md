@@ -6,7 +6,7 @@
 | P1 | 10 | 1 | 0 | 11 |
 | P2 | 8 | 4 | 0 | 12 |
 | P3 | 9 | 0 | 0 | 9 |
-| P4 | 2 | 9 | 0 | 11 |
+| P4 | 5 | 6 | 0 | 11 |
 | P5 | 1 | 4 | 0 | 5 |
 | P6 | 2 | 2 | 0 | 4 |
 | P7 | 0 | 9 | 0 | 9 |
@@ -64,9 +64,9 @@
 | P4-05 | Sky view: polar plot and horizon strip with real skyline and discs | afreen | DONE | PR 137: polar sky plot plus horizon strip (azimuth vs elevation 0 to 15 deg) with Sun and Earth, scrubber driven; vitest 26, e2e 14; live https://13-52-97-105.sslip.io/command; issue #70 |
 | P4-06 | Metrics panel and countdown chips with sensitivity band | afreen | DONE | PR 137: verdict states incl. amber upper bound, editable mission needs in URL, sunset and Earthset UTC chips, band basis incl. terrain incompleteness; live API returns upper_bound_terrain_incomplete for pgda-site04; issue #71, #126 |
 | P4-07 | Timeline strips with zoom and event markers | afreen | PENDING | first slice: four strips with text alternatives plus scrubber marker (PR 137); zoom and event markers not built; issue #72 |
-| P4-08 | Compare board and flip mode | afreen | PENDING | issue #73 |
-| P4-09 | Slip matrix and what-changes-if panel | afreen | PENDING | issue #74 |
-| P4-10 | Export CSV, PNG, permalink, scenario summary | afreen | PENDING | issue #75 |
+| P4-08 | Compare board and flip mode | afreen | DONE | PR 145: /compare with 2 to 4 sites, bands, flip, amber upper-bound for incomplete terrain; vitest 66, e2e 30; live https://13-52-97-105.sslip.io/compare returns 200; issue #73 |
+| P4-09 | Slip matrix and what-changes-if panel | afreen | DONE | PR 145: /slip matrix with metric switch, cell links, text alternatives, what-changes-if list; the 2 km shift panel is not built (no API); live /slip returns 200; issue #74 |
+| P4-10 | Export CSV, PNG, permalink, scenario summary | afreen | DONE | PR 145: Command Centre export bar: metrics and timeline CSV, sky view and horizon strip PNG, copy link, scenario summary with provenance; e2e checks the files; compare and slip pages have no export; issue #75 |
 | P4-11 | Loading, error and degraded states; keyboard and screen reader pass | afreen | PENDING | issue #76 |
 | P5-01 | Terrain tile endpoint (heightfield) and slope layer in the API | irfan | PENDING | issue #77 |
 | P5-02 | 2D polar map with OpenLayers, proj4 and Trek SP tiles, site markers | afreen | DONE | PR 138: OpenLayers + proj4 + Trek WAC polar WMTS, site markers, click to pick; projection unit-tested against QuickMap-verified pgda-site04; live page checked with real tiles; marker labels overlap near the pole; issue #78 |
@@ -79,10 +79,10 @@
 | P6-04 | Public View guided story, glossary, simple and detailed modes, CSA and NASA links with attribution | member3 | DONE | PR 141: Public View with story, glossary, simple and detailed toggle, CSA and NASA links with attribution; e2e covers it; live https://13-52-97-105.sslip.io/public; issue #87, #132 |
 | P7-01 | Accessibility audit and fixes (axe, keyboard, contrast, reduced motion) | afreen | PENDING | issue #90 |
 | P7-02 | Performance audit and fixes (Lighthouse, bundle, 3D) | afreen | PENDING | issue #91 |
-| P7-03 | Security hardening, dependency audit, secret scan, headers | irfan | PENDING | issue #92 |
+| P7-03 | Security hardening, dependency audit, secret scan, headers | irfan | PENDING | audit done (PR 146): docs/validation/security-dependency-audit.md, npm audit prod 0 vulnerabilities, pip-audit clean, scripts/scan_secrets.py 0 findings over 242 files; 11 suggested Caddy/header fixes not yet applied; issue #92 |
 | P7-04 | Resilience drills: Horizons outage, backup restore, service kill, rollback | irfan | PENDING | issue #93 |
-| P7-05 | Attribution audit, in-app Credits page, third-party licence report, NOTICE | member3 | PENDING | issue #94 |
-| P7-06 | Docs: README, user guide, architecture, validation report, SI_USAGE final | member3 | PENDING | issue #95 |
-| P7-07 | Demo assets: 3 minute script, screenshots, submission text draft | member3 | PENDING | issue #96 |
+| P7-05 | Attribution audit, in-app Credits page, third-party licence report, NOTICE | member3 | PENDING | partial (PR 146): docs/THIRD_PARTY_LICENSES.md (391 packages, gen_licenses.py --check), NOTICE, Credits page live; usage terms still pending-source until A1 (issue #16); issue #94 |
+| P7-06 | Docs: README, user guide, architecture, validation report, SI_USAGE final | member3 | PENDING | partial (PR 146): README, docs/USER_GUIDE.md, docs/ARCHITECTURE.md, SI_USAGE updated; docs/validation/REPORT.md (P2-12) not written; issue #95 |
+| P7-07 | Demo assets: 3 minute script, screenshots, submission text draft | member3 | PENDING | partial (PR 146): docs/submission-draft.md and docs/demo-shotlist.md; demo script waiting for Luz (docs/teammate-tasks.md task 4); screenshots not captured; issue #96 |
 | P7-08 | Final deploy, uptime check, tag v1.0.0, release notes, START_PROOF export | irfan | PENDING | issue #97 |
 | P7-09 | Feature freeze and final gate: checklist all DONE (--require-complete) | irfan | PENDING | issue #98 |

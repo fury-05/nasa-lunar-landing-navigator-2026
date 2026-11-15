@@ -59,6 +59,39 @@
       "modules": "engine.terrain"
     },
     {
+      "id": "lola-dem-wide",
+      "name": "A New View of the Lunar South Pole from LOLA: 80S 20 m/px LDEM with ERR and EFFRES (80 m fallback)",
+      "publisher": "NASA GSFC PGDA (M. K. Barker, LRO-LOLA)",
+      "url": "https://pgda.gsfc.nasa.gov/products/90",
+      "retrieved_at": "2026-11-15 (page and headers read, files not yet downloaded)",
+      "version": "LDEM_80S_20MPP_ADJ, _ERR, _EFFRES (ADR-0007); data DOI 10.60903/gsfcpgda-lola-spole",
+      "usage_statement": "pending-source (last-resort NASA public product, Reproduction Guidelines and Important Notices not yet read by a human)",
+      "citation": "Barker et al., 2023, Planetary Science Journal 4, 183, https://doi.org/10.3847/PSJ/acf3e1",
+      "modules": "engine.terrain, engine.skyline"
+    },
+    {
+      "id": "lola-dem-87s",
+      "name": "South Pole LOLA DEM Mosaic, 87S to 90S, 5 m/px",
+      "publisher": "NASA GSFC PGDA (M. K. Barker, LRO-LOLA)",
+      "url": "https://pgda.gsfc.nasa.gov/products/81",
+      "retrieved_at": "2026-11-15 (page and headers read, file not yet downloaded)",
+      "version": "ldem_87s_5mpp.tif (ADR-0007)",
+      "usage_statement": "pending-source (last-resort NASA public product, Reproduction Guidelines and Important Notices not yet read by a human)",
+      "citation": "Barker et al., 2021, Planetary and Space Science 203, 105119, https://doi.org/10.1016/j.pss.2020.105119",
+      "modules": "engine.terrain, engine.skyline"
+    },
+    {
+      "id": "lola-illum",
+      "name": "Lunar Polar Illumination: average solar illumination and Earth visibility 85S-90S 60 m/px (cross-check only)",
+      "publisher": "NASA GSFC PGDA (E. Mazarico, LRO-LOLA)",
+      "url": "https://pgda.gsfc.nasa.gov/products/69",
+      "retrieved_at": "2026-11-15 (page and headers read)",
+      "version": "AVGVISIB_85S_060M_201608 and _EARTH (ADR-0007)",
+      "usage_statement": "pending-source (last-resort NASA public product, Reproduction Guidelines and Important Notices not yet read by a human)",
+      "citation": "Mazarico et al., 2011, Icarus 211, 1066-1081, https://doi.org/10.1016/j.icarus.2010.10.030",
+      "modules": "scripts.crosscheck_illumination"
+    },
+    {
       "id": "nssdc-apollo",
       "name": "Apollo Lunar Landings (1969 - 1972) table",
       "publisher": "NASA GSFC NSSDCA (curator D. R. Williams)",

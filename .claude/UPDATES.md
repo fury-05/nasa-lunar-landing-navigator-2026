@@ -41,3 +41,5 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-15T01:40:17Z | afreen+irfan | P4-03 | site picker with Trek polar map, custom point, job progress; far terrain download started on VM | merge/site-picker
 2026-11-15T01:52:39Z | irfan | P4/P5 | rows P4-05, P4-06, P5-02 DONE with evidence; P4-03, P4-07, P5-04 partial notes | docs/todo-evidence
 2026-11-15T02:06:04Z | afreen+irfan | P6-03,P6-04 | Spacecraft Dashboard and Public View deployed (PR 141) | docs/todo-evidence-2
+2026-11-15T02:21:34Z | irfan | P2-02,P5-01,P1-08 partial | multi-tier skyline, ERR into band, terrain endpoint, /sites site facts merged (session A) | merge/far2
+2026-11-15T02:53:46Z | irfan | P4-08..10,P7 | compare, slip, exports deployed (PR 145); docs, licences, audits merged (PR 146) | docs/todo-evidence-3

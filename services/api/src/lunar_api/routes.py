@@ -21,6 +21,7 @@ from lunar_engine.events import Interval, time_remaining
 from lunar_engine.links import quickmap_link
 from lunar_engine.metrics import sun_fraction_series
 from lunar_engine.sensitivity import PLACEHOLDER_CRITERIA, Assessment, Criteria
+from lunar_engine.terrain_status import REQUIRED_RANGE_M
 from pydantic import BaseModel, Field, field_validator
 
 from lunar_api.errors import ApiError, safe_echo
@@ -149,6 +150,13 @@ def terrain_warnings(meta: dict[str, Any]) -> list[str]:
             f"{want_km:.0f} km "
             f"(the shortest is {first_km:.1f} km). Distant terrain is missing there, so the real "
             "skyline can only be higher and the real sunlight and Earth visibility lower."
+        )
+    elif sky.get("max_range_m", REQUIRED_RANGE_M) < REQUIRED_RANGE_M - 1e-6:
+        read_km = sky.get("max_range_m", 0) / 1000
+        out.append(
+            f"Terrain was read only to {read_km:.0f} km but {REQUIRED_RANGE_M / 1000:.0f} km is "
+            "needed. Terrain beyond that is missing, so the real skyline can only be higher and "
+            "the real sunlight and Earth visibility lower: treat every figure as an upper bound."
         )
     return out
 
@@ -324,6 +332,60 @@ def criteria_of(c: CriteriaIn | None) -> Criteria:
 # ---- sites ------------------------------------------------------------------------------------
 
 
+CATALOGUE_PATHS = (
+    Path(__file__).resolve().parents[4] / "data" / "sites.json",  # repository checkout
+    Path("/opt/lunar/current/data/sites.json"),  # deployed release
+)
+_CATALOGUE: dict[str, dict[str, Any]] | None = None
+
+
+def catalogue() -> dict[str, dict[str, Any]]:
+    """Catalogue records by id (data/sites.json). Empty when the file is not shipped."""
+    global _CATALOGUE
+    if _CATALOGUE is None:
+        found: dict[str, dict[str, Any]] = {}
+        for p in CATALOGUE_PATHS:
+            if p.exists():
+                doc = json.loads(p.read_text(encoding="utf8"))
+                found = {r["id"]: r for r in doc.get("sites", [])}
+                break
+        _CATALOGUE = found
+    return _CATALOGUE
+
+
+def site_facts(site_id: str, m: dict[str, Any]) -> dict[str, Any]:
+    """Name, source, coverage radius and reach for one site. Nothing is made up.
+
+    `name` comes from the catalogue; a custom point is named by its coordinates. `tile_radius_km`
+    is half the width of the site's own DEM tile (catalogue geometry), else null. `reach_km` is the
+    shortest distance the skyline could read in any direction (the radius that is certain).
+    """
+    rec = catalogue().get(site_id)
+    lat, lon = m["lat_deg"], m["lon_east_deg"]
+    custom = site_id.startswith("custom-")
+    if rec is not None:
+        name, source = rec["name"], rec.get("source_id", "catalogue")
+    elif custom:
+        name, source = f"Custom point {lat:.4f},{lon:.4f}", "custom"
+    else:
+        name, source = site_id, "bundle"
+    radius: float | None = None
+    tile = (rec or {}).get("tile")
+    if tile:
+        radius = round(min(tile["width_px"], tile["height_px"]) * tile["pixel_m"] / 2000.0, 3)
+    unavailable = bool(m.get("terrain_unavailable"))
+    reach = 0.0 if unavailable else m["skyline"].get("min_reach_m", 0.0) / 1000.0
+    return {
+        "name": name,
+        "source": source,
+        "tile_radius_km": None if unavailable else radius,
+        "terrain_available": not unavailable,
+        "reach_km": reach,
+        "reach_km_max": 0.0 if unavailable else m["skyline"].get("max_reach_m", 0.0) / 1000.0,
+        "quickmap": quickmap_link(lat, lon),
+    }
+
+
 @router.get("/sites", response_model=SiteList, responses=ERRORS)
 def list_sites(store: Annotated[SiteStore, Depends(get_store)]) -> dict[str, Any]:
     items = []
@@ -338,6 +400,7 @@ def list_sites(store: Annotated[SiteStore, Depends(get_store)]) -> dict[str, Any
                 "window": m["window"],
                 "built_at_utc": m["built_at_utc"],
                 "terrain_coverage": effective_coverage(m),
+                **site_facts(sid, m),
             }
         )
     return clean(
@@ -349,6 +412,20 @@ def list_sites(store: Annotated[SiteStore, Depends(get_store)]) -> dict[str, Any
 def get_site(site_id: str, store: Annotated[SiteStore, Depends(get_store)]) -> dict[str, Any]:
     _, meta = site_or_404(store, site_id)
     return clean({**meta, "quickmap": quickmap_link(meta["lat_deg"], meta["lon_east_deg"])})
+
+
+def _tier_labels(sky: Any, stride: int) -> list[str | None]:
+    """Name of the tier that set the horizon at each azimuth; None where nothing was sampled."""
+    if sky.tier_idx is None or sky.tier_names is None:
+        return [None] * len(sky.azimuth_deg[::stride])
+    names = sky.tier_names
+    return [names[int(i)] if i >= 0 else "bare-sphere" for i in sky.tier_idx[::stride]]
+
+
+def _opt_list(a: Any, stride: int, digits: int) -> list[float | None] | None:
+    if a is None:
+        return None
+    return [None if not math.isfinite(float(v)) else round(float(v), digits) for v in a[::stride]]
 
 
 @router.get("/sites/{site_id}/skyline", response_model=SkylineOut, responses=ERRORS)
@@ -370,6 +447,12 @@ def get_skyline(
             "azimuth_deg": [float(v) for v in az],
             "elevation_deg": [round(float(v), 4) for v in sky.elevation_deg[::stride]],
             "reach_m": [round(float(v)) for v in sky.reach_m[::stride]],
+            "reach_km": [round(float(v) / 1000.0, 3) for v in sky.reach_m[::stride]],
+            "tier": _tier_labels(sky, stride),
+            "tiers": list(sky.tier_names) if sky.tier_names else [],
+            "dem_error_deg": _opt_list(sky.dem_error_az_deg, stride, 4),
+            "effective_resolution_m": _opt_list(sky.effres_m, stride, 1),
+            "required_range_km": REQUIRED_RANGE_M / 1000.0,
             "requested_range_m": sky.max_range_m,
             "covered_fraction": sky.covered_fraction(),
             "coverage_note": "Where reach_m is below requested_range_m the DEM ended; "

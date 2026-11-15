@@ -28,8 +28,8 @@ from lunar_engine.ephemeris import HorizonsClient
 from lunar_engine.ephemeris.client import EARTH, SUN, observer_params
 from lunar_engine.geometry import sphere_dip_deg
 from lunar_engine.metrics import AU_KM, BodySeries
-from lunar_engine.skyline import Skyline, cast_skyline
-from lunar_engine.terrain import DemTile
+from lunar_engine.skyline import Skyline, cast_skyline, cast_skyline_tiers
+from lunar_engine.terrain import DemTier, DemTile
 
 CHUNK_DAYS = 30
 FMT = "%Y-%m-%d %H:%M"
@@ -116,7 +116,23 @@ def save_skyline(path: Path, sky: Skyline) -> None:
                 np.nan if sky.unseen_relief_m is None else sky.unseen_relief_m,
             ]
         ),
+        **_tier_arrays(sky),
     )
+
+
+def _tier_arrays(sky: Skyline) -> dict[str, Any]:
+    """Optional multi-tier columns (ADR-0007); absent keys keep old bundles loadable."""
+    out: dict[str, Any] = {}
+    if sky.tier_names is not None and sky.tier_idx is not None:
+        out["tier_names"] = np.array(sky.tier_names)
+        out["tier_idx"] = sky.tier_idx
+    if sky.dem_error_az_deg is not None:
+        out["dem_error_az_deg"] = sky.dem_error_az_deg
+    if sky.effres_m is not None:
+        out["effres_m"] = sky.effres_m
+    if sky.ctrl_dist_m is not None:
+        out["ctrl_dist_m"] = sky.ctrl_dist_m
+    return out
 
 
 def load_skyline(path: Path) -> Skyline:
@@ -126,7 +142,12 @@ def load_skyline(path: Path) -> Skyline:
         return Skyline(z["azimuth_deg"], z["elevation_deg"], z["reach_m"], float(m[0]),
                        float(m[1]), float(m[2]), float(m[3]),
                        None if np.isnan(extra[0]) else float(extra[0]),
-                       None if np.isnan(extra[1]) else float(extra[1]))
+                       None if np.isnan(extra[1]) else float(extra[1]),
+                       tuple(str(n) for n in z["tier_names"]) if "tier_names" in z.files else None,
+                       z["tier_idx"].astype(np.int8) if "tier_idx" in z.files else None,
+                       z["dem_error_az_deg"] if "dem_error_az_deg" in z.files else None,
+                       z["effres_m"] if "effres_m" in z.files else None,
+                       z["ctrl_dist_m"] if "ctrl_dist_m" in z.files else None)
 
 
 def flat_skyline(eye_height_m: float, azimuth_step_deg: float) -> Skyline:
@@ -150,11 +171,23 @@ def build_site(
     client: HorizonsClient, site_id: str, lat_deg: float, lon_east_deg: float,
     tile: DemTile | None,
     dem_info: dict[str, Any], out_dir: Path, settings: BuildSettings,
+    tiers: list[DemTier] | None = None,
+    err: DemTile | None = None,
+    effres: DemTile | None = None,
 ) -> Path:
-    """Build and store everything for one site. Returns the site folder."""
+    """Build and store everything for one site. Returns the site folder.
+
+    With `tiers` (finest first, ADR-0007) the skyline is cast over all of them and `tile` is
+    ignored; `err` and `effres` add the measured DEM error to the sensitivity band.
+    """
     folder = out_dir / site_id
     folder.mkdir(parents=True, exist_ok=True)
-    if tile is None:
+    if tiers:
+        sky = cast_skyline_tiers(tiers, lat_deg, lon_east_deg, settings.eye_height_m,
+                                 settings.max_range_m, settings.azimuth_step_deg,
+                                 err=err, effres=effres)
+        tile = tiers[0].tile
+    elif tile is None:
         sky = flat_skyline(settings.eye_height_m, settings.azimuth_step_deg)
     else:
         sky = cast_skyline(tile, lat_deg, lon_east_deg, settings.eye_height_m,
@@ -180,9 +213,16 @@ def build_site(
             "azimuth_step_deg": settings.azimuth_step_deg, "site_height_m": sky.site_height_m,
             "sphere_dip_deg": sky.sphere_dip_deg, "covered_fraction": sky.covered_fraction(),
             "min_reach_m": sky.min_reach_m(), "max_reach_m": float(sky.reach_m.max()),
+            "tiers": list(sky.tier_names) if sky.tier_names else None,
+            "tier_azimuth_share": _tier_share(sky),
+            "dem_error_deg_p95": sky.effective_dem_error_deg(),
         },
         "dem": dem_info,
-        "sources": ["horizons"] if tile is None else ["horizons", "lola-dem"],
+        "sources": (
+            ["horizons"]
+            if tile is None
+            else ["horizons", "lola-dem"] + (["lola-dem-wide"] if tiers else [])
+        ),
         "terrain_unavailable": tile is None,
         "horizons": {"sun": sun_prov, "earth": earth_prov},
         "assumptions": (
@@ -197,12 +237,26 @@ def build_site(
                 "Horizons frame MEAN_ME versus DEM frame MOON_ME treated as equal "
                 "(ADR-0004, ADR-0003)",
                 f"skyline covers {sky.min_reach_m():.0f} to {float(sky.reach_m.max()):.0f} m of "
-                "terrain; beyond that no data (approval item A2)",
+                "terrain; beyond that no data (approval item A2)"
+                if not tiers
+                else f"multi-tier skyline ({', '.join(t.name for t in tiers)}) covers "
+                f"{sky.min_reach_m():.0f} to {float(sky.reach_m.max()):.0f} m of terrain; "
+                "beyond that no data (ADR-0007)",
             ]
         ),
     }
     (folder / "meta.json").write_text(json.dumps(meta, indent=2) + "\n", encoding="utf8")
     return folder
+
+
+def _tier_share(sky: Skyline) -> dict[str, float] | None:
+    """Share of azimuths whose horizon-setting sample came from each tier (and the bare sphere)."""
+    if sky.tier_names is None or sky.tier_idx is None:
+        return None
+    n = float(sky.tier_idx.size)
+    out = {name: float(np.sum(sky.tier_idx == i)) / n for i, name in enumerate(sky.tier_names)}
+    out["bare-sphere"] = float(np.sum(sky.tier_idx == -1)) / n
+    return out
 
 
 def load_site(out_dir: Path, site_id: str) -> tuple[SiteSky, dict[str, Any]]:
