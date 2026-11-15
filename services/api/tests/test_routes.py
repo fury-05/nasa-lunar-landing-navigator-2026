@@ -339,7 +339,8 @@ def test_terrain_warnings_function_covers_each_case() -> None:
     )
     assert "5% of directions" in mostly[0] and "8 to 8" not in mostly[0]
     none = terrain_warnings({"terrain_unavailable": True, "skyline": {}})
-    assert len(none) == 1 and "bare sphere" in none[0] and "Do not use for site selection" in none[0]
+    assert len(none) == 1 and "bare sphere" in none[0]
+    assert "Do not use for site selection" in none[0]
 
 
 def test_a_skyline_without_terrain_is_reported_as_uncovered() -> None:
