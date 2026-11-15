@@ -118,3 +118,76 @@ test("picker: clicking the map fills the coordinates; the nav links to the picke
   const lat = Number(await page.getByLabel(/Latitude/).inputValue());
   expect(lat).toBeLessThan(-80);
 });
+
+async function mockFailing(page: Page, over: Record<string, unknown> = {}, failTimes = 1) {
+  await mock(page);
+  let posts = 0;
+  await page.unroute("**/api/v1/sites/custom");
+  await page.unroute("**/api/v1/jobs/job-abc");
+  await page.route("**/api/v1/sites/custom", (r) => {
+    posts += 1;
+    return r.fulfill({
+      status: 202,
+      json: {
+        site_id: "custom-abc",
+        job_id: "job-abc",
+        status: "queued",
+        cached: false,
+        status_url: "/api/v1/jobs/job-abc",
+      },
+    });
+  });
+  await page.route("**/api/v1/jobs/job-abc", (r) => {
+    const fails = posts <= failTimes;
+    return r.fulfill({
+      json: {
+        job_id: "job-abc",
+        site_id: "custom-abc",
+        status: fails ? "failed" : "done",
+        progress: fails ? 0.4 : 1,
+        message: fails ? "failed" : "finished",
+        reason: fails ? "HorizonsError: Horizons timed out after 30 s" : null,
+        retry: fails ? "POST the same coordinates to /api/v1/sites/custom to try again." : null,
+        result: fails ? {} : { terrain_unavailable: false, warnings: [] },
+        created_at_utc: "x",
+        updated_at_utc: "x",
+        ...(fails ? over : {}),
+      },
+    });
+  });
+  return () => posts;
+}
+
+async function fill(page: Page) {
+  await page.getByLabel(/Latitude/).fill("-85");
+  await page.getByLabel(/Longitude/).fill("12");
+  await page.getByRole("button", { name: /Build site/ }).click();
+}
+
+test("picker: a failed job shows the server's text and Try again builds it again", async ({
+  page,
+}) => {
+  const posts = await mockFailing(page);
+  await page.goto("/sites/pick");
+  await fill(page);
+  const alert = page.getByRole("alert").filter({ hasText: "could not be built" });
+  await expect(alert).toContainText("HorizonsError: Horizons timed out after 30 s");
+  await expect(alert).toContainText("POST the same coordinates");
+  await page.getByRole("button", { name: "Try again" }).click();
+  await expect(page.getByRole("button", { name: "Open in Command Centre" })).toBeVisible({
+    timeout: 10_000,
+  });
+  expect(posts()).toBe(2);
+  await expect(page.getByRole("button", { name: "Try again" })).toHaveCount(0);
+});
+
+test("picker: an error string from a newer API wins, and retryable false hides Try again", async ({
+  page,
+}) => {
+  await mockFailing(page, { error: "Horizons is down for maintenance", retryable: false }, 99);
+  await page.goto("/sites/pick");
+  await fill(page);
+  await expect(page.getByRole("alert")).toContainText("Horizons is down for maintenance");
+  await expect(page.getByRole("button", { name: "Try again" })).toHaveCount(0);
+  await expect(page.getByText(/cannot be retried as it is/)).toBeVisible();
+});

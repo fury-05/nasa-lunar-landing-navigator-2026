@@ -5,6 +5,7 @@ import { Chip } from "../components/Chip";
 import { Glass } from "../components/Glass";
 import { createCustomSite, loadSites, pollJob, type JobOut } from "../lib/data";
 import { validateCoords } from "../lib/polar";
+import { describeFailure } from "../lib/jobFailure";
 import { fmtLat, fmtLon, terrainSentence, toSiteInfo } from "../lib/site";
 import { useAsync } from "../lib/useAsync";
 
@@ -13,7 +14,7 @@ const PolarMap = lazy(() => import("../components/PolarMap"));
 type Phase =
   | { kind: "idle" }
   | { kind: "working"; job: JobOut | null; message: string }
-  | { kind: "failed"; message: string }
+  | { kind: "failed"; message: string; retryable: boolean; hint: string | null }
   | { kind: "done"; siteId: string; flat: boolean; warnings: string[] };
 
 const inputCls = "min-h-11 rounded-cell border border-white/20 bg-void px-3 font-mono text-ink";
@@ -67,11 +68,16 @@ export function SitePicker() {
         setPhase({
           kind: "failed",
           message: "The job is taking longer than expected. Try again in a minute.",
+          retryable: true,
+          hint: null,
         });
       } else if (end.status === "failed") {
+        const f = describeFailure(end);
         setPhase({
           kind: "failed",
-          message: `The site could not be built: ${end.reason ?? "unknown reason"}. ${end.retry ?? ""}`,
+          message: `The site could not be built: ${f.text}`,
+          retryable: f.retryable,
+          hint: f.hint,
         });
       } else {
         const r = end.result as { terrain_unavailable?: boolean; warnings?: string[] };
@@ -83,7 +89,8 @@ export function SitePicker() {
         });
       }
     } catch (e) {
-      if (!ctl.signal.aborted) setPhase({ kind: "failed", message: problemMessage(e) });
+      if (!ctl.signal.aborted)
+        setPhase({ kind: "failed", message: problemMessage(e), retryable: true, hint: null });
     }
   };
 
@@ -207,9 +214,27 @@ export function SitePicker() {
               </>
             )}
             {phase.kind === "failed" && (
-              <p role="alert" className="m-0 text-bad">
-                {phase.message}
-              </p>
+              <>
+                <p role="alert" className="m-0 text-bad">
+                  {phase.message}
+                  {phase.hint && <span className="block text-xs text-muted">{phase.hint}</span>}
+                </p>
+                {phase.retryable ? (
+                  <button
+                    type="button"
+                    onClick={() => void submit()}
+                    disabled={!check.ok}
+                    className="min-h-11 w-fit rounded-cell border border-earth/60 px-4 text-sm text-earth hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Try again
+                  </button>
+                ) : (
+                  <p className="m-0 text-xs text-muted">
+                    The server says this point cannot be retried as it is. Change the coordinates
+                    and build again.
+                  </p>
+                )}
+              </>
             )}
             {phase.kind === "done" && (
               <>
