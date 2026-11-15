@@ -9,7 +9,7 @@ import {
 } from "../lib/dates";
 
 const btn =
-  "min-h-11 rounded-cell border border-white/20 px-3 text-sm text-ink hover:bg-white/10 focus-visible:bg-white/10";
+  "min-h-11 rounded-cell border border-white/20 px-3 text-base text-ink hover:bg-white/10 focus-visible:bg-white/10";
 
 type Props = {
   start: string;
@@ -36,7 +36,7 @@ export function DateControl({ start, days, onChange, now = () => new Date() }: P
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-end gap-2">
-        <label className="flex flex-col gap-1 text-sm text-muted">
+        <label className="flex flex-col gap-1 text-base text-muted">
           Start date (UTC)
           <input
             type="date"
@@ -79,18 +79,26 @@ export function DateControl({ start, days, onChange, now = () => new Date() }: P
           Next 30 days from today
         </button>
       </div>
-      <p role="status" className="m-0 min-h-5 text-xs text-ink">
+      <p role="status" className="m-0 min-h-5 text-sm text-ink">
         {note}
       </p>
-      <p className="m-0 max-w-3xl text-xs text-muted">
+      <p className="m-0 max-w-4xl text-sm text-muted">
         A lunar month jump moves the start by {SYNODIC_MONTH_DAYS} days (the mean synodic month),
-        rounded to whole days. It is an approximation: the real month varies by several hours, so
-        the Sun geometry comes back close to, not exactly at, the same state. Today is clamped into
-        the data range {DATA_MIN} to {DATA_MAX}; the current length is {days} days. One lunar day
-        and one lunar night are not offered as presets: how long the Sun stays up or down differs by
-        site and by month, so no fixed length is right for every site. Choose a length from the
-        list, or read the actual Sun-up and dark spells from the timeline below.
+        rounded to whole days. It is an approximation: the real month varies by several hours.
       </p>
+      <details className="text-sm text-muted">
+        <summary className="min-h-8 cursor-pointer py-1 text-earth">
+          More about dates and lengths
+        </summary>
+        <p className="m-0 mt-1 max-w-4xl">
+          The Sun geometry comes back close to, not exactly at, the same state after one lunar
+          month. Today is clamped into the data range {DATA_MIN} to {DATA_MAX}; the current length
+          is {days} days. One lunar day and one lunar night are not offered as presets: how long the
+          Sun stays up or down differs by site and by month, so no fixed length is right for every
+          site. Choose a length from the list, or read the actual Sun-up and dark spells from the
+          timeline below.
+        </p>
+      </details>
     </div>
   );
 }

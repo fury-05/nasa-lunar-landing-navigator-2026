@@ -21,11 +21,11 @@ export function Scrubber({
   const clamp = (i: number) => Math.min(Math.max(i, 0), last);
   const t = times[index] ?? 0;
   return (
-    <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="text-sm text-muted">
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+      <label htmlFor={id} className="text-base text-muted">
         Time shown in the sky views (UTC)
       </label>
-      <div className="flex items-center gap-2">
+      <div className="flex min-w-[16rem] flex-1 items-center gap-2">
         <button
           type="button"
           aria-label="One step earlier"
@@ -70,11 +70,11 @@ export function Scrubber({
             onClick={clock.playing ? clock.pause : clock.play}
             disabled={clock.reduced || times.length < 2}
             aria-pressed={clock.playing}
-            className="min-h-11 min-w-24 rounded-cell border border-earth/60 px-4 text-sm text-earth hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+            className="min-h-11 min-w-24 rounded-cell border border-earth/60 bg-earth/10 px-4 text-base font-semibold text-earth hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {clock.playing ? "Pause" : "Play"}
           </button>
-          <label className="flex items-center gap-2 text-sm text-muted">
+          <label className="flex items-center gap-2 text-base text-muted">
             Speed
             <select
               value={clock.speed.id}
@@ -89,13 +89,16 @@ export function Scrubber({
             </select>
           </label>
           {clock.reduced && (
-            <span className="text-xs text-muted">
+            <span className="text-sm text-muted">
               Playback is off because your system asks for reduced motion. Use the slider.
             </span>
           )}
         </div>
       )}
-      <output htmlFor={id} className="font-mono text-sm text-ink">
+      <output
+        htmlFor={id}
+        className="rounded-cell bg-white/[0.06] px-3 py-1 font-mono text-base text-sun"
+      >
         {fmtUtc(t)}
       </output>
     </div>

@@ -19,7 +19,7 @@ function Field({
   const id = useId();
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="text-sm text-muted">
+      <label htmlFor={id} className="text-base text-ink">
         {label}
       </label>
       <input
@@ -34,7 +34,7 @@ function Field({
         onChange={(e) => onChange(e.target.value)}
         className="min-h-11 w-full rounded-cell border border-white/20 bg-void px-3 font-mono text-ink"
       />
-      <span id={`${id}-h`} className="text-xs text-muted">
+      <span id={`${id}-h`} className="text-sm text-muted">
         {hint}
       </span>
     </div>
@@ -93,18 +93,18 @@ export function NeedsForm({ needs, onApply }: Props) {
       }}
     >
       <div className="flex flex-wrap items-center gap-2">
-        <h2 id="needs-h" className="m-0 text-base">
+        <h2 id="needs-h" className="m-0 text-xl">
           Mission needs
         </h2>
-        <span className="rounded-chip border border-warn/50 px-3 font-mono text-xs text-warn">
+        <span className="rounded-chip border border-warn/50 px-3 font-mono text-sm text-warn">
           {isDefaultNeeds(needs) ? "placeholder defaults" : "custom needs, saved in the link"}
         </span>
       </div>
-      <p className="m-0 text-xs text-muted">
+      <p className="m-0 text-sm text-muted">
         These targets decide the verdict. The default values are placeholders, not mission
         requirements. Enter your own, then press Apply; they are saved in the page link.
       </p>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3">
         <Field
           label="Minimum sunlight (% of window)"
           hint="Sun at least half visible"
@@ -142,14 +142,14 @@ export function NeedsForm({ needs, onApply }: Props) {
       <div className="flex flex-wrap gap-2">
         <button
           type="submit"
-          className="min-h-11 rounded-cell border border-earth/60 px-4 text-sm text-earth hover:bg-white/10"
+          className="min-h-11 rounded-cell border border-earth/60 px-4 text-base text-earth hover:bg-white/10"
         >
           Apply needs
         </button>
         <button
           type="button"
           onClick={reset}
-          className="min-h-11 rounded-cell border border-white/20 px-4 text-sm text-muted hover:text-ink"
+          className="min-h-11 rounded-cell border border-white/20 px-4 text-base text-muted hover:text-ink"
         >
           Reset to defaults
         </button>

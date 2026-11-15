@@ -48,7 +48,7 @@ const DAY_CHOICES = [3, 8, 15, 30];
 
 function Problem({ message }: { message: string }) {
   return (
-    <p role="alert" className="m-0 rounded-cell border border-bad/50 p-3 text-sm text-bad">
+    <p role="alert" className="m-0 rounded-cell border border-bad/50 p-3 text-base text-bad">
       {message}
     </p>
   );
@@ -57,7 +57,7 @@ function Problem({ message }: { message: string }) {
 /** A panel whose request failed. The message itself is shown once, at the top of the page. */
 function Failed({ what }: { what: string }) {
   return (
-    <p className="m-0 text-sm text-muted">
+    <p className="m-0 text-base text-muted">
       The {what} could not be loaded. See the message at the top of the page.
     </p>
   );
@@ -65,7 +65,7 @@ function Failed({ what }: { what: string }) {
 
 function Loading({ what }: { what: string }) {
   return (
-    <p role="status" className="m-0 text-sm text-muted">
+    <p role="status" className="m-0 text-base text-muted">
       Loading {what}...
     </p>
   );
@@ -190,93 +190,102 @@ export function Command() {
   const stripRef = useRef<SVGSVGElement>(null);
   const nowMs = midpoint ? Date.parse(midpoint.t) : null;
 
+  const sunData = midpoint ? { azDeg: midpoint.sun.az_deg, elDeg: midpoint.sun.el_deg } : null;
+
   return (
-    <div className="flex flex-col gap-6">
-      <header>
-        <h1 className="m-0 text-3xl">Command Centre</h1>
-        <p className="mt-2 max-w-3xl text-muted">
-          Choose a site and a start date. The Sun and Earth are shown against the real terrain
-          horizon, with the range of results if the terrain is slightly off.
-        </p>
+    <div className="flex flex-col gap-4">
+      <header className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+        <div>
+          <h1 className="m-0 text-3xl">Command Centre</h1>
+          <p className="m-0 mt-1 text-base text-muted">
+            <strong className="text-ink">1</strong> Choose a site and dates,{" "}
+            <strong className="text-ink">2</strong> read the verdict on the right,{" "}
+            <strong className="text-ink">3</strong> press{" "}
+            <strong className="text-earth">Play</strong> to watch the Sun and Earth move against the
+            real horizon. Everything below updates together.
+          </p>
+        </div>
+        <Chip tone="warn">Planning tool, not for flight operations</Chip>
       </header>
 
-      <Glass className="flex flex-wrap items-end gap-4">
-        <label className="flex flex-col gap-1 text-sm text-muted">
-          Site
-          <select
-            className="min-h-11 rounded-cell border border-white/20 bg-void px-3 text-ink"
-            value={id}
-            onChange={(e) => set("site", e.target.value)}
-          >
-            {options.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-1 text-sm text-muted">
-          Length
-          <select
-            className="min-h-11 rounded-cell border border-white/20 bg-void px-3 text-ink"
-            value={days}
-            onChange={(e) => set("days", e.target.value)}
-          >
-            {DAY_CHOICES.map((d) => (
-              <option key={d} value={d}>
-                {d} days
-              </option>
-            ))}
-          </select>
-        </label>
-        <button
-          type="button"
-          aria-expanded={showFilter}
-          aria-controls="site-filter-panel"
-          onClick={() => setShowFilter((v) => !v)}
-          className="min-h-11 rounded-cell border border-white/20 px-4 text-sm text-ink hover:bg-white/10"
-        >
-          {showFilter ? "Hide site search" : "Search and filter sites"}
-        </button>
-        <Link
-          to="/sites/pick"
-          className="inline-flex min-h-11 items-center rounded-cell border border-white/20 px-4 text-sm text-earth no-underline hover:bg-white/10"
-        >
-          Pick another site on the map
-        </Link>
-        <Chip tone="warn">Planning tool, not for flight operations</Chip>
-        {showFilter && (
-          <div id="site-filter-panel" className="basis-full">
-            <SiteFilter
-              value={siteFilter}
-              onChange={setSiteFilter}
-              kinds={kindsPresent(allInfos)}
-              shown={applyFilter(allInfos, siteFilter).length}
-              total={allInfos.length}
-            />
+      <Glass className="flex flex-col gap-3 p-4 [@media(min-height:820px)]:lg:sticky [@media(min-height:820px)]:lg:top-2 [@media(min-height:820px)]:lg:z-30">
+        <div className="flex flex-wrap items-end gap-x-4 gap-y-3">
+          <label className="flex flex-col gap-1 text-base text-muted">
+            Site
+            <select
+              className="min-h-11 rounded-cell border border-white/20 bg-void px-3 text-base text-ink"
+              value={id}
+              onChange={(e) => set("site", e.target.value)}
+            >
+              {options.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-base text-muted">
+            Length
+            <select
+              className="min-h-11 rounded-cell border border-white/20 bg-void px-3 text-base text-ink"
+              value={days}
+              onChange={(e) => set("days", e.target.value)}
+            >
+              {DAY_CHOICES.map((d) => (
+                <option key={d} value={d}>
+                  {d} days
+                </option>
+              ))}
+            </select>
+          </label>
+          <DateControl
+            start={startMs === null ? DEFAULT_START : start}
+            days={days}
+            onChange={(st, len) => {
+              const next = new URLSearchParams(params);
+              next.set("start", st);
+              if (len !== undefined) next.set("days", String(len));
+              next.delete("t"); // a new window starts at its own middle
+              setParams(next, { replace: true });
+            }}
+          />
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              aria-expanded={showFilter}
+              aria-controls="site-filter-panel"
+              onClick={() => setShowFilter((v) => !v)}
+              className="min-h-11 rounded-cell border border-white/20 px-4 text-base text-ink hover:bg-white/10"
+            >
+              {showFilter ? "Hide site search" : "Search and filter sites"}
+            </button>
+            <Link
+              to="/sites/pick"
+              className="inline-flex min-h-11 items-center rounded-cell border border-white/20 px-4 text-base text-earth no-underline hover:bg-white/10"
+            >
+              Pick another site on the map
+            </Link>
           </div>
+          {showFilter && (
+            <div id="site-filter-panel" className="basis-full">
+              <SiteFilter
+                value={siteFilter}
+                onChange={setSiteFilter}
+                kinds={kindsPresent(allInfos)}
+                shown={applyFilter(allInfos, siteFilter).length}
+                total={allInfos.length}
+              />
+            </div>
+          )}
+        </div>
+        {midpoint && timeline.state === "ok" ? (
+          <Scrubber times={times} index={clock.index} onChange={clock.scrub} clock={clock} />
+        ) : (
+          <p role="status" className="m-0 text-base text-muted">
+            The time control appears when the timeline has loaded.
+          </p>
         )}
       </Glass>
-
-      <Glass>
-        <DateControl
-          start={startMs === null ? DEFAULT_START : start}
-          days={days}
-          onChange={(st, len) => {
-            const next = new URLSearchParams(params);
-            next.set("start", st);
-            if (len !== undefined) next.set("days", String(len));
-            next.delete("t"); // a new window starts at its own middle
-            setParams(next, { replace: true });
-          }}
-        />
-      </Glass>
-
-      {info && usable && (
-        <Glass>
-          <SiteContext site={info} timeIso={midpoint ? midpoint.t : iso(a)} />
-        </Glass>
-      )}
 
       {sites.state === "loading" && <Loading what="sites" />}
       {shownProblems.map((m) => (
@@ -284,7 +293,7 @@ export function Command() {
       ))}
 
       {assess.state === "ok" && assess.data.provenance.warnings.length > 0 && (
-        <div role="note" className="rounded-cell border border-warn/50 p-3 text-sm text-warn">
+        <div role="note" className="rounded-cell border border-warn/50 p-3 text-base text-warn">
           <strong>Read this first.</strong>
           <ul className="m-0 mt-1 list-disc pl-5">
             {assess.data.provenance.warnings.map((w) => (
@@ -294,102 +303,106 @@ export function Command() {
         </div>
       )}
 
-      <Glass>
-        <NeedsForm
-          key={needsKey}
-          needs={needs}
-          onApply={(n) => setParams(needsToParams(params, n), { replace: true })}
-        />
-      </Glass>
-
-      {midpoint && timeline.state === "ok" && (
-        <Glass className="grid gap-6 lg:grid-cols-2">
-          <Scrubber times={times} index={clock.index} onChange={clock.scrub} clock={clock} />
-          <Readout data={timeline.data} t={Date.parse(midpoint.t)} />
-        </Glass>
-      )}
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Glass>
-          <h2 className="mt-0 text-xl">Sky from the site</h2>
-          {skyline.state === "loading" && <Loading what="terrain horizon" />}
-          {skyline.state === "error" && <Failed what="terrain horizon" />}
-          {skyline.state === "ok" && (
-            <SkyView skyline={skyline.data} now={midpoint} svgRef={skyRef} />
+      <div className="grid items-start gap-4 lg:grid-cols-2 xl:grid-cols-[minmax(0,5fr)_minmax(0,6fr)_minmax(0,5fr)]">
+        <div className="flex min-w-0 flex-col gap-4">
+          <Glass className="p-4">
+            <h2 className="mt-0 text-xl">Sky from the site</h2>
+            {skyline.state === "loading" && <Loading what="terrain horizon" />}
+            {skyline.state === "error" && <Failed what="terrain horizon" />}
+            {skyline.state === "ok" && (
+              <SkyView skyline={skyline.data} now={midpoint} svgRef={skyRef} />
+            )}
+          </Glass>
+          {midpoint && timeline.state === "ok" && (
+            <Glass className="p-4">
+              <Readout data={timeline.data} t={Date.parse(midpoint.t)} />
+            </Glass>
           )}
-        </Glass>
-        <Glass>
+        </div>
+
+        <div className="order-last flex min-w-0 flex-col gap-4 lg:col-span-2 xl:order-none xl:col-span-1">
+          <Glass className="p-4">
+            <h2 className="mt-0 text-xl">Horizon strip</h2>
+            {skyline.state === "ok" && rows.length > 0 ? (
+              <HorizonStrip skyline={skyline.data} rows={rows} now={midpoint} svgRef={stripRef} />
+            ) : (
+              <Loading what="horizon strip" />
+            )}
+          </Glass>
+          <Glass className="p-4">
+            <h2 className="mt-0 text-xl">Local terrain</h2>
+            {terrain.state === "loading" && <Loading what="terrain tile" />}
+            {terrain.state === "error" && <Failed what="terrain tile" />}
+            {terrain.state === "ok" && terrain.data.kind === "tile" && (
+              <Suspense fallback={<Loading what="terrain view" />}>
+                <TerrainView tile={terrain.data.tile} sun={sunData} />
+              </Suspense>
+            )}
+            {terrain.state === "ok" && terrain.data.kind === "unavailable" && (
+              <div className="flex flex-col gap-3 text-base">
+                <p className="m-0 text-muted">
+                  No local relief is shown for this site. {terrain.data.detail} The horizon strip
+                  above uses the skyline the engine built for this site; where terrain is missing it
+                  is a flat horizon and is marked that way.
+                </p>
+                {!demo ? (
+                  <button
+                    type="button"
+                    onClick={() => setDemo(true)}
+                    className="min-h-11 w-fit rounded-cell border border-white/20 px-4 text-base text-muted hover:text-ink"
+                  >
+                    Show a synthetic preview of the viewer (made-up surface, not this site)
+                  </button>
+                ) : (
+                  <Suspense fallback={<Loading what="terrain view" />}>
+                    <TerrainView tile={syntheticDemoTile()} sun={sunData} />
+                  </Suspense>
+                )}
+              </div>
+            )}
+          </Glass>
+        </div>
+
+        <Glass className="order-first p-4 xl:order-none">
           {assess.state === "loading" && <Loading what="results" />}
           {assess.state === "error" && <Failed what="results" />}
           {assess.state === "ok" && <Metrics a={assess.data} />}
         </Glass>
       </div>
 
-      <Glass>
-        <h2 className="mt-0 text-xl">Horizon strip</h2>
-        {skyline.state === "ok" && rows.length > 0 ? (
-          <HorizonStrip skyline={skyline.data} rows={rows} now={midpoint} svgRef={stripRef} />
-        ) : (
-          <Loading what="horizon strip" />
-        )}
-      </Glass>
-
-      <Glass>
-        <h2 className="mt-0 text-xl">Local terrain</h2>
-        {terrain.state === "loading" && <Loading what="terrain tile" />}
-        {terrain.state === "error" && <Failed what="terrain tile" />}
-        {terrain.state === "ok" && terrain.data.kind === "tile" && (
-          <Suspense fallback={<Loading what="terrain view" />}>
-            <TerrainView
-              tile={terrain.data.tile}
-              sun={midpoint ? { azDeg: midpoint.sun.az_deg, elDeg: midpoint.sun.el_deg } : null}
-            />
-          </Suspense>
-        )}
-        {terrain.state === "ok" && terrain.data.kind === "unavailable" && (
-          <div className="flex flex-col gap-3 text-sm">
-            <p className="m-0 text-muted">
-              No local relief is shown for this site. {terrain.data.detail} The horizon strip above
-              uses the skyline the engine built for this site; where terrain is missing it is a flat
-              horizon and is marked that way.
-            </p>
-            {!demo ? (
-              <button
-                type="button"
-                onClick={() => setDemo(true)}
-                className="min-h-11 w-fit rounded-cell border border-white/20 px-4 text-sm text-muted hover:text-ink"
-              >
-                Show a synthetic preview of the viewer (made-up surface, not this site)
-              </button>
-            ) : (
-              <Suspense fallback={<Loading what="terrain view" />}>
-                <TerrainView
-                  tile={syntheticDemoTile()}
-                  sun={midpoint ? { azDeg: midpoint.sun.az_deg, elDeg: midpoint.sun.el_deg } : null}
-                />
-              </Suspense>
-            )}
-          </div>
-        )}
-      </Glass>
-
-      <Glass>
+      <Glass className="p-4">
         <h2 className="mt-0 text-xl">Timeline</h2>
         {timeline.state === "loading" && <Loading what="timeline" />}
         {timeline.state === "error" && <Failed what="timeline" />}
         {timeline.state === "ok" && <Timeline data={timeline.data} marker={nowMs} />}
       </Glass>
 
-      <Glass>
-        <ExportBar
-          siteId={id}
-          site={info}
-          assess={assess.state === "ok" ? assess.data : null}
-          timeline={timeline.state === "ok" ? timeline.data : null}
-          skySvg={() => skyRef.current}
-          stripSvg={() => stripRef.current}
-        />
-      </Glass>
+      <div className="grid items-start gap-4 lg:grid-cols-3">
+        <Glass className="p-4">
+          <NeedsForm
+            key={needsKey}
+            needs={needs}
+            onApply={(n) => setParams(needsToParams(params, n), { replace: true })}
+          />
+        </Glass>
+        {info && usable ? (
+          <Glass className="p-4">
+            <SiteContext site={info} timeIso={midpoint ? midpoint.t : iso(a)} />
+          </Glass>
+        ) : (
+          <div />
+        )}
+        <Glass className="p-4">
+          <ExportBar
+            siteId={id}
+            site={info}
+            assess={assess.state === "ok" ? assess.data : null}
+            timeline={timeline.state === "ok" ? timeline.data : null}
+            skySvg={() => skyRef.current}
+            stripSvg={() => stripRef.current}
+          />
+        </Glass>
+      </div>
     </div>
   );
 }

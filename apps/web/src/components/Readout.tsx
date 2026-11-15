@@ -13,22 +13,22 @@ export function Readout({ data, t }: { data: TimelineData; t: number }) {
   const outage = longestSpan(data.earth_outages, t0, t1);
   return (
     <section aria-labelledby="readout-h" className="flex flex-col gap-3">
-      <h2 id="readout-h" className="m-0 text-base">
+      <h2 id="readout-h" className="m-0 text-lg">
         What happens next (times in UTC)
       </h2>
       <div className="flex flex-col items-start gap-2">
-        <Chip tone={sun.holdsNow ? "warn" : "neutral"} role="status">
+        <Chip tone={sun.holdsNow ? "warn" : "neutral"} role="status" className="text-sm">
           {sun.holdsNow ? "☀" : "●"} {countdownText(sun, t, "Sun")}
         </Chip>
-        <Chip tone={earth.holdsNow ? "good" : "bad"} role="status">
+        <Chip tone={earth.holdsNow ? "good" : "bad"} role="status" className="text-sm">
           {earth.holdsNow ? "✓" : "✕"} {countdownText(earth, t, "Earth")}
         </Chip>
       </div>
-      <ul className="m-0 list-disc pl-5 text-sm text-ink">
+      <ul className="m-0 list-disc pl-5 text-base text-ink">
         <li>{longestText(dark, "dark spell")}</li>
         <li>{longestText(outage, "Earth outage")}</li>
       </ul>
-      <p className="m-0 text-xs text-muted">
+      <p className="m-0 text-sm text-muted">
         Sunset means the visible Sun fraction falls below one half. Earthset means the centre of the
         Earth drops below the skyline.
       </p>
