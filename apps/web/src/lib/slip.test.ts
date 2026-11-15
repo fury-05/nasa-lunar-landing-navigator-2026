@@ -39,6 +39,7 @@ const site = (f: number, reach = 8000) =>
     window: {},
     built_at_utc: "x",
     tiers: [] as string[],
+    kind: "pgda-tile" as const,
     terrain_coverage: { covered_fraction: f, min_reach_m: reach, max_reach_m: reach },
   });
 

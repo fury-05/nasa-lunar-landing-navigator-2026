@@ -44,6 +44,7 @@ export const criteriaOut = (over: Partial<S["CriteriaOut"]> = {}): S["CriteriaOu
   // The API's own placeholder criteria (lunar_engine.sensitivity.PLACEHOLDER_CRITERIA).
   max_dark_hours: 120,
   min_earth_fraction: 0.5,
+  marginal_factor: 0.8,
   max_outage_hours: 120,
   source: "default-placeholder",
   status: "pending-source: placeholder planning criteria, not mission requirements",
@@ -58,6 +59,7 @@ export const siteSummary = (
   id,
   name: id,
   source: "lola-dem",
+  kind: id.startsWith("custom-") ? "custom" : "pgda-tile",
   tiers: ["site-tile-5m", "ldem-20m"],
   lat_deg: -89.5,
   lon_east_deg: 40,
