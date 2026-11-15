@@ -163,7 +163,8 @@ function lengthText(m: number): string {
   return m >= 1000 ? `${m / 1000} km` : `${m} m`;
 }
 
-/** Scale bar overlay: a round length and a bar of exactly that length at the drawn scale. */
+/** Scale bar: a round length and a bar of exactly that length at the drawn scale. It sits in the
+ * strip under the picture, so nothing covers the map. */
 function ScaleBar({
   metresPerPx,
   maxPx,
@@ -177,32 +178,28 @@ function ScaleBar({
   if (!(len > 0) || !Number.isFinite(metresPerPx)) return null;
   const px = len / metresPerPx;
   return (
-    <div
-      className="pointer-events-none absolute bottom-2 left-2 rounded-cell bg-void/75 px-2 py-1 text-sm leading-tight text-ink"
-      data-testid="scale-bar"
-    >
-      <div className="font-mono font-semibold">{lengthText(len)}</div>
-      <div
-        aria-hidden="true"
-        className="h-2 border-x-2 border-b-2 border-ink"
-        style={{ width: `${px.toFixed(1)}px` }}
-      />
-      {note && <div className="mt-0.5 text-xs text-muted">{note}</div>}
+    <div className="flex flex-col gap-0.5 text-sm leading-tight text-ink" data-testid="scale-bar">
+      <div className="flex items-center gap-2">
+        <span className="font-mono font-semibold">{lengthText(len)}</span>
+        <span
+          aria-hidden="true"
+          className="inline-block h-2 border-x-2 border-b-2 border-ink"
+          style={{ width: `${px.toFixed(1)}px` }}
+        />
+      </div>
+      {note && <div className="text-xs text-muted">{note}</div>}
     </div>
   );
 }
 
-/** North arrow overlay; `rotationDeg` turns it clockwise from straight up. */
+/** North arrow; `rotationDeg` turns it clockwise from straight up. */
 function NorthArrow({ rotationDeg = 0 }: { rotationDeg?: number }) {
   return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none absolute right-2 top-2 flex flex-col items-center rounded-cell bg-void/75 px-2 py-1 text-ink"
-    >
+    <div aria-hidden="true" className="flex items-center gap-1 text-ink">
       <span className="text-sm font-bold leading-none">N</span>
       <svg
-        width="18"
-        height="26"
+        width="14"
+        height="20"
         viewBox="0 0 18 26"
         style={{ transform: `rotate(${rotationDeg.toFixed(1)}deg)` }}
       >
@@ -212,7 +209,7 @@ function NorthArrow({ rotationDeg = 0 }: { rotationDeg?: number }) {
   );
 }
 
-/** One canvas with its overlays (north arrow, scale bar) positioned on top. */
+/** One canvas, with its north arrow and scale bar in a strip UNDER the picture. */
 function CanvasFrame({
   canvasRef,
   w,
@@ -228,7 +225,7 @@ function CanvasFrame({
   children: ReactNode;
 }) {
   return (
-    <div className="relative w-full">
+    <div className="flex w-full flex-col gap-1.5">
       <canvas
         ref={canvasRef}
         width={w}
@@ -238,7 +235,7 @@ function CanvasFrame({
         aria-label={label}
         className="block h-auto w-full rounded-cell border border-white/15 bg-void"
       />
-      {children}
+      <div className="flex min-h-9 items-start justify-between gap-3">{children}</div>
     </div>
   );
 }
@@ -404,31 +401,31 @@ export function TerrainView({ tile, sun }: { tile: TerrainTile; sun: SunDir | nu
             <div className="flex min-w-0 flex-col gap-2">
               {heading("2D map", "north up, exact scale")}
               <CanvasFrame canvasRef={canvas} w={size.w} h={size.h} label={summary}>
-                <NorthArrow />
                 <ScaleBar metresPerPx={mapMetresPerPx} maxPx={barMaxPx} />
+                <NorthArrow />
               </CanvasFrame>
             </div>
             <div className="flex min-w-0 flex-col gap-2">
               {heading("3D view", "tilted, scale approximate")}
               <CanvasFrame canvasRef={canvas2} w={size.w} h={size.h}>
-                <NorthArrow rotationDeg={northDeg} />
                 <ScaleBar
                   metresPerPx={obliqueMetresPerPx}
                   maxPx={barMaxPx}
                   note="approximate (3D perspective)"
                 />
+                <NorthArrow rotationDeg={northDeg} />
               </CanvasFrame>
             </div>
           </div>
         ) : (
           <div className="max-w-[640px]">
             <CanvasFrame canvasRef={canvas} w={size.w} h={size.h} label={summary}>
-              <NorthArrow rotationDeg={mode === "map" ? 0 : northDeg} />
               <ScaleBar
                 metresPerPx={mode === "map" ? mapMetresPerPx : obliqueMetresPerPx}
                 maxPx={barMaxPx}
                 note={mode === "map" ? undefined : "approximate (3D perspective)"}
               />
+              <NorthArrow rotationDeg={mode === "map" ? 0 : northDeg} />
             </CanvasFrame>
           </div>
         )}

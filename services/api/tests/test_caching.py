@@ -43,6 +43,10 @@ def _app(**kw) -> tuple[FastAPI, Clock]:  # type: ignore[no-untyped-def]
     def x() -> dict[str, int]:
         return payload
 
+    @app.get("/api/v1/sites")
+    def sites_list() -> dict[str, int]:
+        return payload
+
     @app.get("/api/v1/jobs/j")
     def j() -> dict[str, int]:
         return payload
@@ -136,6 +140,17 @@ def test_cacheable_gets_have_etag_and_304_on_match() -> None:
     miss = c.get("/api/v1/sites/x", headers={"If-None-Match": '"nope"'})
     assert miss.status_code == 200 and miss.json() == {"v": 1}
     assert c.get("/api/v1/sites/x").headers["etag"] == etag  # same content, same tag
+
+
+def test_the_site_list_always_revalidates_but_one_site_stays_cached() -> None:
+    # A custom site built a moment ago must show up in the list at once (it was hidden for five
+    # minutes by max-age), while per-site data can still be reused.
+    app, _ = _app()
+    c = TestClient(app)
+    lst = c.get("/api/v1/sites")
+    assert lst.status_code == 200 and lst.headers["cache-control"] == "no-cache"
+    assert c.get("/api/v1/sites", headers={"If-None-Match": lst.headers["etag"]}).status_code == 304
+    assert c.get("/api/v1/sites/x").headers["cache-control"] == "public, max-age=300"
 
 
 def test_etag_changes_when_the_content_changes() -> None:

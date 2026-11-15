@@ -22,7 +22,10 @@ async function ok<T>(p: Promise<{ data?: T; error?: unknown }>): Promise<T> {
   return r.data;
 }
 
-export const loadSites = () => ok(api.GET("/api/v1/sites"));
+// The site list changes while the server runs (visitors build custom points), so always ask the
+// server whether it changed; an unchanged list still answers with a cheap 304. Without this a
+// browser reused a five minute old list and said a just-built site did not exist.
+export const loadSites = () => ok(api.GET("/api/v1/sites", { cache: "no-cache" }));
 
 export const loadSkyline = (id: string) =>
   ok(

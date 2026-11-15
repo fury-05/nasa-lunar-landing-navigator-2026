@@ -194,21 +194,40 @@ export function Command() {
 
   return (
     <div className="flex flex-col gap-4">
-      <header className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1">
-        <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
-          <h1 className="m-0 text-2xl">Command Centre</h1>
-          <p className="m-0 text-sm text-muted">
-            <strong className="text-ink">1</strong> Choose a site and dates,{" "}
-            <strong className="text-ink">2</strong> read the verdict,{" "}
-            <strong className="text-ink">3</strong> press{" "}
-            <strong className="text-earth">Play</strong> to watch the Sun and Earth move against the
-            real horizon.
-          </p>
+      <header className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+          <h1 className="m-0 text-3xl">Command Centre</h1>
+          <Chip tone="warn">Planning tool, not for flight operations</Chip>
         </div>
-        <Chip tone="warn">Planning tool, not for flight operations</Chip>
+        <ol
+          aria-label="How to use this page"
+          className="m-0 grid list-none gap-2 p-0 text-base sm:grid-cols-3"
+        >
+          {[
+            ["Choose a site and dates", "Use the Site, Length and Start date boxes."],
+            ["Read the verdict", "Sun, Earth link and the amber upper-bound warning."],
+            ["Press Play", "Watch the Sun and Earth move against the real horizon."],
+          ].map(([head, body], i) => (
+            <li
+              key={head}
+              className="flex items-start gap-3 rounded-cell border border-earth/40 bg-earth/10 px-3 py-2"
+            >
+              <span
+                aria-hidden="true"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-earth font-mono text-lg font-bold text-void"
+              >
+                {i + 1}
+              </span>
+              <span className="flex flex-col">
+                <strong className="text-lg text-ink">{head}</strong>
+                <span className="text-sm text-muted">{body}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
       </header>
 
-      <div className="grid items-start gap-4 min-[1600px]:grid-cols-[15rem_minmax(0,1fr)]">
+      <div className="grid items-start gap-4 min-[1600px]:grid-cols-[18.75rem_minmax(0,1fr)]">
         <Glass className="flex flex-col gap-3 p-3 min-[1600px]:sticky min-[1600px]:top-2 min-[1600px]:max-h-[calc(100vh-1rem)] min-[1600px]:overflow-y-auto">
           <div className="flex flex-wrap items-end gap-x-3 gap-y-2">
             <label className="flex min-w-0 max-w-full flex-col gap-0.5 text-sm text-muted min-[1600px]:w-full">

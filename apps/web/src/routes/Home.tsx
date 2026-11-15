@@ -174,6 +174,95 @@ export function Home() {
         </div>
       </div>
 
+      <section aria-labelledby="km-h">
+        <h2 id="km-h" className="m-0 text-3xl">
+          What does &ldquo;300 km&rdquo; mean?
+        </h2>
+        <Glass className="mt-4 grid items-center gap-8 lg:grid-cols-[1.2fr_1fr]">
+          <div className="flex flex-col gap-3 text-base text-muted">
+            <p className="m-0">
+              <Hl>300 km is how far from a landing site the tool looks for terrain</Hl> that could
+              hide the Sun or the Earth. From the site it follows 1,440 lines of sight, one every
+              quarter of a degree around the compass, out to 300 km, and keeps the highest ridge it
+              meets in each direction. That is the skyline the lander would see.
+            </p>
+            <p className="m-0">
+              <Hl>Why that far?</Hl> The Moon is small and curved. A ridge 100 km away must be about
+              3 km tall to show over the curve, and one 300 km away about 26 km tall. Near the pole
+              the Sun sits only a degree or two above the horizon, so far ridges and crater rims
+              matter. Beyond about 300 km nothing on the Moon is tall enough to count.
+            </p>
+            <p className="m-0">
+              <Hl>Where the map ends.</Hl> NASA&apos;s elevation map covers the pole and about 300
+              km around it. For a site away from the pole, some directions run off the edge of the
+              map before 300 km. There the tool cannot see what lies beyond, so it shows an amber{" "}
+              <Hl>upper bound</Hl>: the real sunlight and Earth link can only be lower than shown.
+            </p>
+            <p className="m-0">
+              <Hl>How to read it:</Hl> the Command Centre says, for example, &ldquo;Terrain covers
+              45% of directions to the required 300 km&rdquo;. A &ldquo;Not viable&rdquo; with that
+              warning is a firm answer. A &ldquo;Viable&rdquo; would only be a best case.
+            </p>
+          </div>
+          <figure className="m-0">
+            <svg
+              viewBox="0 0 320 300"
+              role="img"
+              aria-label="Diagram, not to scale of any one site: a circle of NASA elevation data around the south pole, and a 300 km look-out circle around a site away from the pole that sticks out past the edge of the data."
+              className="h-auto w-full"
+            >
+              <circle cx="150" cy="150" r="110" fill="#14214a" stroke="#5ea2ff" strokeWidth="1.5" />
+              <circle cx="150" cy="150" r="3" fill="#e8eefc" />
+              <text x="150" y="168" textAnchor="middle" fill="#9fb0d6" fontSize="12">
+                south pole
+              </text>
+              <circle
+                cx="210"
+                cy="120"
+                r="100"
+                fill="#ffb454"
+                fillOpacity="0.12"
+                stroke="#ffb454"
+                strokeWidth="1.5"
+                strokeDasharray="6 4"
+              />
+              <circle cx="210" cy="120" r="5" fill="#ffb454" stroke="#fff3d6" strokeWidth="1.5" />
+              <text
+                x="210"
+                y="106"
+                textAnchor="middle"
+                fill="#ffb454"
+                fontSize="13"
+                fontWeight="700"
+              >
+                landing site
+              </text>
+              <text x="62" y="60" textAnchor="middle" fill="#5ea2ff" fontSize="12">
+                NASA elevation
+              </text>
+              <text x="62" y="75" textAnchor="middle" fill="#5ea2ff" fontSize="12">
+                data
+              </text>
+              <text x="268" y="236" textAnchor="middle" fill="#ffb454" fontSize="12">
+                no data here:
+              </text>
+              <text x="268" y="251" textAnchor="middle" fill="#ffb454" fontSize="12">
+                upper bound
+              </text>
+              <line x1="210" y1="120" x2="298" y2="72" stroke="#ffb454" strokeWidth="1.5" />
+              <text x="262" y="82" fill="#ffb454" fontSize="12" transform="rotate(-28 262 82)">
+                300 km
+              </text>
+            </svg>
+            <figcaption className="mt-2 text-sm text-muted">
+              Simplified picture. Blue: where NASA elevation data exists. Amber dashes: the 300 km
+              look-out circle around a site. The part of the amber circle outside the blue is where
+              the tool cannot see, and says so.
+            </figcaption>
+          </figure>
+        </Glass>
+      </section>
+
       <section aria-labelledby="pages-h">
         <h2 id="pages-h" className="m-0 text-3xl">
           What is on each page

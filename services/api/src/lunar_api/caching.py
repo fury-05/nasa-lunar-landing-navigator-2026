@@ -6,7 +6,9 @@
   immediate peer is loopback, so a remote caller cannot spoof it.
 * ETag: a hash of the response bytes. Responses to GET requests under /api/v1/sites, /attribution
   and /links are immutable per data build, so they get `Cache-Control: public, max-age=300` and
-  `If-None-Match` is honoured with 304. Probes, jobs and POSTs are never cached.
+  `If-None-Match` is honoured with 304. The one exception is the site list itself, which changes
+  when a visitor builds a custom point, so it gets `no-cache` (always revalidate, still 304).
+  Probes, jobs and POSTs are never cached.
 """
 
 from __future__ import annotations
@@ -25,6 +27,10 @@ from lunar_api.errors import safe_echo
 
 CACHEABLE_PREFIXES = ("/api/v1/sites", "/api/v1/attribution", "/api/v1/links")
 NEVER_CACHED = ("/api/v1/sites/custom",)
+# The site LIST changes while the server runs, because visitors build custom points. A browser that
+# reused a five minute old list said "There is no site called ..." right after a build finished. The
+# list therefore always revalidates (ETag and 304 still keep it cheap). Per-site data stays cached.
+ALWAYS_REVALIDATE = ("/api/v1/sites",)
 MAX_CACHE_BODY = 2_000_000  # do not buffer and hash bigger responses
 
 
@@ -130,9 +136,8 @@ class EtagMiddleware(BaseHTTPMiddleware):
                 )
         etag = '"' + hashlib.sha256(body).hexdigest()[:32] + '"'
         headers = {k: v for k, v in response.headers.items() if k.lower() != "content-length"}
-        headers.update(
-            {"ETag": etag, "Cache-Control": "public, max-age=300", "Vary": "Accept-Encoding"}
-        )
+        cache_control = "no-cache" if path in ALWAYS_REVALIDATE else "public, max-age=300"
+        headers.update({"ETag": etag, "Cache-Control": cache_control, "Vary": "Accept-Encoding"})
         sent = {
             t.strip().removeprefix("W/")
             for t in request.headers.get("if-none-match", "").split(",")
