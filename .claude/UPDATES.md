@@ -56,3 +56,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-15T06:52:36Z | afreen+irfan | P7-02 | Lighthouse audit, route splitting, robots.txt deployed (PR 168); live re-check recorded | docs/todo-evidence-8
 2026-11-15T07:07:33Z | irfan | P7-07 | submission draft updated to the delivered features, far terrain numbers and terms readings | docs/refresh-submission
 2026-11-15T07:05:53Z | irfan | P7-06 | README and user guide updated to the far terrain, validation and terms facts | docs/refresh-stale-claims
+2026-11-15T07:40:58Z | irfan | P7-05 | attribution audit written; no uncredited source found; two terms pending a person | docs/attribution-audit
