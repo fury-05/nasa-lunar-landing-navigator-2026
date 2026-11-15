@@ -112,18 +112,29 @@ export async function pollJob(
   return null;
 }
 
+export type TerrainResult =
+  { kind: "tile"; tile: import("./terrain").TerrainTile } | { kind: "unavailable"; detail: string };
+
 /**
- * Terrain tile for the local 3D view. The route is a proposal (todo P5-01) and is not in the
- * generated schema, so this uses fetch directly. A 404 or other failure means "no terrain tile
- * available" and is reported to the caller as null, never replaced by invented data.
+ * Terrain tile for the local view. A 404 problem document means no elevation data covers the site:
+ * that is a normal answer, reported with the API's own text and never replaced by invented data.
+ * Any other failure throws and is shown as an error.
  */
-export async function loadTerrainTile(id: string): Promise<import("./terrain").TerrainTile | null> {
-  const r = await fetch(`/api/v1/sites/${encodeURIComponent(id)}/terrain`, {
-    headers: { accept: "application/json" },
+export async function loadTerrainTile(id: string): Promise<TerrainResult> {
+  const r = await api.GET("/api/v1/sites/{site_id}/terrain", {
+    params: { path: { site_id: id } },
   });
-  if (!r.ok || !(r.headers.get("content-type") ?? "").includes("json")) return null;
-  const j: unknown = await r.json();
-  return j as import("./terrain").TerrainTile;
+  if (r.data !== undefined) {
+    return { kind: "tile", tile: r.data as unknown as import("./terrain").TerrainTile };
+  }
+  if (r.response.status === 404) {
+    const detail =
+      r.error && typeof r.error === "object" && "detail" in r.error
+        ? String((r.error as { detail: unknown }).detail)
+        : "No elevation data covers this site.";
+    return { kind: "unavailable", detail };
+  }
+  throw r.error ?? new Error("empty response");
 }
 
 export type Credits = {
@@ -146,3 +157,19 @@ export async function loadCredits(): Promise<Credits> {
   if (r.data === undefined) throw r.error ?? new Error("empty response");
   return r.data as unknown as Credits;
 }
+
+export type LanderIn = components["schemas"]["LanderIn"];
+export type MissionNeedsIn = components["schemas"]["MissionNeedsIn"];
+
+export const loadLanderAssess = (
+  siteId: string,
+  start: string,
+  end: string,
+  lander: LanderIn,
+  needs?: MissionNeedsIn,
+) =>
+  ok(
+    api.POST("/api/v1/lander/assess", {
+      body: { site_id: siteId, start, end, lander, ...(needs ? { mission_needs: needs } : {}) },
+    }),
+  );

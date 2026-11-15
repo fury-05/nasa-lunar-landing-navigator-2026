@@ -108,27 +108,140 @@ async function mock(page: Page) {
   );
 }
 
-test("spacecraft: placeholders are labelled and checks use the API results", async ({ page }) => {
+const check = (id: string, title: string, status: string, over: Record<string, unknown> = {}) => ({
+  id,
+  title,
+  status,
+  reasoning: `${title} reasoning from the API.`,
+  unit: null,
+  available: null,
+  required_nominal: null,
+  required_pessimistic: null,
+  margin_nominal: null,
+  margin_pessimistic: null,
+  ...over,
+});
+
+function landerResult(
+  body: { lander: Record<string, unknown> },
+  over: Record<string, unknown> = {},
+) {
+  const heavy = (body.lander.survival_load_w as number) > 15;
+  return {
+    site_id: "alpha",
+    start_utc: "2026-12-11T00:00:00Z",
+    end_utc: "2026-12-26T00:00:00Z",
+    verdict: heavy ? "fail" : "pass",
+    conclusive: true,
+    summary: heavy ? "API summary: the battery does not last." : "API summary: survives.",
+    checks: [
+      check("power", "Power through the longest dark spell", heavy ? "fail" : "pass", {
+        unit: "Wh",
+        available: 800,
+        required_nominal: 600,
+        required_pessimistic: 660,
+        margin_nominal: 200,
+        margin_pessimistic: 140,
+      }),
+      check("communication", "Autonomy through the longest Earth outage", "pass"),
+      check("terrain_slope", "Landing slope", "not_assessed"),
+      check("thermal", "Thermal survival", "not_assessed", {
+        reasoning: "No thermal model exists in this tool.",
+      }),
+      check("mission_needs", "Mission needs", "pass"),
+    ],
+    lander: { ...body.lander, usable_energy_wh: 800, dark_survival_hours: 80 },
+    terrain: ASSESS.terrain,
+    band_basis: ["Lander basis line from the API."],
+    longest_dark_hours: band(60),
+    longest_outage_hours: band(40),
+    slope: null,
+    mission_needs: ASSESS.criteria,
+    warnings: ["Lander warning from the API."],
+    assumptions: ["Lander assumption from the API."],
+    label: "Planning tool, not for flight operations.",
+    provenance: ASSESS.provenance,
+    ...over,
+  };
+}
+
+async function mockLander(
+  page: Page,
+  seen: Record<string, unknown>[] = [],
+  over: Record<string, unknown> = {},
+) {
+  await page.route("**/api/v1/lander/assess", (r) => {
+    const body = r.request().postDataJSON() as { lander: Record<string, unknown> };
+    seen.push(body as Record<string, unknown>);
+    return r.fulfill({ json: landerResult(body, over) });
+  });
+}
+
+test("spacecraft: results and reasoning come from the API, placeholders stay labelled", async ({
+  page,
+}) => {
   await mock(page);
-  await page.goto("/spacecraft");
+  const seen: Record<string, unknown>[] = [];
+  await mockLander(page, seen);
+  await page.goto("/spacecraft?site=alpha");
   await expect(page.getByText("placeholder values, not a real lander")).toBeVisible();
   await expect(page.getByText(/Status: pending-source/)).toBeVisible();
-  await expect(page.getByText("Longest dark spell", { exact: true })).toBeVisible();
-  // Default placeholders: usable 800 Wh vs 10 W over the worst dark value 66 h = 660 Wh.
-  await expect(page.getByText("Usable 800 Wh against 660 Wh")).toBeVisible();
-  await expect(page.getByText("✓ within your assumptions").first()).toBeVisible();
-  // A heavier load fails the power check, is saved in the link, and survives a reload.
+  await expect(page.getByText("✓ Pass").first()).toBeVisible();
+  await expect(page.getByText("API summary: survives.")).toBeVisible();
+  await expect(
+    page.getByText("Power through the longest dark spell reasoning from the API."),
+  ).toBeVisible();
+  await expect(page.getByText("No thermal model exists in this tool.")).toBeVisible();
+  await expect(page.getByText("not assessed")).toHaveCount(2);
+  await expect(page.getByText("Lander warning from the API.")).toBeVisible();
+  await expect(page.getByText("Lander basis line from the API.")).toBeAttached();
+  await expect(page.getByText(/placeholder: pending-source/).first()).toBeVisible();
+  expect((seen[0]!.lander as Record<string, unknown>).source).toMatch(/placeholder/);
+  // Editing the load is sent to the API, the source label changes, and the result follows.
   await page.getByLabel("Survival load in darkness (W)").fill("20");
   await page.getByRole("button", { name: "Apply assumptions" }).click();
   await expect(page).toHaveURL(/load=20/);
-  await expect(page.getByText("✕ exceeds your assumptions").first()).toBeVisible();
+  await expect(page.getByText("✕ Fail").first()).toBeVisible();
+  await expect(page.getByText("API summary: the battery does not last.")).toBeVisible();
+  const last = seen[seen.length - 1]!.lander as Record<string, unknown>;
+  expect(last.survival_load_w).toBe(20);
+  expect(last.source).toMatch(/entered by the user/);
   await page.reload();
   await expect(page.getByLabel("Survival load in darkness (W)")).toHaveValue("20");
   await expect(page.getByText("your values, saved in the link")).toBeVisible();
 });
 
+test("spacecraft: an incomplete terrain verdict is an amber upper bound", async ({ page }) => {
+  await mock(page);
+  await mockLander(page, [], {
+    verdict: "upper_bound_terrain_incomplete",
+    conclusive: false,
+    terrain: { ...ASSESS.terrain, complete: false, covered_fraction: 0.5, reach_km_min: 2 },
+  });
+  await page.goto("/spacecraft?site=alpha");
+  await expect(page.getByText("! Upper bound, terrain incomplete").first()).toBeVisible();
+  await expect(page.getByText("✓ Pass", { exact: true })).toHaveCount(0);
+});
+
+test("spacecraft: the slope limit is optional and validated", async ({ page }) => {
+  await mock(page);
+  const seen: Record<string, unknown>[] = [];
+  await mockLander(page, seen);
+  await page.goto("/spacecraft?site=alpha");
+  await page.getByLabel(/Steepest landing slope/).fill("120");
+  await page.getByRole("button", { name: "Apply assumptions" }).click();
+  await expect(page.getByRole("alert")).toContainText("between 0 and 90");
+  await page.getByLabel(/Steepest landing slope/).fill("10");
+  await page.getByRole("button", { name: "Apply assumptions" }).click();
+  await expect(page).toHaveURL(/slope=10/);
+  await expect
+    .poll(() => seen.some((b) => (b.lander as Record<string, unknown>).slope_limit_deg === 10))
+    .toBe(true);
+});
+
 test("spacecraft: bad numbers are refused with a message", async ({ page }) => {
   await mock(page);
+  await mockLander(page);
   await page.goto("/spacecraft");
   await page.getByLabel("Reserve kept unused (%)").fill("250");
   await page.getByRole("button", { name: "Apply assumptions" }).click();
@@ -161,10 +274,4 @@ test("public view: story, simple/detailed toggle, glossary and attributed CSA li
     "https://trek.nasa.gov/moon/",
   );
   await expect(page.getByText(/3 days later gives/)).toContainText("3.3 d");
-});
-
-test("spacecraft: a site given in the link loads its results", async ({ page }) => {
-  await mock(page);
-  await page.goto("/spacecraft?site=alpha");
-  await expect(page.getByText("Longest dark spell", { exact: true })).toBeVisible();
 });

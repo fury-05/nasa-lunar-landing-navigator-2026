@@ -5,6 +5,7 @@ import { Chip } from "../components/Chip";
 import { Glass } from "../components/Glass";
 import { createCustomSite, loadSites, pollJob, type JobOut } from "../lib/data";
 import { validateCoords } from "../lib/polar";
+import { describeFailure } from "../lib/jobFailure";
 import { fmtLat, fmtLon, terrainSentence, toSiteInfo } from "../lib/site";
 import { useAsync } from "../lib/useAsync";
 
@@ -13,7 +14,7 @@ const PolarMap = lazy(() => import("../components/PolarMap"));
 type Phase =
   | { kind: "idle" }
   | { kind: "working"; job: JobOut | null; message: string }
-  | { kind: "failed"; message: string }
+  | { kind: "failed"; message: string; retryable: boolean; hint: string | null }
   | { kind: "done"; siteId: string; flat: boolean; warnings: string[] };
 
 const inputCls = "min-h-11 rounded-cell border border-white/20 bg-void px-3 font-mono text-ink";
@@ -25,6 +26,8 @@ export function SitePicker() {
   const [lon, setLon] = useState("");
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const [imageryDown, setImageryDown] = useState(false);
+  // Site whose name the map shows: hovered on the map, or hovered or focused in the list.
+  const [activeId, setActiveId] = useState<string | null>(null);
   const abort = useRef<AbortController | null>(null);
 
   useEffect(() => () => abort.current?.abort(), []);
@@ -67,11 +70,16 @@ export function SitePicker() {
         setPhase({
           kind: "failed",
           message: "The job is taking longer than expected. Try again in a minute.",
+          retryable: true,
+          hint: null,
         });
       } else if (end.status === "failed") {
+        const f = describeFailure(end);
         setPhase({
           kind: "failed",
-          message: `The site could not be built: ${end.reason ?? "unknown reason"}. ${end.retry ?? ""}`,
+          message: `The site could not be built: ${f.text}`,
+          retryable: f.retryable,
+          hint: f.hint,
         });
       } else {
         const r = end.result as { terrain_unavailable?: boolean; warnings?: string[] };
@@ -83,7 +91,8 @@ export function SitePicker() {
         });
       }
     } catch (e) {
-      if (!ctl.signal.aborted) setPhase({ kind: "failed", message: problemMessage(e) });
+      if (!ctl.signal.aborted)
+        setPhase({ kind: "failed", message: problemMessage(e), retryable: true, hint: null });
     }
   };
 
@@ -119,6 +128,8 @@ export function SitePicker() {
               }}
               onSelectSite={go}
               onImageryError={() => setImageryDown(true)}
+              activeId={activeId}
+              onHover={setActiveId}
             />
           </Suspense>
           {imageryDown && (
@@ -126,10 +137,16 @@ export function SitePicker() {
               Some Moon Trek map tiles did not load. You can still enter coordinates in the form.
             </p>
           )}
+          <p aria-live="polite" className="mb-0 mt-2 min-h-5 text-sm text-ink">
+            {activeId
+              ? `${infos.find((i) => i.id === activeId)?.name ?? activeId}: click to open in the Command Centre`
+              : ""}
+          </p>
           <p className="mb-0 mt-2 text-xs text-muted">
             Map: south polar stereographic view of the LROC wide angle mosaic from NASA Moon Trek
-            (60 S to the pole, scale 1 at the pole). Click an existing site to open it; click empty
-            ground to choose a new point.
+            (60 S to the pole, scale 1 at the pole). Teal dots are existing sites; point at one or
+            use the list below to see its name. Click a dot to open it; click empty ground to choose
+            a new point.
           </p>
         </Glass>
 
@@ -207,9 +224,27 @@ export function SitePicker() {
               </>
             )}
             {phase.kind === "failed" && (
-              <p role="alert" className="m-0 text-bad">
-                {phase.message}
-              </p>
+              <>
+                <p role="alert" className="m-0 text-bad">
+                  {phase.message}
+                  {phase.hint && <span className="block text-xs text-muted">{phase.hint}</span>}
+                </p>
+                {phase.retryable ? (
+                  <button
+                    type="button"
+                    onClick={() => void submit()}
+                    disabled={!check.ok}
+                    className="min-h-11 w-fit rounded-cell border border-earth/60 px-4 text-sm text-earth hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Try again
+                  </button>
+                ) : (
+                  <p className="m-0 text-xs text-muted">
+                    The server says this point cannot be retried as it is. Change the coordinates
+                    and build again.
+                  </p>
+                )}
+              </>
             )}
             {phase.kind === "done" && (
               <>
@@ -252,7 +287,13 @@ export function SitePicker() {
           {infos.map((i) => (
             <li
               key={i.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-cell border border-white/10 p-3"
+              onMouseEnter={() => setActiveId(i.id)}
+              onMouseLeave={() => setActiveId(null)}
+              onFocus={() => setActiveId(i.id)}
+              onBlur={() => setActiveId(null)}
+              className={`flex flex-wrap items-center justify-between gap-2 rounded-cell border p-3 ${
+                activeId === i.id ? "border-good/70 bg-white/[0.06]" : "border-white/10"
+              }`}
             >
               <span className="text-sm">
                 <Link

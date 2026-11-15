@@ -84,3 +84,42 @@ test("keyboard: every control on the Command Centre can be reached with Tab and 
   });
   expect(bad).toEqual([]);
 });
+
+test("degraded: a Horizons flag on /ready shows the Horizons message even when ready", async ({
+  page,
+}) => {
+  await page.route("**/api/v1/ready", (r) =>
+    r.fulfill({
+      json: {
+        status: "ready",
+        checks: {},
+        horizons_degraded: {
+          since_utc: "2026-11-15T03:00:00Z",
+          reason: "Horizons unreachable",
+          using_cache: true,
+        },
+      },
+    }),
+  );
+  await page.goto("/");
+  const banner = page.getByRole("status").filter({ hasText: "Horizons" });
+  await expect(banner).toContainText("not responding normally");
+  await expect(banner).toContainText("Stored positions for existing sites are still being served");
+  await expect(banner).toContainText("Reason given: Horizons unreachable");
+});
+
+test("degraded: the flag is also read from /version", async ({ page }) => {
+  await page.route("**/api/v1/ready", (r) => r.fulfill({ json: { status: "ready", checks: {} } }));
+  await page.route("**/api/v1/version", (r) =>
+    r.fulfill({ json: { api: "1", engine: "1", horizons_degraded: true } }),
+  );
+  await page.goto("/");
+  await expect(page.getByText(/Horizons ephemeris service is not responding/)).toBeVisible();
+});
+
+test("degraded: no banner when the service is ready and reports no flag", async ({ page }) => {
+  await page.route("**/api/v1/ready", (r) => r.fulfill({ json: { status: "ready", checks: {} } }));
+  await page.goto("/");
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  await expect(page.getByText(/reduced state/)).toHaveCount(0);
+});
