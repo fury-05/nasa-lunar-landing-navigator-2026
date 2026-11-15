@@ -248,6 +248,18 @@ export const slipCell = (
   robust,
   sunlight_hours: sunlight,
   earth_share: 0.5,
+  verdict_state:
+    verdict === "viable" ? "viable" : verdict === "marginal" ? "marginal" : "not_viable",
+  verdict_conclusive: true,
+  terrain: {
+    available: true,
+    complete: true,
+    covered_fraction: 1,
+    reach_km_max: 300,
+    reach_km_median: 300,
+    reach_km_min: 300,
+    required_km: 300,
+  },
 });
 
 export const slipOut = (over: Partial<S["SlipOut"]> = {}): S["SlipOut"] => ({
