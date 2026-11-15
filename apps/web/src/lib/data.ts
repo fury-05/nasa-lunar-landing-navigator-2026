@@ -125,3 +125,24 @@ export async function loadTerrainTile(id: string): Promise<import("./terrain").T
   const j: unknown = await r.json();
   return j as import("./terrain").TerrainTile;
 }
+
+export type Credits = {
+  notice: string;
+  unconfirmed_terms: string[];
+  sources: {
+    id: string;
+    name: string;
+    publisher: string;
+    url: string;
+    credit: string;
+    usage_statement: string;
+    terms_confirmed: boolean;
+  }[];
+};
+
+/** Attribution document as the API serves it (the generated type lags the real shape). */
+export async function loadCredits(): Promise<Credits> {
+  const r = await api.GET("/api/v1/attribution");
+  if (r.data === undefined) throw r.error ?? new Error("empty response");
+  return r.data as unknown as Credits;
+}
