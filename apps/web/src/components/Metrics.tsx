@@ -1,6 +1,8 @@
 import { Chip } from "./Chip";
 import { fmtHours, type Assess } from "../lib/data";
 import { verdictLabel } from "../api/client";
+import { verdictView } from "../lib/verdict";
+import type { SiteInfo } from "../lib/site";
 
 type Band = { low: number; nominal: number; high: number };
 
@@ -23,9 +25,18 @@ function BandRow({ label, band, fmt }: { label: string; band: Band; fmt: (n: num
 
 const pct = (n: number) => `${(n * 100).toFixed(0)}%`;
 
-export function Metrics({ a }: { a: Assess }) {
-  const tone = a.verdict === "viable" ? "good" : a.verdict === "marginal" ? "warn" : "bad";
-  const glyph = a.verdict === "viable" ? "✓" : a.verdict === "marginal" ? "~" : "✕";
+export function Metrics({ a, site = null }: { a: Assess; site?: SiteInfo | null }) {
+  const v = verdictView(a, site);
+  const upper = v.state === "upper-bound";
+  const tone = upper
+    ? "warn"
+    : a.verdict === "viable"
+      ? "good"
+      : a.verdict === "marginal"
+        ? "warn"
+        : "bad";
+  const glyph = upper ? "!" : a.verdict === "viable" ? "✓" : a.verdict === "marginal" ? "~" : "✕";
+  const label = upper ? "Upper bound, terrain incomplete" : verdictLabel(a.verdict);
   return (
     <section aria-labelledby="metrics-h" className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
@@ -33,15 +44,23 @@ export function Metrics({ a }: { a: Assess }) {
           Verdict
         </h2>
         <Chip tone={tone}>
-          {glyph} {verdictLabel(a.verdict)}
+          {glyph} {label}
         </Chip>
-        <Chip tone={a.robust ? "good" : "warn"}>{a.robust ? "robust" : "fragile"}</Chip>
+        {!upper && <Chip tone={a.robust ? "good" : "warn"}>{a.robust ? "robust" : "fragile"}</Chip>}
       </div>
+      {v.incomplete && (
+        <p className="m-0 rounded-cell border border-warn/50 p-2 text-sm text-warn">
+          {v.reason} The real sunlight and Earth link can only be lower than shown, so treat every
+          number here as an upper bound.
+        </p>
+      )}
       <p className="m-0 text-xs text-muted">
         Thresholds: {a.criteria_status}.{" "}
-        {a.robust
-          ? "The verdict holds across the uncertainty band."
-          : "The verdict changes inside the uncertainty band (shown as a range)."}
+        {upper
+          ? "No robust or fragile label is given while terrain is incomplete."
+          : a.robust
+            ? "The verdict holds across the uncertainty band."
+            : "The verdict changes inside the uncertainty band (shown as a range)."}
       </p>
       <dl className="m-0">
         <BandRow label="Sunlight" band={a.sunlight_hours} fmt={fmtHours} />
@@ -57,6 +76,16 @@ export function Metrics({ a }: { a: Assess }) {
           </dd>
         </div>
       </dl>
+      <details className="text-xs text-muted">
+        <summary className="min-h-11 cursor-pointer py-2">
+          How the range in brackets is made
+        </summary>
+        <ul className="m-0 list-disc pl-5">
+          {v.basis.map((b) => (
+            <li key={b}>{b}</li>
+          ))}
+        </ul>
+      </details>
     </section>
   );
 }

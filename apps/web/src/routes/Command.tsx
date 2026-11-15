@@ -15,6 +15,8 @@ import {
   loadTimeline,
   type SeriesRow,
 } from "../lib/data";
+import { NeedsForm } from "../components/NeedsForm";
+import { needsFromParams, needsToParams, needsToQuery } from "../lib/mission";
 import { toSiteInfo } from "../lib/site";
 import { useAsync } from "../lib/useAsync";
 
@@ -48,6 +50,13 @@ export function Command() {
     setParams(next, { replace: true });
   };
 
+  const needs = useMemo(() => needsFromParams(params), [params]);
+  const needsKey = [
+    params.get("sun"),
+    params.get("dark"),
+    params.get("earth"),
+    params.get("outage"),
+  ].join(",");
   const sites = useAsync(loadSites, "sites");
   const first = sites.state === "ok" ? sites.data.sites[0]?.id : undefined;
   const id = site || first || "";
@@ -67,8 +76,8 @@ export function Command() {
 
   const usable = id !== "" && !unknownSite;
   const assess = useAsync(
-    usable && valid ? () => loadAssess(id, iso(a), iso(b)) : null,
-    `a|${key}`,
+    usable && valid ? () => loadAssess(id, iso(a), iso(b), needsToQuery(needs)) : null,
+    `a|${key}|${needsKey}`,
   );
   const skyline = useAsync(usable ? () => loadSkyline(id) : null, `s|${id}`);
   const timeline = useAsync(
@@ -162,6 +171,14 @@ export function Command() {
         </div>
       )}
 
+      <Glass>
+        <NeedsForm
+          key={needsKey}
+          needs={needs}
+          onApply={(n) => setParams(needsToParams(params, n), { replace: true })}
+        />
+      </Glass>
+
       <div className="grid gap-6 lg:grid-cols-2">
         <Glass>
           <h2 className="mt-0 text-xl">Sky from the site</h2>
@@ -177,7 +194,7 @@ export function Command() {
         <Glass>
           {assess.state === "loading" && <Loading what="results" />}
           {assess.state === "error" && <Problem message={assess.message} />}
-          {assess.state === "ok" && <Metrics a={assess.data} />}
+          {assess.state === "ok" && <Metrics a={assess.data} site={info} />}
         </Glass>
       </div>
 

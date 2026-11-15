@@ -30,10 +30,17 @@ export const loadSkyline = (id: string) =>
     }),
   );
 
-export const loadAssess = (id: string, start: string, end: string) =>
+export const loadAssess = (
+  id: string,
+  start: string,
+  end: string,
+  needs?: Record<string, number>,
+) =>
   ok(
     api.GET("/api/v1/sites/{site_id}/assess", {
-      params: { path: { site_id: id }, query: { start, end } },
+      // Mission-need parameters are added to the schema by the API in a later version; until then
+      // they are passed through untyped.
+      params: { path: { site_id: id }, query: { start, end, ...needs } },
     }),
   );
 

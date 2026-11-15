@@ -183,3 +183,49 @@ test("site context shows coordinates, terrain state and a QuickMap link from the
   const link = page.getByRole("link", { name: /Open in QuickMap/ });
   await expect(link).toHaveAttribute("href", /quickmap\.lroc\.im-ldi\.com\/\?proj=27/);
 });
+
+test("a viable verdict with incomplete terrain is shown as an amber upper bound", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.route("**/api/v1/sites/*/assess*", (r) =>
+    r.fulfill({ json: { ...ASSESS, verdict: "viable", robust: true } }),
+  );
+  await page.route("**/api/v1/sites", (r) =>
+    r.fulfill({
+      json: {
+        ...SITES,
+        sites: SITES.sites.map((s) => ({
+          ...s,
+          terrain_coverage: { covered_fraction: 0.5, min_reach_m: 2000, max_reach_m: 8000 },
+        })),
+      },
+    }),
+  );
+  await page.goto("/command");
+  await expect(page.getByText("Upper bound, terrain incomplete")).toBeVisible();
+  await expect(page.getByText("robust", { exact: true })).toHaveCount(0);
+});
+
+test("mission needs are applied to the request and saved in the link", async ({ page }) => {
+  await mock(page);
+  const seen: string[] = [];
+  await page.route("**/api/v1/sites/*/assess*", (r) => {
+    seen.push(r.request().url());
+    return r.fulfill({ json: ASSESS });
+  });
+  await page.goto("/command");
+  await expect(page.getByText("placeholder defaults")).toBeVisible();
+  await page.getByLabel("Minimum sunlight (% of window)").fill("70");
+  await page.getByLabel("Maximum Earth outage (hours, optional)").fill("12");
+  await page.getByRole("button", { name: "Apply needs" }).click();
+  await expect(page).toHaveURL(/sun=70/);
+  await expect(page).toHaveURL(/outage=12/);
+  await expect.poll(() => seen.some((u) => u.includes("min_sun_share=0.7"))).toBe(true);
+  expect(seen.some((u) => u.includes("max_outage_hours=12"))).toBe(true);
+  await page.reload();
+  await expect(page.getByLabel("Minimum sunlight (% of window)")).toHaveValue("70");
+  await page.getByLabel("Minimum sunlight (% of window)").fill("500");
+  await page.getByRole("button", { name: "Apply needs" }).click();
+  await expect(page.getByRole("alert")).toContainText("between 0 and 100");
+});
