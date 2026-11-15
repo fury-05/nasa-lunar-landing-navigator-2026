@@ -245,6 +245,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sites/{site_id}/terrain": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Terrain */
+        get: operations["get_terrain_api_v1_sites__site_id__terrain_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sites/{site_id}/timeline": {
         parameters: {
             query?: never;
@@ -796,7 +813,21 @@ export interface components {
             lat_deg: number;
             /** Lon East Deg */
             lon_east_deg: number;
+            /** Name */
+            name: string;
+            /** Quickmap */
+            quickmap: string;
+            /** Reach Km */
+            reach_km: number;
+            /** Reach Km Max */
+            reach_km_max: number;
+            /** Source */
+            source: string;
+            /** Terrain Available */
+            terrain_available: boolean;
             terrain_coverage: components["schemas"]["TerrainCoverage"];
+            /** Tile Radius Km */
+            tile_radius_km?: number | null;
             /** Window */
             window: {
                 [key: string]: unknown;
@@ -812,17 +843,29 @@ export interface components {
             coverage_note: string;
             /** Covered Fraction */
             covered_fraction: number;
+            /** Dem Error Deg */
+            dem_error_deg?: (number | null)[] | null;
+            /** Effective Resolution M */
+            effective_resolution_m?: (number | null)[] | null;
             /** Elevation Deg */
             elevation_deg: number[];
             /** Eye Height M */
             eye_height_m: number;
             provenance: components["schemas"]["Provenance"];
+            /** Reach Km */
+            reach_km: number[];
             /** Reach M */
             reach_m: number[];
             /** Requested Range M */
             requested_range_m: number;
+            /** Required Range Km */
+            required_range_km: number;
             /** Site Id */
             site_id: string;
+            /** Tier */
+            tier: (string | null)[];
+            /** Tiers */
+            tiers: string[];
         };
         /** SlipCellOut */
         SlipCellOut: {
@@ -946,6 +989,47 @@ export interface components {
             reach_km_min: number;
             /** Required Km */
             required_km: number;
+        };
+        /**
+         * TerrainTileOut
+         * @description Local height grid around a site, row 0 = north edge, column 0 = west edge.
+         */
+        TerrainTileOut: {
+            /** Centre */
+            centre: {
+                [key: string]: number;
+            };
+            /** Cols */
+            cols: number;
+            /** Finite Fraction */
+            finite_fraction: number;
+            /** Height Error Basis */
+            height_error_basis: string;
+            /** Height Error M */
+            height_error_m: number | null;
+            /** Heights M */
+            heights_m: (number | null)[];
+            /** Interpolated Basis */
+            interpolated_basis: string;
+            /** Interpolated Fraction */
+            interpolated_fraction: number | null;
+            /** Native Resolution M */
+            native_resolution_m: number;
+            provenance: components["schemas"]["Provenance"];
+            /** Rows */
+            rows: number;
+            /** Site Id */
+            site_id: string;
+            /** Source */
+            source: string;
+            /** Spacing M */
+            spacing_m: number;
+            /** Tier Share */
+            tier_share: {
+                [key: string]: number;
+            };
+            /** Window M */
+            window_m: number;
         };
         /** TimelineOut */
         TimelineOut: {
@@ -1532,6 +1616,49 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["StateOut"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Invalid input */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    get_terrain_api_v1_sites__site_id__terrain_get: {
+        parameters: {
+            query?: {
+                window_m?: number;
+                max_n?: number;
+            };
+            header?: never;
+            path: {
+                site_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TerrainTileOut"];
                 };
             };
             /** @description Not found */

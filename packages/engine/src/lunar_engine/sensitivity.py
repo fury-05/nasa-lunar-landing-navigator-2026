@@ -159,10 +159,13 @@ def _band_basis(
     out: list[str] = []
     if delta_given:
         out.append(f"band half-width of {delta:.3f} degrees set by the caller")
-    elif skyline.dem_error_deg is not None:
+    elif (measured := skyline.effective_dem_error_deg()) is not None:
+        how = "ERR"
+        if skyline.dem_error_deg is None:
+            how = "ERR product, 95th percentile over azimuths"
         out.append(
-            f"DEM vertical error measured along the rays: {skyline.dem_error_deg:.3f} degrees "
-            f"(ERR product), combined with an assumed frame error of {ASSUMED_FRAME_ERROR_DEG} "
+            f"DEM vertical error measured along the rays: {measured:.3f} degrees "
+            f"({how}), combined with an assumed frame error of {ASSUMED_FRAME_ERROR_DEG} "
             f"degrees: half-width {delta:.3f} degrees"
         )
     else:
@@ -206,9 +209,8 @@ def assess(
 ) -> Assessment:
     status = terrain_status(skyline, required_range_m)
     if delta_deg is None:
-        delta = default_delta_deg(
-            ASSUMED_SKYLINE_ERROR_DEG if skyline.dem_error_deg is None else skyline.dem_error_deg
-        )
+        measured = skyline.effective_dem_error_deg()
+        delta = default_delta_deg(ASSUMED_SKYLINE_ERROR_DEG if measured is None else measured)
     else:
         delta = delta_deg
     if delta < 0:
