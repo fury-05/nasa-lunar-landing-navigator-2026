@@ -40,3 +40,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-15T01:24:34Z | irfan | P4 | verdict honesty, site context, horizon strip, scrubber, mission needs merged (A1+B1..B3) | feat/web-honesty-context-command
 2026-11-15T01:40:17Z | afreen+irfan | P4-03 | site picker with Trek polar map, custom point, job progress; far terrain download started on VM | merge/site-picker
 2026-11-15T01:52:39Z | irfan | P4/P5 | rows P4-05, P4-06, P5-02 DONE with evidence; P4-03, P4-07, P5-04 partial notes | docs/todo-evidence
+2026-11-15T02:06:04Z | afreen+irfan | P6-03,P6-04 | Spacecraft Dashboard and Public View deployed (PR 141) | docs/todo-evidence-2
