@@ -5,6 +5,8 @@ import { Command } from "./routes/Command";
 import { Credits } from "./routes/Credits";
 import { Home } from "./routes/Home";
 import { Placeholder } from "./routes/Placeholder";
+import { Public } from "./routes/Public";
+import { Spacecraft } from "./routes/Spacecraft";
 
 // The picker pulls in OpenLayers and proj4, so it loads only when someone opens the route.
 const SitePicker = lazy(() =>
@@ -17,11 +19,8 @@ export function App() {
       <Route element={<Shell />}>
         <Route index element={<Home />} />
         <Route path="command" element={<Command />} />
-        <Route
-          path="spacecraft"
-          element={<Placeholder title="Spacecraft Dashboard" phase="phase 6" />}
-        />
-        <Route path="public" element={<Placeholder title="Public View" phase="phase 6" />} />
+        <Route path="spacecraft" element={<Spacecraft />} />
+        <Route path="public" element={<Public />} />
         <Route
           path="sites/pick"
           element={
