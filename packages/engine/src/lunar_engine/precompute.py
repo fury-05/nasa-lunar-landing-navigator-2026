@@ -109,14 +109,24 @@ def save_skyline(path: Path, sky: Skyline) -> None:
     np.savez_compressed(
         path, azimuth_deg=sky.azimuth_deg, elevation_deg=sky.elevation_deg, reach_m=sky.reach_m,
         meta=np.array([sky.max_range_m, sky.eye_height_m, sky.site_height_m, sky.sphere_dip_deg]),
+        # NaN means not measured / unknown (older bundles lack these keys and load as None)
+        extra=np.array(
+            [
+                np.nan if sky.dem_error_deg is None else sky.dem_error_deg,
+                np.nan if sky.unseen_relief_m is None else sky.unseen_relief_m,
+            ]
+        ),
     )
 
 
 def load_skyline(path: Path) -> Skyline:
     with np.load(path) as z:
         m = z["meta"]
+        extra = z["extra"] if "extra" in z.files else np.array([np.nan, np.nan])
         return Skyline(z["azimuth_deg"], z["elevation_deg"], z["reach_m"], float(m[0]),
-                       float(m[1]), float(m[2]), float(m[3]))
+                       float(m[1]), float(m[2]), float(m[3]),
+                       None if np.isnan(extra[0]) else float(extra[0]),
+                       None if np.isnan(extra[1]) else float(extra[1]))
 
 
 def flat_skyline(eye_height_m: float, azimuth_step_deg: float) -> Skyline:
