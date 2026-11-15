@@ -60,3 +60,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-15T07:45:12Z | irfan | P7-06 | SI_USAGE brought up to date with 77 commits, helper agents and what was not verified | docs/final-docs-check
 2026-11-15T07:50:14Z | irfan | P7-05,P7-06 | attribution audit and final docs recorded | docs/todo-evidence-9
 2026-11-15T08:02:51Z | irfan | P7-08 | release notes drafted for v1.0.0 (tag waits for the freeze checks) | docs/release-notes
+2026-11-15T08:15:00Z | irfan | P2-11,P7-07 | independent browser checks recorded as evidence (performed by Claude); P2-11 DONE, P7-07 note updated and still PENDING | docs/validation/browser-checks-2026-11-15.md
