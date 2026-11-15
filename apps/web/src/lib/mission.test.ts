@@ -29,9 +29,9 @@ describe("mission needs in the URL", () => {
   });
   it("maps to API query names and omits an unset outage limit", () => {
     expect(needsToQuery(DEFAULT_NEEDS)).toEqual({
-      min_sun_share: 0.5,
+      min_sun_fraction: 0.5,
       max_dark_hours: 100,
-      min_earth_share: 0.5,
+      min_earth_fraction: 0.5,
     });
     expect(needsToQuery({ ...DEFAULT_NEEDS, maxOutageH: 5 }).max_outage_hours).toBe(5);
   });

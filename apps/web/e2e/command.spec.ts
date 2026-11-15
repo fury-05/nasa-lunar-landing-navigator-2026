@@ -221,7 +221,7 @@ test("mission needs are applied to the request and saved in the link", async ({ 
   await page.getByRole("button", { name: "Apply needs" }).click();
   await expect(page).toHaveURL(/sun=70/);
   await expect(page).toHaveURL(/outage=12/);
-  await expect.poll(() => seen.some((u) => u.includes("min_sun_share=0.7"))).toBe(true);
+  await expect.poll(() => seen.some((u) => u.includes("min_sun_fraction=0.7"))).toBe(true);
   expect(seen.some((u) => u.includes("max_outage_hours=12"))).toBe(true);
   await page.reload();
   await expect(page.getByLabel("Minimum sunlight (% of window)")).toHaveValue("70");
