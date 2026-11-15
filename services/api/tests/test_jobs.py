@@ -270,9 +270,14 @@ def test_sse_streams_progress_then_end(http) -> None:  # type: ignore[no-untyped
     assert client.get("/api/v1/jobs/job-missing/events").status_code == 404
 
 
-def test_sse_reports_each_change_once(http) -> None:  # type: ignore[no-untyped-def]
+def test_sse_reports_each_change_once(http, monkeypatch) -> None:  # type: ignore[no-untyped-def]
     import threading
     import time
+
+    from lunar_api import job_routes
+
+    # Poll much faster than the updates (0.4 s apart) so a loaded machine cannot skip a step.
+    monkeypatch.setattr(job_routes, "SSE_POLL_S", 0.05)
 
     client, store, _r = http
     store.create(JobState("job-live", "custom-live"))
