@@ -1,4 +1,7 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { useEffect, useRef } from "react";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { DegradedBanner } from "./DegradedBanner";
+import { ErrorBoundary } from "./ErrorBoundary";
 
 const links = [
   { to: "/", label: "Home", end: true },
@@ -12,6 +15,17 @@ const links = [
 ];
 
 export function Shell() {
+  const loc = useLocation();
+  const main = useRef<HTMLElement>(null);
+  const first = useRef(true);
+  // After a client-side navigation, move focus to the page so screen readers announce it.
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    main.current?.focus({ preventScroll: false });
+  }, [loc.pathname]);
   return (
     <div className="flex min-h-screen flex-col">
       <a
@@ -45,8 +59,16 @@ export function Shell() {
           </ul>
         </nav>
       </header>
-      <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-6 py-10">
-        <Outlet />
+      <DegradedBanner />
+      <main
+        id="main"
+        ref={main}
+        tabIndex={-1}
+        className="mx-auto w-full max-w-6xl flex-1 px-6 py-10"
+      >
+        <ErrorBoundary key={loc.pathname}>
+          <Outlet />
+        </ErrorBoundary>
       </main>
       <footer className="border-t border-white/10 px-6 py-4 text-center text-xs text-muted">
         Planning tool, not for flight operations. Data credits on the Credits page.

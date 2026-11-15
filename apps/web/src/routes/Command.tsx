@@ -1,10 +1,11 @@
-import { lazy, Suspense, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Chip } from "../components/Chip";
 import { Glass } from "../components/Glass";
 import { Metrics } from "../components/Metrics";
 import { SiteContext } from "../components/SiteContext";
 import { SkyView } from "../components/SkyView";
+import { DEFAULT_SPEED, useMissionClock } from "../lib/clock";
 import { ExportBar } from "../components/ExportBar";
 import { HorizonStrip } from "../components/HorizonStrip";
 import { Readout } from "../components/Readout";
@@ -102,16 +103,26 @@ export function Command() {
     () => (timeline.state === "ok" ? (timeline.data.series as unknown as SeriesRow[]) : []),
     [timeline],
   );
-  // Scrubber position belongs to the window it was set in; a new window starts at the middle.
-  const [pos, setPos] = useState<{ key: string; i: number } | null>(null);
-  const index =
-    rows.length === 0
-      ? 0
-      : pos && pos.key === key
-        ? Math.min(pos.i, rows.length - 1)
-        : Math.floor(rows.length / 2);
-  const midpoint: SeriesRow | null = rows[index] ?? null;
   const times = useMemo(() => rows.map((r) => Date.parse(r.t)), [rows]);
+  // One mission clock (time and speed in the URL) drives every view on this page.
+  const commitClock = useCallback(
+    (t: string, sp: string) => {
+      const next = new URLSearchParams(params);
+      next.set("t", t);
+      if (sp === DEFAULT_SPEED) next.delete("sp");
+      else next.set("sp", sp);
+      setParams(next, { replace: true });
+    },
+    [params, setParams],
+  );
+  const clock = useMissionClock({
+    times,
+    key,
+    urlT: params.get("t"),
+    urlSpeed: params.get("sp"),
+    commit: commitClock,
+  });
+  const midpoint: SeriesRow | null = rows[clock.index] ?? null;
   const skyRef = useRef<SVGSVGElement>(null);
   const stripRef = useRef<SVGSVGElement>(null);
   const nowMs = midpoint ? Date.parse(midpoint.t) : null;
@@ -212,7 +223,7 @@ export function Command() {
 
       {midpoint && timeline.state === "ok" && (
         <Glass className="grid gap-6 lg:grid-cols-2">
-          <Scrubber times={times} index={index} onChange={(i) => setPos({ key, i })} />
+          <Scrubber times={times} index={clock.index} onChange={clock.scrub} clock={clock} />
           <Readout data={timeline.data} t={Date.parse(midpoint.t)} />
         </Glass>
       )}
