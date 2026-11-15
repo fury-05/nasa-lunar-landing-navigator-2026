@@ -46,3 +46,14 @@ export function verdictView(a: VerdictInput): VerdictView {
     incomplete && !a.verdict_conclusive ? "upper-bound" : a.verdict;
   return { state, incomplete, reason, basis };
 }
+
+/**
+ * Plain wording for who chose the thresholds, from the API's `criteria.source`. Used by the
+ * Verdict card and the exported summary so they cannot disagree. Only "user-chosen" means the
+ * visitor set a need; everything else is the placeholder defaults (issue #179).
+ */
+export function thresholdsText(c: { source: string; status: string }): string {
+  return c.source === "user-chosen"
+    ? `chosen by you (${c.status})`
+    : `placeholder defaults, not mission requirements (${c.status})`;
+}

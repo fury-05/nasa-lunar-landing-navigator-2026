@@ -13,6 +13,8 @@ import {
   toApiLander,
   type Lander,
 } from "../lib/lander";
+import { toSiteInfo } from "../lib/site";
+import { defaultSite } from "../lib/siteFilter";
 import { needsFromParams, needsToApi } from "../lib/mission";
 import { useAsync } from "../lib/useAsync";
 
@@ -169,7 +171,10 @@ function LanderForm({ lander, onApply }: { lander: Lander; onApply: (l: Lander) 
 export function Spacecraft() {
   const [params, setParams] = useSearchParams();
   const sites = useAsync(loadSites, "sites");
-  const first = sites.state === "ok" ? sites.data.sites[0]?.id : undefined;
+  const first = useMemo(
+    () => (sites.state === "ok" ? defaultSite(sites.data.sites.map(toSiteInfo))?.id : undefined),
+    [sites],
+  );
   const id = params.get("site") ?? first ?? "";
   const start = params.get("start") ?? DEFAULT_START;
   const lander = useMemo(() => landerFromParams(params), [params]);

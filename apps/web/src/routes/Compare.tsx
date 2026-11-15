@@ -15,6 +15,7 @@ import {
 } from "../lib/compare";
 import { addDays, fmtHours, iso, loadCompare, loadSites } from "../lib/data";
 import { toSiteInfo } from "../lib/site";
+import { sortSites } from "../lib/siteFilter";
 import { useAsync } from "../lib/useAsync";
 import { verdictView } from "../lib/verdict";
 
@@ -135,7 +136,7 @@ export function Compare() {
           )}
           <div className="flex flex-wrap gap-2">
             {sites.state === "ok" &&
-              sites.data.sites.map((s) => {
+              sortSites(sites.data.sites.map(toSiteInfo)).map((s) => {
                 const on = sel.includes(s.id);
                 const full = !on && sel.length >= MAX_SITES;
                 return (
@@ -151,7 +152,7 @@ export function Compare() {
                       disabled={full}
                       onChange={() => setSel(toggleSite(sel, s.id))}
                     />
-                    {toSiteInfo(s).name}
+                    {s.name}
                   </label>
                 );
               })}
@@ -225,7 +226,7 @@ export function Compare() {
       {cmp.state === "ok" && rows.length > 0 && (
         <Glass>
           <h2 className="mt-0 text-xl">Side by side</h2>
-          <div className="overflow-x-auto">
+          <div className="relative overflow-x-auto">
             <table className="w-full border-collapse text-left">
               <caption className="pb-2 text-left text-xs text-muted">
                 Window {start} for {days} days, UTC. Brackets show the range if the terrain is

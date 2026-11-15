@@ -5,6 +5,7 @@ import { Glass } from "../components/Glass";
 import { MAX_SITES, parseSites, toggleSite } from "../lib/compare";
 import { fmtHours, iso, loadSites, loadSlip } from "../lib/data";
 import { toSiteInfo } from "../lib/site";
+import { sortSites } from "../lib/siteFilter";
 import { cellView, SLIP_OFFSETS, signed, whatChanges, type CellView } from "../lib/slip";
 import { useAsync } from "../lib/useAsync";
 
@@ -70,7 +71,7 @@ export function Slip() {
           </legend>
           <div className="flex flex-wrap gap-2">
             {sites.state === "ok" &&
-              sites.data.sites.map((s) => {
+              sortSites(sites.data.sites.map(toSiteInfo)).map((s) => {
                 const on = sel.includes(s.id);
                 const full = !on && sel.length >= MAX_SITES;
                 return (
@@ -86,7 +87,7 @@ export function Slip() {
                       disabled={full}
                       onChange={() => put("sites", toggleSite(sel, s.id).join(","))}
                     />
-                    {toSiteInfo(s).name}
+                    {s.name}
                   </label>
                 );
               })}
@@ -171,7 +172,7 @@ export function Slip() {
         <>
           <Glass>
             <h2 className="mt-0 text-xl">Slip by site</h2>
-            <div className="overflow-x-auto">
+            <div className="relative overflow-x-auto">
               <table className="w-full border-collapse text-left">
                 <caption className="pb-2 text-left text-xs text-muted">
                   Rows are sites, columns are days of slip after {start} (UTC), each a {days} day

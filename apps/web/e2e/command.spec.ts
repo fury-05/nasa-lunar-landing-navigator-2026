@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 import {
   assessOut,
+  criteriaForRequest,
   json,
   mockApi,
   problem,
@@ -446,4 +447,214 @@ test("terrain view: relief is labelled plus or minus uncertainty and never claim
   await expect(page.getByText(/mostly interpolated/)).toBeVisible();
   await expect(page.getByText(/not the spacing of real measurements/)).toBeVisible();
   await expect(page.getByText(/are measured at 5 m/i)).toHaveCount(0);
+});
+
+test("verdict thresholds: placeholder defaults say so, in the card and in the exported summary", async ({
+  page,
+}) => {
+  await mock(page);
+  const seen: string[] = [];
+  await page.route("**/api/v1/sites/*/assess*", (r) => {
+    seen.push(r.request().url());
+    return json(r, { ...ASSESS, criteria: criteriaForRequest(r.request().url()) });
+  });
+  await page.goto("/command?site=alpha");
+  const card = page.getByRole("heading", { name: "Verdict" }).locator("..").locator("..");
+  await expect(card).toContainText("Thresholds: placeholder defaults, not mission requirements");
+  await expect(card).not.toContainText("chosen by you");
+  // The defaults are not sent at all, so the API cannot call them user-chosen (issue #179).
+  expect(seen.every((u) => !u.includes("min_sun_fraction") && !u.includes("max_dark_hours"))).toBe(
+    true,
+  );
+  const [d] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("button", { name: /Summary \(TXT file\)/ }).click(),
+  ]);
+  const txt = (await import("node:fs")).readFileSync((await d.path())!, "utf8");
+  expect(txt).toContain("Criteria: placeholder defaults, not mission requirements");
+  expect(txt).not.toMatch(/chosen by you|user-chosen/i);
+});
+
+test("verdict thresholds: a need the visitor changed is called chosen by you", async ({ page }) => {
+  await mock(page);
+  await page.goto("/command?site=alpha&earth=60");
+  const card = page.getByRole("heading", { name: "Verdict" }).locator("..").locator("..");
+  await expect(card).toContainText("Thresholds: chosen by you");
+  await expect(card).not.toContainText("placeholder defaults, not mission requirements");
+});
+
+// A list shaped like the live one: custom points first (API order), flat first, catalogue later.
+const LIVE_SHAPED = siteList([
+  siteSummary(
+    "custom-16c5b0f303b9",
+    { name: "Custom point -85.4137,23.7719", source: "custom" },
+    0,
+  ),
+  siteSummary(
+    "custom-20f36b9edc26",
+    { name: "Custom point -86.2137,12.3071", source: "custom" },
+    1,
+  ),
+  siteSummary("pgda-haworth", { name: "Haworth" }, 0.5),
+  siteSummary("pgda-site04", { name: "Shackleton rim" }, 1),
+]);
+
+test("default site: a catalogue site with terrain, Shackleton rim first, not the first list entry", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.route("**/api/v1/sites", (r) => json(r, LIVE_SHAPED));
+  await page.goto("/command");
+  const select = page.getByRole("combobox", { name: "Site" });
+  await expect(select).toHaveValue("pgda-site04");
+  await expect(page.getByRole("heading", { name: "Shackleton rim" })).toBeVisible();
+  await expect(page.getByText("Flat horizon, not terrain aware")).toHaveCount(0);
+  // catalogue first, custom after
+  const names = await select.locator("option").allTextContents();
+  expect(names).toEqual([
+    "Haworth",
+    "Shackleton rim",
+    "Custom point -85.4137,23.7719",
+    "Custom point -86.2137,12.3071",
+  ]);
+});
+
+test("default site: Spacecraft and Public View use the same site and the same terrain wording", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.route("**/api/v1/sites", (r) => json(r, LIVE_SHAPED));
+  await page.goto("/spacecraft");
+  await expect(page.getByRole("combobox", { name: "Site" })).toHaveValue("pgda-site04");
+  await page.goto("/public");
+  await expect(page.getByRole("heading", { name: "Live example: Shackleton rim" })).toBeVisible();
+  await expect(page.getByText(/Terrain available, extends/).first()).toBeVisible();
+  // Same sentence as the Command Centre for a site with partial terrain.
+  await page.route("**/api/v1/sites", (r) =>
+    json(r, siteList([siteSummary("pgda-haworth", { name: "Haworth" }, 0.5)])),
+  );
+  await page.goto("/public");
+  await expect(page.getByText(/Terrain incomplete: covers 50% of directions/)).toBeVisible();
+  await expect(page.getByText("Upper bound, terrain incomplete for this site")).toHaveCount(0);
+});
+
+test("default site: a link that names a site is never replaced", async ({ page }) => {
+  await mock(page);
+  await page.route("**/api/v1/sites", (r) => json(r, LIVE_SHAPED));
+  await page.goto("/command?site=custom-16c5b0f303b9");
+  await expect(page.getByRole("combobox", { name: "Site" })).toHaveValue("custom-16c5b0f303b9");
+  await expect(page.getByText("Flat horizon, not terrain aware").first()).toBeVisible();
+});
+
+test("a non-date start in the address shows the normal date message, not the crash screen", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.goto("/command?site=alpha&days=8&start=banana");
+  await expect(page.getByRole("heading", { name: "Command Centre" })).toBeVisible();
+  await expect(page.getByText("Something went wrong in this view")).toHaveCount(0);
+  await expect(page.getByRole("alert")).toHaveCount(1);
+  await expect(page.getByRole("alert")).toContainText("Pick a start date");
+  // The rest of the page still works: the date field can fix it.
+  await page.getByLabel("Start date (UTC)").fill("2026-12-15");
+  await expect(page).toHaveURL(/start=2026-12-15/);
+  await expect(page.getByRole("alert")).toHaveCount(0);
+});
+
+test("other unreadable starts (impossible date, empty, a time) also do not crash", async ({
+  page,
+}) => {
+  await mock(page);
+  for (const bad of ["2026-02-30", "", "2026-12-11T10:00:00Z", "99999-01-01", "%00", "<script>"]) {
+    await page.goto(`/command?site=alpha&days=8&start=${encodeURIComponent(bad)}`);
+    await expect(page.getByRole("heading", { name: "Command Centre" })).toBeVisible();
+    await expect(page.getByText("Something went wrong in this view")).toHaveCount(0);
+  }
+});
+
+test("one problem, one alert: an out-of-range date is announced once", async ({ page }) => {
+  await mock(page);
+  const outside = problem(
+    422,
+    "Outside precomputed coverage",
+    "This site is precomputed from 2026-12-01T00:00Z to 2029-12-01T00:00Z.",
+  );
+  for (const route of ["assess", "timeline"]) {
+    await page.route(`**/api/v1/sites/*/${route}*`, (r) => json(r, outside, 422));
+  }
+  await page.goto("/command?site=alpha&start=2020-01-01&days=8");
+  await expect(page.getByRole("alert")).toHaveCount(1);
+  await expect(page.getByRole("alert")).toContainText("Outside precomputed coverage");
+});
+
+test("one problem, one alert: an unknown site is announced once", async ({ page }) => {
+  await mock(page);
+  const missing = problem(404, "Site not found", "No precomputed site 'nope'.");
+  for (const route of ["assess", "timeline", "skyline", "terrain"]) {
+    await page.route(`**/api/v1/sites/*/${route}*`, (r) => json(r, missing, 404));
+  }
+  await page.goto("/command?site=nope&start=2026-12-11&days=8");
+  await expect(page.getByRole("alert")).toHaveCount(1);
+  await expect(page.getByRole("alert")).toContainText('There is no site called "nope"');
+});
+
+test("different problems are still each reported", async ({ page }) => {
+  await mock(page);
+  await page.route("**/api/v1/sites/*/assess*", (r) =>
+    json(r, problem(500, "Server error", "assess broke"), 500),
+  );
+  await page.route("**/api/v1/sites/*/skyline*", (r) =>
+    json(r, problem(503, "Unavailable", "skyline broke"), 503),
+  );
+  await page.goto("/command?site=alpha&start=2026-12-11&days=8");
+  await expect(page.getByRole("alert")).toHaveCount(2);
+  await expect(page.getByRole("alert").first()).toContainText("assess broke");
+});
+
+test("time in link: minutes are snapped to the shown sample, and the QuickMap link agrees", async ({
+  page,
+}) => {
+  await mock(page);
+  const seen: string[] = [];
+  await page.route("**/api/v1/links/quickmap*", (r) => {
+    seen.push(decodeURIComponent(new URL(r.request().url()).searchParams.get("t") ?? ""));
+    return json(r, quickmapOut());
+  });
+  // 2026-12-12T00:00 is a sample (hourly series in the default timeline fixture is 3 points: 11, 12, 13).
+  await page.goto("/command?site=alpha&t=2026-12-12T00:24:00Z");
+  await expect(page.getByText("2026-12-12 00:00 UTC").first()).toBeVisible();
+  await expect.poll(() => seen.at(-1)).toBe("2026-12-12T00:00:00Z");
+  // Using the slider writes the sample time (no stray minutes) to the address.
+  await page.getByLabel("Time shown in the sky views (UTC)").focus();
+  await page.keyboard.press("End");
+  await expect(page).toHaveURL(/t=2026-12-13T00%3A00%3A00Z/);
+});
+
+test("time in link: after Play and Pause the address holds a whole sample time", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.route("**/api/v1/sites/*/timeline*", (r) =>
+    json(
+      r,
+      timelineOut({
+        count: 49,
+        series: Array.from({ length: 49 }, (_, i) => ({
+          t: new Date(Date.parse("2026-12-11T00:00:00Z") + i * 3_600_000)
+            .toISOString()
+            .replace(".000Z", "Z"),
+          sun: { az_deg: 90, el_deg: 1.5, visible_fraction: 1 },
+          earth: { az_deg: 180, el_deg: -2, margin_deg: -5 },
+        })),
+      }),
+    ),
+  );
+  await page.goto("/command?site=alpha&sp=1");
+  await page.getByRole("button", { name: "Play" }).click();
+  await page.waitForTimeout(1500);
+  await page.getByRole("button", { name: "Pause" }).click();
+  await expect(page).toHaveURL(/t=2026-12-1\dT\d\d%3A00%3A00Z/);
+  const t = new URL(page.url()).searchParams.get("t")!;
+  // The clock text shows the same time as the address.
+  await expect(page.getByText(t.replace("T", " ").slice(0, 16) + " UTC").first()).toBeVisible();
 });

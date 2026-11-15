@@ -91,3 +91,48 @@ describe("resultText", () => {
     expect(resultText(0, 4)).toBe("No sites match. 4 sites in the list.");
   });
 });
+
+import { PREFERRED_SITE, defaultSite, sortSites } from "./siteFilter";
+
+describe("sortSites and defaultSite", () => {
+  const custom = (id: string, f = 0) => mk(`custom-${id}`, `Custom point ${id}`, "custom", f);
+  const cat = (id: string, name: string, f: number) => mk(`pgda-${id}`, name, "lola-dem", f);
+  const list = [
+    custom("a"),
+    custom("b", 1),
+    cat("haworth", "Haworth", 0.5),
+    cat("site04", "Shackleton rim", 1),
+    cat("dm2", "Nobile rim 2", 0),
+  ];
+  it("puts catalogue first and custom last, keeping the API order inside a group", () => {
+    expect(sortSites(list).map((s) => s.id)).toEqual([
+      "pgda-haworth",
+      "pgda-site04",
+      "pgda-dm2",
+      "custom-a",
+      "custom-b",
+    ]);
+  });
+  it("prefers Shackleton rim when it has terrain", () => {
+    expect(PREFERRED_SITE).toBe("pgda-site04");
+    expect(defaultSite(list)?.id).toBe("pgda-site04");
+  });
+  it("falls back to the first catalogue site with complete terrain, then partial", () => {
+    const noShack = list.filter((s) => s.id !== "pgda-site04");
+    expect(defaultSite(noShack)?.id).toBe("pgda-haworth");
+    const onlyFlat = [custom("a"), cat("dm2", "Nobile rim 2", 0), cat("x", "X", 1)];
+    expect(defaultSite(onlyFlat)?.id).toBe("pgda-x");
+  });
+  it("skips Shackleton rim when it has no terrain", () => {
+    const flatShack = [cat("site04", "Shackleton rim", 0), cat("haworth", "Haworth", 1)];
+    expect(defaultSite(flatShack)?.id).toBe("pgda-haworth");
+  });
+  it("never lands on a flat custom point while a site with terrain exists", () => {
+    const l = [custom("flat"), custom("ok", 1)];
+    expect(defaultSite(l)?.id).toBe("custom-ok");
+  });
+  it("with nothing but flat sites it still returns one rather than nothing", () => {
+    expect(defaultSite([custom("a"), custom("b")])?.id).toBe("custom-a");
+    expect(defaultSite([])).toBeNull();
+  });
+});

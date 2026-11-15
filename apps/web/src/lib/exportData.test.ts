@@ -88,6 +88,23 @@ describe("scenarioSummary", () => {
     expect(text).toContain("UPPER BOUND, terrain incomplete");
     expect(text).not.toMatch(/Verdict: viable/);
   });
+  it("says placeholder defaults when the criteria were not chosen, never 'chosen by you'", () => {
+    expect(text).toContain("Criteria: placeholder defaults, not mission requirements");
+    expect(text).not.toMatch(/chosen by you|user-chosen/i);
+  });
+  it("says chosen by you only for user-chosen criteria", () => {
+    const chosen = scenarioSummary({
+      site: null,
+      siteId: "alpha",
+      assess: {
+        ...assess,
+        criteria: { source: "user-chosen", status: "user-chosen needs" },
+      } as unknown as Assess,
+      permalink: "https://x/command",
+      generatedUtc: "2026-11-15T00:00:00Z",
+    });
+    expect(chosen).toContain("Criteria: chosen by you (user-chosen needs)");
+  });
   it("lists duplicated assumptions once", () => {
     expect(text.match(/- A1\n/g)).toHaveLength(1);
   });

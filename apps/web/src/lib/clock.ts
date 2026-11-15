@@ -46,6 +46,17 @@ export function nearestIndex(times: number[], ms: number): number {
   return lo;
 }
 
+/**
+ * Snap a time to the nearest loaded sample. The views show the sample the clock points at, so the
+ * time in the address, the time on screen and the time in the QuickMap link must all be that
+ * sample's time, not a minute in between that no view can show (#176). Snapping on the way in and
+ * on the way out keeps one rule: the clock has the resolution of the timeline.
+ */
+export function snapToSample(times: number[], ms: number): number {
+  const t = times[nearestIndex(times, ms)];
+  return t === undefined ? ms : t;
+}
+
 /** Advance by `dtMs` of real time at `hoursPerSecond`; stops at the last sample. */
 export function advance(
   ms: number,
@@ -99,7 +110,9 @@ export function useMissionClock(opts: {
   const initial = useMemo(() => {
     if (times.length === 0 || first === undefined || last === undefined) return 0;
     const t = parseT(urlT);
-    return t !== null && t >= first && t <= last ? t : times[Math.floor(times.length / 2)]!;
+    return t !== null && t >= first && t <= last
+      ? snapToSample(times, t)
+      : times[Math.floor(times.length / 2)]!;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [times, key]);
 
@@ -108,8 +121,10 @@ export function useMissionClock(opts: {
 
   // Latest values for the interval callback, so the timer is not restarted on every tick.
   const live = useRef({ cur, speed, last, commit });
+  const timesRef = useRef(times);
   useEffect(() => {
     live.current = { cur, speed, last, commit };
+    timesRef.current = times;
   });
 
   const playing = cur.playing && !reduced && times.length > 1;
@@ -120,7 +135,7 @@ export function useMissionClock(opts: {
       if (end === undefined) return;
       const r = advance(c.ms, TICK_MS, sp.hoursPerSecond, end);
       setState({ key: c.key, ms: r.ms, playing: !r.ended });
-      if (r.ended) cm(fmtT(r.ms), sp.id);
+      if (r.ended) cm(fmtT(snapToSample(timesRef.current, r.ms)), sp.id);
     }, TICK_MS);
     return () => clearInterval(h);
   }, [playing]);
@@ -133,9 +148,11 @@ export function useMissionClock(opts: {
   }, [reduced, times.length, cur.ms, last, first, key]);
 
   const pause = useCallback(() => {
-    setState({ key, ms: cur.ms, playing: false });
-    commit(fmtT(cur.ms), speed.id);
-  }, [key, cur.ms, commit, speed.id]);
+    // Stop on the sample that is on screen, so the address says what the views show.
+    const at = snapToSample(times, cur.ms);
+    setState({ key, ms: at, playing: false });
+    commit(fmtT(at), speed.id);
+  }, [key, cur.ms, times, commit, speed.id]);
 
   const scrub = useCallback(
     (i: number) => {
@@ -149,9 +166,9 @@ export function useMissionClock(opts: {
 
   const setSpeed = useCallback(
     (id: string) => {
-      commit(fmtT(cur.ms), id);
+      commit(fmtT(snapToSample(times, cur.ms)), id);
     },
-    [commit, cur.ms],
+    [commit, cur.ms, times],
   );
 
   return { ms: cur.ms, index, playing, speed, reduced, play, pause, scrub, setSpeed };

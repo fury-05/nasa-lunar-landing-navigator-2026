@@ -7,7 +7,7 @@ import { createCustomSite, loadSites, pollJob, type JobOut } from "../lib/data";
 import { validateCoords } from "../lib/polar";
 import { describeFailure } from "../lib/jobFailure";
 import { fmtLat, fmtLon, terrainSentence, toSiteInfo } from "../lib/site";
-import { applyFilter, kindsPresent, NO_FILTER, type Filter } from "../lib/siteFilter";
+import { applyFilter, kindsPresent, NO_FILTER, sortSites, type Filter } from "../lib/siteFilter";
 import { useAsync } from "../lib/useAsync";
 import { SiteFilter } from "../components/SiteFilter";
 
@@ -39,7 +39,7 @@ export function SitePicker() {
   const picked = check.ok ? { lat: check.lat, lon: check.lon } : null;
   const touched = lat !== "" || lon !== "";
   const infos = useMemo(
-    () => (sites.state === "ok" ? sites.data.sites.map(toSiteInfo) : []),
+    () => (sites.state === "ok" ? sortSites(sites.data.sites.map(toSiteInfo)) : []),
     [sites],
   );
   const listed = useMemo(() => applyFilter(infos, filter), [infos, filter]);
@@ -62,6 +62,7 @@ export function SitePicker() {
         // Same point built before: the stored result is reused. Whether it has terrain is read
         // on the Command Centre from the site list, so no claim is made here.
         setPhase({ kind: "done", siteId: acc.site_id, flat: false, warnings: [] });
+        go(acc.site_id);
         return;
       }
       const end = await pollJob(
@@ -93,6 +94,9 @@ export function SitePicker() {
           flat: r.terrain_unavailable === true,
           warnings: r.warnings ?? [],
         });
+        // The job is finished: open the new site. The Command Centre shows its terrain state (a
+        // flat horizon is stated there), and the button below stays as a fallback.
+        go(end.site_id);
       }
     } catch (e) {
       if (!ctl.signal.aborted)

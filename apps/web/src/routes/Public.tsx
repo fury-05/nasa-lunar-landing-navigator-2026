@@ -4,7 +4,8 @@ import csa from "../../../../data/content/csa.json";
 import { Chip } from "../components/Chip";
 import { Glass } from "../components/Glass";
 import { addDays, fmtHours, iso, loadAssess, loadCredits, loadSites, loadSlip } from "../lib/data";
-import { toSiteInfo } from "../lib/site";
+import { terrainSentence, toSiteInfo, type SiteInfo } from "../lib/site";
+import { defaultSite } from "../lib/siteFilter";
 import { useAsync } from "../lib/useAsync";
 
 type Level = "simple" | "detailed";
@@ -88,7 +89,9 @@ function Para({ children }: { children: React.ReactNode }) {
 }
 
 /** Live example: one real site, two start dates, from the same engine as the Command Centre. */
-function SlipExample({ siteId, siteName }: { siteId: string; siteName: string }) {
+function SlipExample({ site }: { site: SiteInfo }) {
+  const siteId = site.id;
+  const siteName = site.name;
   const start = "2026-12-11";
   const slip = useAsync(() => loadSlip([siteId], start, [0, 3], 8), `slip|${siteId}`);
   const now = useMemo(() => new Date(`${start}T00:00:00Z`), []);
@@ -124,8 +127,14 @@ function SlipExample({ siteId, siteName }: { siteId: string; siteName: string })
           </p>
         </>
       )}
+      {/* The same sentence, glyph and colour as the Command Centre site panel. */}
+      <Chip tone={site.terrain === "full" ? "good" : site.terrain === "partial" ? "warn" : "bad"}>
+        {site.terrain === "full" ? "✓" : "!"} {terrainSentence(site)}
+      </Chip>
       {assess.state === "ok" && assess.data.terrain && !assess.data.terrain.complete && (
-        <Chip tone="warn">! Upper bound, terrain incomplete for this site</Chip>
+        <p className="m-0 text-xs text-warn">
+          Upper bound: with terrain missing the real sunlight can only be lower than shown.
+        </p>
       )}
       <Link
         className="w-fit text-sm text-earth underline"
@@ -141,8 +150,7 @@ export function Public() {
   const [level, setLevel] = useState<Level>("simple");
   const credits = useAsync(loadCredits, "credits");
   const sites = useAsync(loadSites, "sites");
-  const example =
-    sites.state === "ok" && sites.data.sites[0] ? toSiteInfo(sites.data.sites[0]) : null;
+  const example = sites.state === "ok" ? defaultSite(sites.data.sites.map(toSiteInfo)) : null;
   const detailed = level === "detailed";
   const csaSource =
     credits.state === "ok" ? credits.data.sources.find((s) => s.id === "csa-moon") : null;
@@ -262,7 +270,7 @@ export function Public() {
           days later can change how much sunlight a site gets in the first days on the surface.
         </Para>
         {example ? (
-          <SlipExample siteId={example.id} siteName={example.name} />
+          <SlipExample site={example} />
         ) : (
           <p role="status" className="m-0 text-sm text-muted">
             Loading an example site...

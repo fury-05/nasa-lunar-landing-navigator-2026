@@ -27,12 +27,27 @@ describe("mission needs in the URL", () => {
     const n = needsFromParams(new URLSearchParams("sun=250&dark=abc&earth=-3&outage=-1"));
     expect(n).toEqual(DEFAULT_NEEDS);
   });
-  it("maps to API query names and omits an unset outage limit", () => {
-    expect(needsToQuery(DEFAULT_NEEDS)).toEqual({
-      min_sun_fraction: 0.5,
-      max_dark_hours: 100,
-      min_earth_fraction: 0.5,
+  it("sends nothing for the placeholder defaults, so the API labels them default-placeholder", () => {
+    expect(needsToQuery(DEFAULT_NEEDS)).toEqual({});
+  });
+  it("sends only the needs the visitor changed, with the API names and fractions", () => {
+    expect(needsToQuery({ ...DEFAULT_NEEDS, minEarthPct: 60 })).toEqual({
+      min_earth_fraction: 0.6,
     });
-    expect(needsToQuery({ ...DEFAULT_NEEDS, maxOutageH: 5 }).max_outage_hours).toBe(5);
+    expect(needsToQuery({ ...DEFAULT_NEEDS, maxOutageH: 5 })).toEqual({ max_outage_hours: 5 });
+    expect(needsToQuery({ minSunPct: 70, maxDarkH: 40, minEarthPct: 60, maxOutageH: 12 })).toEqual({
+      min_sun_fraction: 0.7,
+      max_dark_hours: 40,
+      min_earth_fraction: 0.6,
+      max_outage_hours: 12,
+    });
+  });
+  it("mirrors the API's placeholder criteria (sun 50%, dark 120 h, Earth 50%)", () => {
+    expect(DEFAULT_NEEDS).toEqual({
+      minSunPct: 50,
+      maxDarkH: 120,
+      minEarthPct: 50,
+      maxOutageH: null,
+    });
   });
 });

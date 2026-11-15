@@ -128,7 +128,7 @@ export function NeedsForm({ needs, onApply }: Props) {
         />
         <Field
           label="Maximum Earth outage (hours, optional)"
-          hint="Leave empty for no limit"
+          hint="Leave empty to use the placeholder default of 120 hours"
           value={outage}
           onChange={setOutage}
           max={100000}
