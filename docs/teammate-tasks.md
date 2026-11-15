@@ -14,7 +14,7 @@ Use site pgda-site04 and pgda-site23. Choose five UTC date-times between 2026-12
 ## Task 3 (Afreen and Luz, issue #16): read the terms, replace "pending-source"
 Read the usage terms on each page and write the exact wording of the usage statement, the page URL and the date you read it. Afreen: NASA Horizons terms (https://ssd.jpl.nasa.gov/), NASA Trek (https://trek.nasa.gov/), QuickMap (https://quickmap.lroc.im-ldi.com/), PGDA Data Usage Policy and "Reproduction Guidelines" (https://pgda.gsfc.nasa.gov/products/90, also products 78, 81, 69). Luz: NSSDC Apollo page (https://nssdc.gsfc.nasa.gov/planetary/lunar/apolloland.html), NASA CLPS page (https://science.nasa.gov/lunar-science/clps-deliveries/), CSA terms (https://www.asc-csa.gc.ca/eng/terms.asp, and decide whether a public hackathon submission counts as non-commercial; if unsure, say so and email info@asc-csa.gc.ca). Post the wording in issue #16. Claude then edits data/attribution.json; do not edit it yourselves.
 
-## Task 4 (Luz, issue #133): demo script
+## Task 4 (Luz, issue #134): demo script
 Draft a 3 minute demo script in docs/demo-script.md (new file, no em dashes): problem in one sentence, pick a site, show the Sun and Earth against the real horizon, show the amber "upper bound, terrain incomplete" honesty state, change a mission need, open QuickMap, show Credits, close with "planning tool, not for flight operations". Only describe what the live site really does; check each step on the live site first.
 
 ## Task 5 (Afreen and Luz, issue #135): test the live site
