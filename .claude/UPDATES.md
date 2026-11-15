@@ -38,3 +38,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-15T00:40:23Z | afreen+irfan | P4 first slice | Command Centre page with real data, real Credits page; coverage warning wording fixed | feat/web-command-centre
 2026-11-15T01:03:50Z | irfan | P7 scope | ADR-0008 freeze scope cut (P5-03, P5-05, P6-05, P6-06 to ROADMAP), docs/teammate-tasks.md, issues #126-#135 | docs/freeze-adr-teammate-tasks
 2026-11-15T01:24:34Z | irfan | P4 | verdict honesty, site context, horizon strip, scrubber, mission needs merged (A1+B1..B3) | feat/web-honesty-context-command
+2026-11-15T01:40:17Z | afreen+irfan | P4-03 | site picker with Trek polar map, custom point, job progress; far terrain download started on VM | merge/site-picker
