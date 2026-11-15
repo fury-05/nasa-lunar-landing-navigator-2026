@@ -50,3 +50,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-15T04:13:40Z | irfan | approvals | A2 recorded DONE; A9 teammate tasks and A10 commit emails added | docs/approvals-update
 2026-11-15T04:47:35Z | irfan | P3 follow-ups | Horizons degraded flag, custom site cap and expiry, slip cell terrain state, docs CSP route | merge/api-batch3
 2026-11-15T04:53:05Z | irfan | P7-04 | resilience drills closed after retry fix and degraded flag | docs/todo-evidence-5
+2026-11-15T05:05:29Z | irfan | P7-03 | security hardening closed: Caddy, systemd, CI scan, verified on the VM | docs/todo-evidence-6
