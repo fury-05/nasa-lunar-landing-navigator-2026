@@ -71,3 +71,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-15T14:16:25Z | irfan | UI | UI overhaul: Home guide, one-screen Command Centre, charts with scales and below-horizon view, larger type and coloured numbers; no logic files changed | ui/overhaul-3
 2026-11-15T14:26:55Z | irfan | UI | UI overhaul deployed (PR 197, commit c45e9fa); post-overhaul demo screenshots added | docs/ui-overhaul-evidence
 2026-11-15T16:19:20Z | irfan | fix | site list always revalidates (custom site 'not found' bug), scale bar and north arrow moved under the maps, steps 1 2 3 made prominent, sidebar 60 px wider, Home explains 300 km, perf tests made stable | fix/custom-site-and-ui-polish
+- 2026-11-15 23:12 IST docs: README architecture and formulas section, badges, real animation, docs/HOW-TO-USE.md with marked screenshots (issue 202, PR 203). Docs only; no deploy needed.
