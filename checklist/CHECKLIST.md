@@ -58,12 +58,12 @@
 | P3-08 | Deploy to VM, smoke tests, load test results recorded | irfan | DONE | deployed 3c776c8 to https://13-52-97-105.sslip.io: ready (database and redis ok), all routes answered with real 3 year data, ETag 304, 3 custom jobs through the real arq worker and Redis, SSE stream; load test on the VM (4/8/16 clients, 0 errors, /state p50 9-31 ms, /assess p50 241-463 ms, 111-127 req/s) and via the internet (about 0.9 s per call, mostly TLS and distance); found and fixed 4 problems on the way (state recomputed per request, store rebuilt per request, cold first call, zero-terrain reported as fully covered); written record with NOT measured list in docs/validation/p3-08-deploy-and-load.md; issue #64 |
 | P3-09 | Input validation and security review of the API | irfan | DONE | 62 hostile-input tests (traversal, encoded traversal, injection strings, malformed and huge JSON, bad numbers and times, size abuse, method and header abuse, CORS, header injection); 6 findings fixed (raw echo of caller text, site id alphabet and case aliasing, loose time parsing, booleans accepted as numbers, third party CDN on the docs page, no security headers on the API itself); mutation check shows each fix is guarded; written review with an explicit NOT covered list in docs/validation/api-security-review.md; developer review only, no penetration test; issue #65 |
 | P4-01 | Design system complete: tokens, glass components, motion, contrast checks | afreen | PENDING | issue #66 |
-| P4-02 | App shell, routes, URL state, mock API from OpenAPI | afreen | PENDING | issue #67 |
+| P4-02 | App shell, routes, URL state, mock API from OpenAPI | afreen | PENDING | first slice live: /command route with URL state (site, start, days), typed API calls, loading, error and warning states; mock-based browser tests; not yet a full mock API layer; issue #67 |
 | P4-03 | Site picker with search, filters, custom coordinates, validation | afreen | PENDING | issue #68 |
 | P4-04 | Date control with lunar-day jumps and range presets | afreen | PENDING | issue #69 |
-| P4-05 | Sky view: polar plot and horizon strip with real skyline and discs | afreen | PENDING | issue #70 |
-| P4-06 | Metrics panel and countdown chips with sensitivity band | afreen | PENDING | issue #71 |
-| P4-07 | Timeline strips with zoom and event markers | afreen | PENDING | issue #72 |
+| P4-05 | Sky view: polar plot and horizon strip with real skyline and discs | afreen | PENDING | first slice: polar sky plot with the real skyline, Sun and Earth discs (looking-up convention, text alternative); horizon strip not built yet; issue #70 |
+| P4-06 | Metrics panel and countdown chips with sensitivity band | afreen | PENDING | first slice: verdict, robust/fragile, bands for sunlight, dark spell, Earth share and outage; countdown chips not built yet; issue #71 |
+| P4-07 | Timeline strips with zoom and event markers | afreen | PENDING | first slice: four strips (Sun up, Earth link, Sun dark, Earth outage) with text alternatives; zoom and event markers not built yet; issue #72 |
 | P4-08 | Compare board and flip mode | afreen | PENDING | issue #73 |
 | P4-09 | Slip matrix and what-changes-if panel | afreen | PENDING | issue #74 |
 | P4-10 | Export CSV, PNG, permalink, scenario summary | afreen | PENDING | issue #75 |

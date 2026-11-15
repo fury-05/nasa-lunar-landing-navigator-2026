@@ -328,21 +328,18 @@ def test_terrain_warnings_function_covers_each_case() -> None:
 
     assert terrain_warnings({"skyline": {"covered_fraction": 1.0}}) == []
     short = terrain_warnings(
-        {
-            "skyline": {
-                "covered_fraction": 0.0,
-                "min_reach_m": 8000,
-                "max_reach_m": 11000,
-                "max_range_m": 16000,
-            }
-        }
+        {"skyline": {"covered_fraction": 0.0, "min_reach_m": 8000, "max_reach_m": 11000,
+                     "max_range_m": 16000}}
     )
-    assert len(short) == 1 and "8 to 11 km" in short[0] and "16 km" in short[0]
-    assert "can only be higher" in short[0]
+    assert len(short) == 1 and "100% of directions" in short[0]
+    assert "16 km" in short[0] and "8.0 km" in short[0] and "can only be higher" in short[0]
+    mostly = terrain_warnings(
+        {"skyline": {"covered_fraction": 0.95, "min_reach_m": 7950, "max_reach_m": 8000,
+                     "max_range_m": 8000}}
+    )
+    assert "5% of directions" in mostly[0] and "8 to 8" not in mostly[0]
     none = terrain_warnings({"terrain_unavailable": True, "skyline": {}})
-    assert (
-        len(none) == 1 and "bare sphere" in none[0] and "Do not use for site selection" in none[0]
-    )
+    assert len(none) == 1 and "bare sphere" in none[0] and "Do not use for site selection" in none[0]
 
 
 def test_a_skyline_without_terrain_is_reported_as_uncovered() -> None:

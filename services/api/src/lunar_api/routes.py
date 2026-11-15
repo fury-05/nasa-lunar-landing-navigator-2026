@@ -138,11 +138,14 @@ def terrain_warnings(meta: dict[str, Any]) -> list[str]:
         )
         return out
     sky = meta.get("skyline", {})
-    if sky.get("covered_fraction", 1.0) < 1.0:
+    covered = sky.get("covered_fraction", 1.0)
+    if covered < 1.0:
+        want_km = sky.get("max_range_m", 0) / 1000
+        first_km = sky.get("min_reach_m", 0) / 1000
+        gap = (1.0 - covered) * 100
         out.append(
-            f"Terrain data ends {sky.get('min_reach_m', 0) / 1000:.0f} to "
-            f"{sky.get('max_reach_m', 0) / 1000:.0f} km from the site, before the requested "
-            f"{sky.get('max_range_m', 0) / 1000:.0f} km. Distant terrain is missing, so the real "
+            f"In {gap:.0f}% of directions the terrain data ends before the requested {want_km:.0f} km "
+            f"(the shortest is {first_km:.1f} km). Distant terrain is missing there, so the real "
             "skyline can only be higher and the real sunlight and Earth visibility lower."
         )
     return out
