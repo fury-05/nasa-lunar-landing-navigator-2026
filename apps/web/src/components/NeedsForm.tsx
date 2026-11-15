@@ -93,9 +93,9 @@ export function NeedsForm({ needs, onApply }: Props) {
       }}
     >
       <div className="flex flex-wrap items-center gap-2">
-        <h3 id="needs-h" className="m-0 text-base">
+        <h2 id="needs-h" className="m-0 text-base">
           Mission needs
-        </h3>
+        </h2>
         <span className="rounded-chip border border-warn/50 px-3 font-mono text-xs text-warn">
           {isDefaultNeeds(needs) ? "placeholder defaults" : "custom needs, saved in the link"}
         </span>
