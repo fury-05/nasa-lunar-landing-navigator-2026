@@ -44,6 +44,13 @@ export const loadTimeline = (id: string, start: string, end: string, step = 60) 
     }),
   );
 
+export const loadQuickmap = (id: string, t: string | null) =>
+  ok(
+    api.GET("/api/v1/links/quickmap", {
+      params: { query: { site: id, ...(t ? { t } : {}) } },
+    }),
+  );
+
 export const loadSlip = (sites: string[], start: string, offsets: number[], days: number) =>
   ok(
     api.POST("/api/v1/slip-matrix", {

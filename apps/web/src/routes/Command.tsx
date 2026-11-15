@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { Chip } from "../components/Chip";
 import { Glass } from "../components/Glass";
 import { Metrics } from "../components/Metrics";
+import { SiteContext } from "../components/SiteContext";
 import { SkyView } from "../components/SkyView";
 import { Timeline } from "../components/Timeline";
 import {
@@ -14,6 +15,7 @@ import {
   loadTimeline,
   type SeriesRow,
 } from "../lib/data";
+import { toSiteInfo } from "../lib/site";
 import { useAsync } from "../lib/useAsync";
 
 const DEFAULT_START = "2026-12-11";
@@ -51,6 +53,12 @@ export function Command() {
   const id = site || first || "";
   const unknownSite =
     sites.state === "ok" && site !== "" && !sites.data.sites.some((s) => s.id === site);
+
+  const info = useMemo(() => {
+    if (sites.state !== "ok") return null;
+    const s = sites.data.sites.find((x) => x.id === id);
+    return s ? toSiteInfo(s) : null;
+  }, [sites, id]);
 
   const a = useMemo(() => new Date(`${start}T00:00:00Z`), [start]);
   const valid = !Number.isNaN(a.getTime()) && DAY_CHOICES.includes(days);
@@ -95,7 +103,7 @@ export function Command() {
             {sites.state === "ok" &&
               sites.data.sites.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.id}
+                  {toSiteInfo(s).name}
                 </option>
               ))}
           </select>
@@ -127,6 +135,12 @@ export function Command() {
         </label>
         <Chip tone="warn">Planning tool, not for flight operations</Chip>
       </Glass>
+
+      {info && usable && (
+        <Glass>
+          <SiteContext site={info} timeIso={midpoint ? midpoint.t : iso(a)} />
+        </Glass>
+      )}
 
       {sites.state === "error" && <Problem message={sites.message} />}
       {sites.state === "loading" && <Loading what="sites" />}

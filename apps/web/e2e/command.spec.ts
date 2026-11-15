@@ -104,6 +104,15 @@ async function mock(page: Page) {
   await page.route("**/api/v1/sites/*/skyline*", (r) => r.fulfill({ json: SKY }));
   await page.route("**/api/v1/sites/*/assess*", (r) => r.fulfill({ json: ASSESS }));
   await page.route("**/api/v1/sites/*/timeline*", (r) => r.fulfill({ json: TL }));
+  await page.route("**/api/v1/links/quickmap*", (r) =>
+    r.fulfill({
+      json: {
+        site_id: "alpha",
+        url: "https://quickmap.lroc.im-ldi.com/?proj=27&time=2026-12-13T00%3A00%3A00Z",
+        note: "x",
+      },
+    }),
+  );
 }
 
 test("command centre shows verdict, warning, sky view and timeline", async ({ page }) => {
@@ -162,4 +171,15 @@ test("a site in the URL that does not exist is reported, not silently replaced",
   await mock(page);
   await page.goto("/command?site=ghost");
   await expect(page.getByRole("alert")).toContainText("ghost");
+});
+
+test("site context shows coordinates, terrain state and a QuickMap link from the API", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.goto("/command?site=alpha");
+  await expect(page.getByText("89.500 deg S")).toBeVisible();
+  await expect(page.getByText(/Terrain available/)).toBeVisible();
+  const link = page.getByRole("link", { name: /Open in QuickMap/ });
+  await expect(link).toHaveAttribute("href", /quickmap\.lroc\.im-ldi\.com\/\?proj=27/);
 });
