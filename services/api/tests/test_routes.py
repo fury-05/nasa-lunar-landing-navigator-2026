@@ -353,3 +353,15 @@ def test_a_skyline_without_terrain_is_reported_as_uncovered() -> None:
     assert sky.max_range_m == 0.0 and float(sky.reach_m.max()) == 0.0
     assert sky.covered_fraction() == 0.0  # used to read 1.0, which looked like perfect coverage
     assert np.allclose(sky.elevation_deg, sky.elevation_deg[0])
+
+
+def test_listing_trusts_the_terrain_flag_over_an_old_stored_coverage_number() -> None:
+    from lunar_api.routes import effective_coverage
+
+    old_bundle = {"terrain_unavailable": True,
+                  "skyline": {"covered_fraction": 1.0, "min_reach_m": 0.0, "max_reach_m": 0.0}}
+    assert effective_coverage(old_bundle) == {
+        "covered_fraction": 0.0, "min_reach_m": 0.0, "max_reach_m": 0.0}
+    normal = {"skyline": {"covered_fraction": 0.36, "min_reach_m": 1520.0, "max_reach_m": 8000.0}}
+    assert effective_coverage(normal) == {
+        "covered_fraction": 0.36, "min_reach_m": 1520.0, "max_reach_m": 8000.0}
