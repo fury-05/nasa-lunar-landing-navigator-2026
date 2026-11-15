@@ -67,6 +67,9 @@ class SiteSummary(BaseModel):
     name: str
     source: str
     tile_radius_km: float | None = None
+    # catalogue sites keep the kind from data/sites.json (apollo, clps, pgda-tile); "custom" for
+    # points built from the picker; "other" for a bundle that is in neither
+    kind: Literal["apollo", "clps", "pgda-tile", "custom", "other"]
     terrain_available: bool
     reach_km: float
     reach_km_max: float
@@ -134,6 +137,9 @@ class CriteriaOut(BaseModel):
     max_dark_hours: float
     min_earth_fraction: float
     max_outage_hours: float
+    # The 'marginal' line is the need relaxed by this factor (shares times it, hour limits divided
+    # by it); a verdict is robust only if the three skyline runs agree on both lines.
+    marginal_factor: float
     source: Literal["user-chosen", "default-placeholder"]
     status: str
 

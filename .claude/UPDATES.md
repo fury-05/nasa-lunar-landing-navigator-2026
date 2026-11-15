@@ -65,3 +65,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-15T08:37:01Z | irfan | P5-01,P3 | custom-site jobs use the far terrain tiers, catalogue sites first in /sites, SSE test made load-proof | merge/custom-far
 2026-11-15T09:04:16Z | irfan | P7-09,P3 | custom sites use far terrain verified live (real job 69 s, reach 204 to 300 km, tiers mosaic and 20 m); final gate script added | docs/todo-evidence-10
 2026-11-15T09:14:44Z | irfan | P7-07 | 11 demo screenshots captured from the live site with an index that lists what must be retaken after the web fixes deploy | docs/demo-assets-index
+2026-11-15T09:35:41Z | irfan | P3 | API echoes marginal_factor in criteria and a kind on every site, regenerated contracts, mutation checked | feat/api-marginal-factor-kind

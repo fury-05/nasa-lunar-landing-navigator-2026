@@ -623,6 +623,10 @@
       "CriteriaOut": {
         "description": "Mission needs used for the verdict, and whether the user chose them.",
         "properties": {
+          "marginal_factor": {
+            "title": "Marginal Factor",
+            "type": "number"
+          },
           "max_dark_hours": {
             "title": "Max Dark Hours",
             "type": "number"
@@ -657,6 +661,7 @@
           "max_dark_hours",
           "min_earth_fraction",
           "max_outage_hours",
+          "marginal_factor",
           "source",
           "status"
         ],
@@ -1905,6 +1910,17 @@
             "title": "Id",
             "type": "string"
           },
+          "kind": {
+            "enum": [
+              "apollo",
+              "clps",
+              "pgda-tile",
+              "custom",
+              "other"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
           "lat_deg": {
             "title": "Lat Deg",
             "type": "number"
@@ -1975,6 +1991,7 @@
           "terrain_coverage",
           "name",
           "source",
+          "kind",
           "terrain_available",
           "reach_km",
           "reach_km_max",
