@@ -209,7 +209,7 @@ export function Command() {
         <Glass>
           {assess.state === "loading" && <Loading what="results" />}
           {assess.state === "error" && <Problem message={assess.message} />}
-          {assess.state === "ok" && <Metrics a={assess.data} site={info} />}
+          {assess.state === "ok" && <Metrics a={assess.data} />}
         </Glass>
       </div>
 

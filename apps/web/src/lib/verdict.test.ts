@@ -1,64 +1,73 @@
 import { describe, expect, it } from "vitest";
 import type { Assess } from "./data";
-import { toSiteInfo } from "./site";
 import { verdictView } from "./verdict";
 
-const band = { low: 1, nominal: 1, high: 1 };
-function assess(over: Record<string, unknown> = {}, warnings: string[] = []): Assess {
+const terrain = (over: Record<string, unknown> = {}) => ({
+  available: true,
+  complete: true,
+  covered_fraction: 1,
+  reach_km_min: 8,
+  reach_km_median: 8,
+  reach_km_max: 8,
+  required_km: 8,
+  ...over,
+});
+
+function assess(over: Record<string, unknown> = {}): Assess {
   return {
     verdict: "viable",
+    verdict_state: "viable",
+    verdict_conclusive: true,
     robust: true,
-    delta_deg: 0.2,
-    provenance: {
-      warnings,
-      uncertainty: { skyline_deg: 0.2, frame_deg: 0.03, status: "assumed, not yet measured" },
-    },
-    sunlight_hours: band,
+    terrain: terrain(),
+    band_basis: ["Horizon shifted by 0.2 degrees."],
     ...over,
   } as unknown as Assess;
 }
-const site = (frac: number, max: number) =>
-  toSiteInfo({
-    id: "s",
-    lat_deg: -89,
-    lon_east_deg: 0,
-    coordinate_status: "x",
-    window: {},
-    built_at_utc: "x",
-    terrain_coverage: { covered_fraction: frac, min_reach_m: max, max_reach_m: max },
+
+const incompleteViable = () =>
+  assess({
+    verdict_state: "upper_bound_terrain_incomplete",
+    verdict_conclusive: false,
+    terrain: terrain({ complete: false, covered_fraction: 0.4, reach_km_min: 2 }),
   });
 
 describe("verdictView", () => {
   it("keeps a viable verdict when terrain is complete", () => {
-    const v = verdictView(assess(), site(1, 8000));
+    const v = verdictView(assess());
     expect(v.state).toBe("viable");
     expect(v.incomplete).toBe(false);
+    expect(v.reason).toBeNull();
+    expect(v.basis).toEqual(["Horizon shifted by 0.2 degrees."]);
   });
-  it("downgrades viable to an upper bound when terrain is partial", () => {
-    const v = verdictView(assess(), site(0.5, 8000));
+  it("shows an upper bound instead of viable when terrain is incomplete", () => {
+    const v = verdictView(incompleteViable());
     expect(v.state).toBe("upper-bound");
+    expect(v.incomplete).toBe(true);
+    expect(v.reason).toContain("40%");
     expect(v.basis.join(" ")).toMatch(/optimistic/);
   });
-  it("downgrades viable when there is no terrain at all", () => {
-    expect(verdictView(assess(), site(0, 0)).state).toBe("upper-bound");
-  });
-  it("leaves a not viable verdict as not viable but flags incomplete", () => {
-    const v = verdictView(assess({ verdict: "not viable" }), site(0.5, 8000));
-    expect(v.state).toBe("not viable");
-    expect(v.incomplete).toBe(true);
-  });
-  it("reads the API terrain object and verdict_state when present", () => {
+  it("says so plainly when no terrain exists", () => {
     const v = verdictView(
-      assess({ terrain: { available: true, covered_fraction: 0.4, dem_error_m: 3, basis: "B" } }),
-      null,
+      assess({
+        verdict_state: "upper_bound_terrain_incomplete",
+        verdict_conclusive: false,
+        terrain: terrain({ available: false, complete: false, covered_fraction: 0 }),
+      }),
     );
     expect(v.state).toBe("upper-bound");
-    expect(v.basis).toContain("B");
-    expect(v.basis.join(" ")).toContain("3 m");
-    expect(verdictView(assess({ verdict_state: "upper-bound" }), null).state).toBe("upper-bound");
+    expect(v.reason).toContain("No terrain data");
   });
-  it("treats an API terrain warning as incomplete", () => {
-    const v = verdictView(assess({}, ["In 40% of directions the terrain data ends early."]), null);
-    expect(v.state).toBe("upper-bound");
+  it("keeps a conclusive not viable result as not viable", () => {
+    const v = verdictView(
+      assess({
+        verdict: "not viable",
+        verdict_state: "upper_bound_terrain_incomplete",
+        verdict_conclusive: true,
+        terrain: terrain({ complete: false, covered_fraction: 0.5 }),
+      }),
+    );
+    expect(v.state).toBe("not viable");
+    expect(v.incomplete).toBe(true);
   });
 });

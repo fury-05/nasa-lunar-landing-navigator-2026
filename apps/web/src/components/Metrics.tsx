@@ -2,7 +2,6 @@ import { Chip } from "./Chip";
 import { fmtHours, type Assess } from "../lib/data";
 import { verdictLabel } from "../api/client";
 import { verdictView } from "../lib/verdict";
-import type { SiteInfo } from "../lib/site";
 
 type Band = { low: number; nominal: number; high: number };
 
@@ -38,8 +37,8 @@ function BandRow({
 
 const pct = (n: number) => `${(n * 100).toFixed(0)}%`;
 
-export function Metrics({ a, site = null }: { a: Assess; site?: SiteInfo | null }) {
-  const v = verdictView(a, site);
+export function Metrics({ a }: { a: Assess }) {
+  const v = verdictView(a);
   const upper = v.state === "upper-bound";
   const tone = upper
     ? "warn"
@@ -68,7 +67,8 @@ export function Metrics({ a, site = null }: { a: Assess; site?: SiteInfo | null 
         </p>
       )}
       <p className="m-0 text-xs text-muted">
-        Thresholds: {a.criteria_status}.{" "}
+        Thresholds: {a.criteria.source === "user-chosen" ? "chosen by you" : "default placeholders"}{" "}
+        ({a.criteria.status}).{" "}
         {upper
           ? "No robust or fragile label is given while terrain is incomplete."
           : a.robust

@@ -62,11 +62,15 @@ export function needsToParams(p: URLSearchParams, n: MissionNeeds): URLSearchPar
 
 /**
  * Query parameters sent to /assess. The names follow the API's mission-need query parameters
- * (min_sun_fraction, max_dark_hours, min_earth_fraction, max_outage_hours; fractions 0..1). If the API names differ
- * after merging session A, change only this function.
+ * (min_sun_fraction, max_dark_hours, min_earth_fraction, max_outage_hours; fractions 0..1).
  */
-export function needsToQuery(n: MissionNeeds): Record<string, number> {
-  const q: Record<string, number> = {
+export function needsToQuery(n: MissionNeeds) {
+  const q: {
+    min_sun_fraction: number;
+    max_dark_hours: number;
+    min_earth_fraction: number;
+    max_outage_hours?: number;
+  } = {
     min_sun_fraction: n.minSunPct / 100,
     max_dark_hours: n.maxDarkH,
     min_earth_fraction: n.minEarthPct / 100,

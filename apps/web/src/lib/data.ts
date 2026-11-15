@@ -30,16 +30,16 @@ export const loadSkyline = (id: string) =>
     }),
   );
 
-export const loadAssess = (
-  id: string,
-  start: string,
-  end: string,
-  needs?: Record<string, number>,
-) =>
+type NeedsQuery = {
+  min_sun_fraction?: number;
+  max_dark_hours?: number;
+  min_earth_fraction?: number;
+  max_outage_hours?: number;
+};
+
+export const loadAssess = (id: string, start: string, end: string, needs?: NeedsQuery) =>
   ok(
     api.GET("/api/v1/sites/{site_id}/assess", {
-      // Mission-need parameters are added to the schema by the API in a later version; until then
-      // they are passed through untyped.
       params: { path: { site_id: id }, query: { start, end, ...needs } },
     }),
   );

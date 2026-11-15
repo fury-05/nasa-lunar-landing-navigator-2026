@@ -43,6 +43,26 @@ const ASSESS = {
   robust: false,
   delta_deg: 0.2,
   criteria_status: "pending-source: placeholder",
+  verdict_state: "marginal",
+  verdict_conclusive: true,
+  criteria: {
+    min_sun_fraction: 0.5,
+    max_dark_hours: 100,
+    min_earth_fraction: 0.5,
+    max_outage_hours: 1e9,
+    source: "default-placeholder",
+    status: "pending-source: placeholder",
+  },
+  terrain: {
+    available: true,
+    complete: true,
+    covered_fraction: 1,
+    reach_km_min: 8,
+    reach_km_median: 8,
+    reach_km_max: 8,
+    required_km: 8,
+  },
+  band_basis: ["Horizon shifted by 0.2 degrees (test basis)."],
   sunlight_hours: band(100),
   sun_share: band(0.5),
   earth_share: band(0.4),
@@ -189,7 +209,16 @@ test("a viable verdict with incomplete terrain is shown as an amber upper bound"
 }) => {
   await mock(page);
   await page.route("**/api/v1/sites/*/assess*", (r) =>
-    r.fulfill({ json: { ...ASSESS, verdict: "viable", robust: true } }),
+    r.fulfill({
+      json: {
+        ...ASSESS,
+        verdict: "viable",
+        robust: true,
+        verdict_state: "upper_bound_terrain_incomplete",
+        verdict_conclusive: false,
+        terrain: { ...ASSESS.terrain, complete: false, covered_fraction: 0.5, reach_km_min: 2 },
+      },
+    }),
   );
   await page.route("**/api/v1/sites", (r) =>
     r.fulfill({
