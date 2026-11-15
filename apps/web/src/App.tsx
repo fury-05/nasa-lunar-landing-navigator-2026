@@ -7,6 +7,7 @@ import { Credits } from "./routes/Credits";
 import { Home } from "./routes/Home";
 import { Placeholder } from "./routes/Placeholder";
 import { Public } from "./routes/Public";
+import { Slip } from "./routes/Slip";
 import { Spacecraft } from "./routes/Spacecraft";
 
 // The picker pulls in OpenLayers and proj4, so it loads only when someone opens the route.
@@ -23,6 +24,7 @@ export function App() {
         <Route path="spacecraft" element={<Spacecraft />} />
         <Route path="public" element={<Public />} />
         <Route path="compare" element={<Compare />} />
+        <Route path="slip" element={<Slip />} />
         <Route
           path="sites/pick"
           element={
