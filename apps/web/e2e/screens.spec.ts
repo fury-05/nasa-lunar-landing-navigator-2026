@@ -162,3 +162,9 @@ test("public view: story, simple/detailed toggle, glossary and attributed CSA li
   );
   await expect(page.getByText(/3 days later gives/)).toContainText("3.3 d");
 });
+
+test("spacecraft: a site given in the link loads its results", async ({ page }) => {
+  await mock(page);
+  await page.goto("/spacecraft?site=alpha");
+  await expect(page.getByText("Longest dark spell", { exact: true })).toBeVisible();
+});

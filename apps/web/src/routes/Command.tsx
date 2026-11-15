@@ -1,10 +1,11 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Chip } from "../components/Chip";
 import { Glass } from "../components/Glass";
 import { Metrics } from "../components/Metrics";
 import { SiteContext } from "../components/SiteContext";
 import { SkyView } from "../components/SkyView";
+import { ExportBar } from "../components/ExportBar";
 import { HorizonStrip } from "../components/HorizonStrip";
 import { Readout } from "../components/Readout";
 import { Scrubber } from "../components/Scrubber";
@@ -111,6 +112,8 @@ export function Command() {
         : Math.floor(rows.length / 2);
   const midpoint: SeriesRow | null = rows[index] ?? null;
   const times = useMemo(() => rows.map((r) => Date.parse(r.t)), [rows]);
+  const skyRef = useRef<SVGSVGElement>(null);
+  const stripRef = useRef<SVGSVGElement>(null);
   const nowMs = midpoint ? Date.parse(midpoint.t) : null;
 
   return (
@@ -219,7 +222,9 @@ export function Command() {
           <h2 className="mt-0 text-xl">Sky from the site</h2>
           {skyline.state === "loading" && <Loading what="terrain horizon" />}
           {skyline.state === "error" && <Problem message={skyline.message} />}
-          {skyline.state === "ok" && <SkyView skyline={skyline.data} now={midpoint} />}
+          {skyline.state === "ok" && (
+            <SkyView skyline={skyline.data} now={midpoint} svgRef={skyRef} />
+          )}
         </Glass>
         <Glass>
           {assess.state === "loading" && <Loading what="results" />}
@@ -231,7 +236,7 @@ export function Command() {
       <Glass>
         <h2 className="mt-0 text-xl">Horizon strip</h2>
         {skyline.state === "ok" && rows.length > 0 ? (
-          <HorizonStrip skyline={skyline.data} rows={rows} now={midpoint} />
+          <HorizonStrip skyline={skyline.data} rows={rows} now={midpoint} svgRef={stripRef} />
         ) : (
           <Loading what="horizon strip" />
         )}
@@ -280,6 +285,17 @@ export function Command() {
         {timeline.state === "loading" && <Loading what="timeline" />}
         {timeline.state === "error" && <Problem message={timeline.message} />}
         {timeline.state === "ok" && <Timeline data={timeline.data} marker={nowMs} />}
+      </Glass>
+
+      <Glass>
+        <ExportBar
+          siteId={id}
+          site={info}
+          assess={assess.state === "ok" ? assess.data : null}
+          timeline={timeline.state === "ok" ? timeline.data : null}
+          skySvg={() => skyRef.current}
+          stripSvg={() => stripRef.current}
+        />
       </Glass>
     </div>
   );

@@ -16,7 +16,13 @@ export type VerdictView = {
   basis: string[];
 };
 
-export function verdictView(a: Assess): VerdictView {
+/** The fields of an assessment that decide the verdict state (shared by Assess and compare rows). */
+export type VerdictInput = Pick<
+  Assess,
+  "terrain" | "verdict_state" | "verdict_conclusive" | "band_basis" | "verdict"
+>;
+
+export function verdictView(a: VerdictInput): VerdictView {
   const t = a.terrain;
   const incomplete = a.verdict_state === "upper_bound_terrain_incomplete" || !t.complete;
   let reason: string | null = null;
