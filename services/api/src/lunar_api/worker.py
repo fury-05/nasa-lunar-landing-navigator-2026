@@ -15,6 +15,7 @@ from arq.connections import RedisSettings
 from lunar_engine.ephemeris import HorizonsClient
 
 from lunar_api.degraded import RedisHealth
+from lunar_api.far_verify import load_far_manifest
 from lunar_api.jobs import JOB_TIMEOUT_S, RedisJobStore, run_custom_site
 from lunar_api.settings import Settings
 
@@ -50,6 +51,9 @@ async def custom_site(
         health=RedisHealth(ctx["sync_redis"]),
         max_custom_sites=settings.max_custom_sites,
         custom_max_age_days=settings.custom_max_age_days,
+        far_dir=settings.far_dir,
+        far_sha256=load_far_manifest(),
+        max_range_m=settings.custom_max_range_m,
     )
     state = store.get(job_id)
     return state.status if state else "missing"

@@ -26,13 +26,17 @@ from typing import Any, Protocol
 
 from lunar_engine.ephemeris import HorizonsClient
 from lunar_engine.ephemeris.client import _Retryable
+from lunar_engine.far_data import load_far_tiers
 from lunar_engine.links import south_polar_xy
 from lunar_engine.precompute import BuildSettings, build_site
-from lunar_engine.terrain import DemTile, read_tile
+from lunar_engine.terrain import DemTier, DemTile, read_tile
 
 from lunar_api.degraded import Health
+from lunar_api.far_verify import FarDataError, verify_far_files
 
 JOB_TIMEOUT_S = 120.0
+NEAR_ONLY_RANGE_M = 8_000.0  # reach of the old build that used only a downloaded 5 m site tile
+DEFAULT_FAR_RANGE_M = 300_000.0  # same default as scripts/precompute_sites.py --far-dir
 TERMINAL = {"done", "failed"}
 MIN_SOUTH_LAT = -89.999  # the polar projection is singular at the pole itself
 UNREACHABLE_MESSAGE = "The Horizons service could not be reached; try again in a minute."
@@ -206,6 +210,15 @@ def find_tile(
     return None
 
 
+def _usable_tiers(tiers: list[DemTier], lat_deg: float, lon_east_deg: float) -> list[DemTier]:
+    """The tiers, or none when the site has no valid height in any of them (the caster would
+    raise). A point outside all data is reported as terrain unavailable, never guessed."""
+    sx, sy = south_polar_xy(lat_deg, lon_east_deg)
+    if any(not math.isnan(t.tile.sample(sx, sy)) for t in tiers):
+        return tiers
+    return []
+
+
 def run_custom_site(
     store: JobStore,
     job_id: str,
@@ -223,6 +236,9 @@ def run_custom_site(
     health: Health | None = None,
     max_custom_sites: int = 50,
     custom_max_age_days: float = 7.0,
+    far_dir: Path | None = None,
+    far_sha256: dict[str, str | None] | None = None,
+    max_range_m: float = DEFAULT_FAR_RANGE_M,
 ) -> None:
     """Do the work and keep the job state current. Never raises; failures become state."""
     t0 = clock()
@@ -243,8 +259,40 @@ def run_custom_site(
         step(0.15, "looking for terrain data")
         tile_path = find_tile(dem_dir, lat_deg, lon_east_deg)
         tile = load_tile(tile_path) if tile_path else None
-        step(0.3, "terrain found" if tile else "no terrain data here: flat horizon will be used")
-        settings = BuildSettings(start, start + timedelta(days=days), max_range_m=8_000.0)
+        tiers: list[DemTier] | None = None
+        err = effres = None
+        info: dict[str, Any] = {
+            "file": tile_path.name if tile_path else None,
+            "custom": True,
+            "note": note,
+        }
+        if far_dir is not None:
+            # The same multi-tier path as scripts/precompute_sites.py --far-dir (ADR-0007): the
+            # 5 m site tile stays the nearest tier, the mosaic and the 20 m LDEM follow.
+            step(0.2, "reading the far terrain tiers")
+            far = load_far_tiers(far_dir, tile, lat_deg, lon_east_deg, max_range_m)
+            try:
+                verify_far_files(far_dir, far.files, far_sha256 or {})
+            except FarDataError as exc:
+                raise JobError(str(exc)) from exc
+            tiers = _usable_tiers(far.tiers, lat_deg, lon_east_deg)
+            err, effres = far.err, far.effres
+            info["far_files"] = {f: (far_sha256 or {})[f] for f in far.files}
+            info["far_missing"] = far.missing
+            if tiers:
+                tile = tiers[0].tile
+            elif tile is not None and not tiers:
+                tile = None  # the point is outside every tier: do not pretend to have terrain
+        names = [t.name for t in tiers] if tiers else (["site-tile-5m"] if tile else [])
+        info["terrain"] = "available" if tile else "unavailable"
+        step(
+            0.3,
+            "terrain tiers: " + ", ".join(names)
+            if names
+            else "no terrain data here: flat horizon will be used",
+        )
+        reach = max_range_m if tiers else NEAR_ONLY_RANGE_M
+        settings = BuildSettings(start, start + timedelta(days=days), max_range_m=reach)
         step(0.4, "fetching Sun and Earth positions from Horizons")
         build_site(
             client,
@@ -252,14 +300,12 @@ def run_custom_site(
             lat_deg,
             lon_east_deg,
             tile,
-            {
-                "file": tile_path.name if tile_path else None,
-                "custom": True,
-                "terrain": "available" if tile else "unavailable",
-                "note": note,
-            },
+            info,
             out_dir,
             settings,
+            tiers=tiers,
+            err=err,
+            effres=effres,
         )
         if health is not None:
             health.record_success()
@@ -274,6 +320,7 @@ def run_custom_site(
             result={
                 "site_id": site_id,
                 "terrain_unavailable": tile is None,
+                "tiers": names,
                 "built_at_utc": meta["built_at_utc"],
                 "warnings": (
                     [
