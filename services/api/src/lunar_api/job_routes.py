@@ -68,6 +68,7 @@ def start_job(
     alt_m: float,
     settings: Settings,
     client: HorizonsClient,
+    attempt: int = 0,
 ) -> str:
     """Start the work. Returns "queue" when handed to the arq worker, "thread" otherwise."""
     if isinstance(store, RedisJobStore):
@@ -87,7 +88,9 @@ def start_job(
                     alt_m,
                     CUSTOM_START.isoformat(),
                     CUSTOM_DAYS,
-                    _job_id=job_id,  # arq ignores a second enqueue of the same id
+                    # arq refuses an id whose finished result it still keeps (an hour), so a
+                    # restart after a failure queues under a new id; the public job id is unchanged
+                    _job_id=job_id if attempt == 0 else f"{job_id}-r{attempt}",
                 )
             finally:
                 await pool.aclose()
@@ -173,9 +176,10 @@ def create_custom(
         return JSONResponse(
             _accepted(existing), status_code=202, headers={"Location": f"/api/v1/jobs/{job_id}"}
         )
-    state = JobState(job_id, site_id)
+    # A failed job is started again under the same public id with the attempt counter raised.
+    state = JobState(job_id, site_id, attempt=0 if existing is None else existing.attempt + 1)
     store.create(state)
-    start_job(store, job_id, body.lat, body.lon, body.alt_m, settings, client)
+    start_job(store, job_id, body.lat, body.lon, body.alt_m, settings, client, state.attempt)
     return JSONResponse(
         _accepted(state), status_code=202, headers={"Location": f"/api/v1/jobs/{job_id}"}
     )

@@ -43,3 +43,6 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-15T02:06:04Z | afreen+irfan | P6-03,P6-04 | Spacecraft Dashboard and Public View deployed (PR 141) | docs/todo-evidence-2
 2026-11-15T02:21:34Z | irfan | P2-02,P5-01,P1-08 partial | multi-tier skyline, ERR into band, terrain endpoint, /sites site facts merged (session A) | merge/far2
 2026-11-15T02:53:46Z | irfan | P4-08..10,P7 | compare, slip, exports deployed (PR 145); docs, licences, audits merged (PR 146) | docs/todo-evidence-3
+2026-11-15T03:20:04Z | irfan | P4-01,P4-11,P5-06,P6-01,P6-02,P7-04 | shared clock, axe pass, lander engine and endpoint merged and deployed; resilience drills recorded | docs/todo-evidence-4
+2026-11-15T03:33:26Z | irfan | P7-03 | Caddy hardening F1, F4, F5, F6, F7 applied and verified on the VM | fix/caddy-hardening
+2026-11-15T03:42:04Z | irfan | P1-08 | far terrain downloaded on the VM (14.09 GB), sha256 recorded in data/MANIFEST.far.json | data/far-manifest-sha

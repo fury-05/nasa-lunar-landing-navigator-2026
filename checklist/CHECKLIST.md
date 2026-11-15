@@ -6,9 +6,9 @@
 | P1 | 10 | 1 | 0 | 11 |
 | P2 | 8 | 4 | 0 | 12 |
 | P3 | 9 | 0 | 0 | 9 |
-| P4 | 5 | 6 | 0 | 11 |
-| P5 | 1 | 4 | 0 | 5 |
-| P6 | 2 | 2 | 0 | 4 |
+| P4 | 7 | 4 | 0 | 11 |
+| P5 | 2 | 3 | 0 | 5 |
+| P6 | 4 | 0 | 0 | 4 |
 | P7 | 0 | 9 | 0 | 9 |
 
 | ID | Task | Owner | Status | Evidence / Notes |
@@ -57,7 +57,7 @@
 | P3-07 | Rate limiting, caching headers, ETag | irfan | DONE | lunar_api.caching: per-client token bucket (reads 5/s burst 60, POSTs 0.5/s burst 6, env configurable, health and ready exempt), 429 as a problem document with Retry-After, X-Forwarded-For trusted only from a loopback peer (a remote caller cannot spoof it, tested), ETag + Cache-Control public max-age 300 + 304 on If-None-Match for /sites, /attribution, /links; jobs, POSTs, probes, errors and SSE never cached; production app checked in a fresh process (60 pass then 429, POST 429 after 6); 11 tests; limits are in memory per process group, a courtesy shield and not a security boundary; issue #63 |
 | P3-08 | Deploy to VM, smoke tests, load test results recorded | irfan | DONE | deployed 3c776c8 to https://13-52-97-105.sslip.io: ready (database and redis ok), all routes answered with real 3 year data, ETag 304, 3 custom jobs through the real arq worker and Redis, SSE stream; load test on the VM (4/8/16 clients, 0 errors, /state p50 9-31 ms, /assess p50 241-463 ms, 111-127 req/s) and via the internet (about 0.9 s per call, mostly TLS and distance); found and fixed 4 problems on the way (state recomputed per request, store rebuilt per request, cold first call, zero-terrain reported as fully covered); written record with NOT measured list in docs/validation/p3-08-deploy-and-load.md; issue #64 |
 | P3-09 | Input validation and security review of the API | irfan | DONE | 62 hostile-input tests (traversal, encoded traversal, injection strings, malformed and huge JSON, bad numbers and times, size abuse, method and header abuse, CORS, header injection); 6 findings fixed (raw echo of caller text, site id alphabet and case aliasing, loose time parsing, booleans accepted as numbers, third party CDN on the docs page, no security headers on the API itself); mutation check shows each fix is guarded; written review with an explicit NOT covered list in docs/validation/api-security-review.md; developer review only, no penetration test; issue #65 |
-| P4-01 | Design system complete: tokens, glass components, motion, contrast checks | afreen | PENDING | issue #66 |
+| P4-01 | Design system complete: tokens, glass components, motion, contrast checks | afreen | DONE | PR 148: contrast unit test checks every text colour at 4.5:1 against the worst glass background; axe reports contrast as incomplete on gradients, so token arithmetic is the evidence; issue #66 |
 | P4-02 | App shell, routes, URL state, mock API from OpenAPI | afreen | PENDING | first slice live: /command route with URL state (site, start, days), typed API calls, loading, error and warning states; mock-based browser tests; not yet a full mock API layer; issue #67 |
 | P4-03 | Site picker with search, filters, custom coordinates, validation | afreen | PENDING | partial, PR 138: custom coordinates + click on Trek polar map, validation, job progress via POST /sites/custom; live page https://13-52-97-105.sslip.io/sites/pick checked, no console errors; search and filters not built; issue #68, #129 |
 | P4-04 | Date control with lunar-day jumps and range presets | afreen | PENDING | issue #69 |
@@ -67,20 +67,20 @@
 | P4-08 | Compare board and flip mode | afreen | DONE | PR 145: /compare with 2 to 4 sites, bands, flip, amber upper-bound for incomplete terrain; vitest 66, e2e 30; live https://13-52-97-105.sslip.io/compare returns 200; issue #73 |
 | P4-09 | Slip matrix and what-changes-if panel | afreen | DONE | PR 145: /slip matrix with metric switch, cell links, text alternatives, what-changes-if list; the 2 km shift panel is not built (no API); live /slip returns 200; issue #74 |
 | P4-10 | Export CSV, PNG, permalink, scenario summary | afreen | DONE | PR 145: Command Centre export bar: metrics and timeline CSV, sky view and horizon strip PNG, copy link, scenario summary with provenance; e2e checks the files; compare and slip pages have no export; issue #75 |
-| P4-11 | Loading, error and degraded states; keyboard and screen reader pass | afreen | PENDING | issue #76 |
+| P4-11 | Loading, error and degraded states; keyboard and screen reader pass | afreen | DONE | PR 148: degraded banner from /ready, error boundary per route, focus after navigation, axe (WCAG 2 A/AA) on 9 routes with no serious or critical findings on mocked pages; e2e 46, vitest 81; no real screen reader run, so only keyboard and axe evidence; issue #76 |
 | P5-01 | Terrain tile endpoint (heightfield) and slope layer in the API | irfan | PENDING | issue #77 |
 | P5-02 | 2D polar map with OpenLayers, proj4 and Trek SP tiles, site markers | afreen | DONE | PR 138: OpenLayers + proj4 + Trek WAC polar WMTS, site markers, click to pick; projection unit-tested against QuickMap-verified pgda-site04; live page checked with real tiles; marker labels overlap near the pole; issue #78 |
 | P5-04 | Local 3D terrain with draped imagery, Sun light, shadows, exaggeration control | afreen | PENDING | partial, PR 139: TerrainView (2D shaded + oblique 3D, scrubber Sun, labelled exaggeration, uncertainty); needs GET /sites/{id}/terrain (P5-01, issue #77) before it shows real data; issue #80, #131 |
-| P5-06 | Shared mission clock and animation controls across all views | afreen | PENDING | issue #82 |
+| P5-06 | Shared mission clock and animation controls across all views | afreen | DONE | PR 148: one clock in the URL (t, sp) drives sky view, horizon strip, terrain view, countdown chips and timeline marker; play, pause, 4 speeds, reduced motion disables play; Command Centre only because compare and slip have no time axis; e2e 46; issue #82 |
 | P5-07 | 3D performance, LOD, tile cache, reduced-motion and low-power fallback | member3 | PENDING | issue #83 |
-| P6-01 | Lander profile model: arrays, battery, loads, slope and thermal limits | irfan | PENDING | issue #84 |
-| P6-02 | Suitability engine and /lander/assess with tests | irfan | PENDING | issue #85 |
+| P6-01 | Lander profile model: arrays, battery, loads, slope and thermal limits | irfan | DONE | PR 149: lunar_engine.lander (validated fields with units, no default lander, placeholders labelled pending-source), 15 engine tests incl. hypothesis monotonicity, 3 mutation checks; thermal not modelled; issue #84 |
+| P6-02 | Suitability engine and /lander/assess with tests | irfan | DONE | PR 149: POST /api/v1/lander/assess with power, communication, slope, thermal (not assessed) and mission-need checks, terrain-incomplete downgrade as in /assess, RFC 7807 errors; 10 API tests; full suite 466 passed; web wiring in progress; issue #85 |
 | P6-03 | Spacecraft Dashboard UI | afreen | DONE | PR 141: Spacecraft Dashboard route, placeholder lander values labelled pending-source, reads API results; vitest 50, e2e 23; live https://13-52-97-105.sslip.io/spacecraft; issue #86, #132 |
 | P6-04 | Public View guided story, glossary, simple and detailed modes, CSA and NASA links with attribution | member3 | DONE | PR 141: Public View with story, glossary, simple and detailed toggle, CSA and NASA links with attribution; e2e covers it; live https://13-52-97-105.sslip.io/public; issue #87, #132 |
 | P7-01 | Accessibility audit and fixes (axe, keyboard, contrast, reduced motion) | afreen | PENDING | issue #90 |
 | P7-02 | Performance audit and fixes (Lighthouse, bundle, 3D) | afreen | PENDING | issue #91 |
 | P7-03 | Security hardening, dependency audit, secret scan, headers | irfan | PENDING | audit done (PR 146): docs/validation/security-dependency-audit.md, npm audit prod 0 vulnerabilities, pip-audit clean, scripts/scan_secrets.py 0 findings over 242 files; 11 suggested Caddy/header fixes not yet applied; issue #92 |
-| P7-04 | Resilience drills: Horizons outage, backup restore, service kill, rollback | irfan | PENDING | issue #93 |
+| P7-04 | Resilience drills: Horizons outage, backup restore, service kill, rollback | irfan | PENDING | drills run on the live VM (PR 150, docs/validation/resilience-drills.md): rollback 3.0 s, API kill 3.4 s, restore 0.17 s PASS; Horizons outage PARTIAL: retry-after-failure bug (blocked on the retry fix) and no degraded banner (issue #151); issue #93 |
 | P7-05 | Attribution audit, in-app Credits page, third-party licence report, NOTICE | member3 | PENDING | partial (PR 146): docs/THIRD_PARTY_LICENSES.md (391 packages, gen_licenses.py --check), NOTICE, Credits page live; usage terms still pending-source until A1 (issue #16); issue #94 |
 | P7-06 | Docs: README, user guide, architecture, validation report, SI_USAGE final | member3 | PENDING | partial (PR 146): README, docs/USER_GUIDE.md, docs/ARCHITECTURE.md, SI_USAGE updated; docs/validation/REPORT.md (P2-12) not written; issue #95 |
 | P7-07 | Demo assets: 3 minute script, screenshots, submission text draft | member3 | PENDING | partial (PR 146): docs/submission-draft.md and docs/demo-shotlist.md; demo script waiting for Luz (docs/teammate-tasks.md task 4); screenshots not captured; issue #96 |

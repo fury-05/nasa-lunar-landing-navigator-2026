@@ -866,6 +866,11 @@
       },
       "JobOut": {
         "properties": {
+          "attempt": {
+            "default": 0,
+            "title": "Attempt",
+            "type": "integer"
+          },
           "created_at_utc": {
             "title": "Created At Utc",
             "type": "string"
@@ -910,6 +915,11 @@
               }
             ],
             "title": "Retry"
+          },
+          "retryable": {
+            "default": false,
+            "title": "Retryable",
+            "type": "boolean"
           },
           "site_id": {
             "title": "Site Id",
