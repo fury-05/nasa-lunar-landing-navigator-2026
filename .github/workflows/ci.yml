@@ -14,6 +14,8 @@ jobs:
       - run: bash scripts/lint-dashes.sh
       - run: python3 scripts/checklist.py --check
       - run: python3 scripts/build_attribution.py --check
+      - name: Secret scan
+        run: python3 scripts/scan_secrets.py
       - name: PR title format
         if: github.event_name == 'pull_request'
         env:
@@ -35,6 +37,12 @@ jobs:
           uv run mypy packages services
           uv run pytest -q --cov
           uv run python scripts/export_openapi.py --check
+      - name: Dependency audit (warn only)
+        continue-on-error: true
+        run: |
+          npm audit --omit=dev
+          uv export --frozen --no-hashes -o /tmp/req.txt >/dev/null 2>&1
+          uvx pip-audit -r /tmp/req.txt --no-deps
   web:
     runs-on: ubuntu-24.04
     steps:
