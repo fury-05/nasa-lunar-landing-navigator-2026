@@ -1119,11 +1119,19 @@ export interface components {
             start_utc: string;
             /** Sunlight Hours */
             sunlight_hours: number;
+            terrain: components["schemas"]["TerrainOut"];
             /**
              * Verdict
              * @enum {string}
              */
             verdict: "viable" | "marginal" | "not viable";
+            /** Verdict Conclusive */
+            verdict_conclusive: boolean;
+            /**
+             * Verdict State
+             * @enum {string}
+             */
+            verdict_state: "viable" | "marginal" | "not_viable" | "upper_bound_terrain_incomplete";
         };
         /** SlipIn */
         SlipIn: {

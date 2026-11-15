@@ -245,6 +245,10 @@ class SlipCellOut(BaseModel):
     robust: bool
     sunlight_hours: float
     earth_share: float
+    # same objects and meaning as in GET /sites/{id}/assess (additive)
+    terrain: TerrainOut
+    verdict_state: VerdictState
+    verdict_conclusive: bool
 
 
 class SlipOut(BaseModel):

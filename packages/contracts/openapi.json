@@ -2154,6 +2154,9 @@
             "title": "Sunlight Hours",
             "type": "number"
           },
+          "terrain": {
+            "$ref": "#/components/schemas/TerrainOut"
+          },
           "verdict": {
             "enum": [
               "viable",
@@ -2161,6 +2164,20 @@
               "not viable"
             ],
             "title": "Verdict",
+            "type": "string"
+          },
+          "verdict_conclusive": {
+            "title": "Verdict Conclusive",
+            "type": "boolean"
+          },
+          "verdict_state": {
+            "enum": [
+              "viable",
+              "marginal",
+              "not_viable",
+              "upper_bound_terrain_incomplete"
+            ],
+            "title": "Verdict State",
             "type": "string"
           }
         },
@@ -2172,7 +2189,10 @@
           "glyph",
           "robust",
           "sunlight_hours",
-          "earth_share"
+          "earth_share",
+          "terrain",
+          "verdict_state",
+          "verdict_conclusive"
         ],
         "title": "SlipCellOut",
         "type": "object"
