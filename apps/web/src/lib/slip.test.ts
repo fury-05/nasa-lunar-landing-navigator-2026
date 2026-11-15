@@ -11,6 +11,17 @@ const cell = (over: Partial<SlipCell> = {}): SlipCell => ({
   robust: true,
   sunlight_hours: 100,
   earth_share: 0.5,
+  verdict_state: "viable",
+  verdict_conclusive: true,
+  terrain: {
+    available: true,
+    complete: true,
+    covered_fraction: 1,
+    reach_km_max: 300,
+    reach_km_median: 300,
+    reach_km_min: 300,
+    required_km: 300,
+  },
   ...over,
 });
 const site = (f: number, reach = 8000) =>

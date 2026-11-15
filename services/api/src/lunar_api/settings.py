@@ -22,6 +22,8 @@ class Settings:
     rate_burst: int = 60
     heavy_rate_per_s: float = 0.5  # POSTs (compare, slip matrix, custom jobs)
     heavy_burst: int = 6
+    max_custom_sites: int = 50  # stored custom bundles on disk; oldest evicted first (F11)
+    custom_max_age_days: float = 7.0  # a custom bundle older than this is deleted
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -44,4 +46,6 @@ class Settings:
             rate_burst=int(os.environ.get("RATE_BURST", "60")),
             heavy_rate_per_s=float(os.environ.get("HEAVY_RATE_PER_S", "0.5")),
             heavy_burst=int(os.environ.get("HEAVY_BURST", "6")),
+            max_custom_sites=int(os.environ.get("LUNAR_MAX_CUSTOM_SITES", "50")),
+            custom_max_age_days=float(os.environ.get("LUNAR_CUSTOM_MAX_AGE_DAYS", "7")),
         )

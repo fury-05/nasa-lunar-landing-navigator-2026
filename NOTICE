@@ -13,54 +13,137 @@ agency named below.
 
 DATA AND SERVICES
 -----------------
-The ids below are the ids used in data/attribution.json, docs/ATTRIBUTION.md and
-GET /api/v1/attribution. Usage terms are copied from the registry. Where the
-registry says "pending-source", the terms have not yet been read and confirmed
-by a human, and this NOTICE does not claim any.
+The ids below are the ids used in data/attribution.json, docs/ATTRIBUTION.md
+and GET /api/v1/attribution. Usage terms are copied from the registry. Where
+the registry says "pending-source", the terms have not yet been read and
+confirmed, and this NOTICE does not claim any.
 
 horizons       JPL Horizons System, API. NASA/JPL Solar System Dynamics.
                https://ssd.jpl.nasa.gov/horizons/
-               Usage statement: pending-source (issue #16). Citation: pending-source.
+               Citation: NASA/JPL Solar System Dynamics. Data retrieved on
+               2026-11-14. Horizons System. https://ssd.jpl.nasa.gov
+               Usage statement: Read 2026-11-15 by Claude on
+               https://ssd.jpl.nasa.gov/faq.html: no permission needed, data on
+               the site are considered public domain; use does not imply
+               NASA/Caltech/JPL endorsement; modified data must be marked as
+               modified; suggested citation form: NASA/JPL Solar System
+               Dynamics, data retrieved on (date), title of page,
+               https://ssd.jpl.nasa.gov; the site is intended for scientific,
+               academic, planning and operations purposes (Fair Use policy
+               linked there)
 
 trek-moon      Moon Trek WMTS. NASA/JPL Solar System Treks.
                https://trek.nasa.gov/moon/
-               Usage statement: layer metadata Use_Constraints and Access_Constraints
-               say None; the Trek terms page is pending-source (human check).
-               Credit: per layer, the Credit field of its FGDC metadata, shown beside
-               the map.
+               Citation: Per layer, the Credit field of its FGDC metadata,
+               shown beside the map (see docs/data/trek-layers.md)
+               Usage statement: pending-source: layer metadata Use_Constraints
+               and Access_Constraints say None (read 2026-11-14), but the Moon
+               Trek pages fetched on 2026-11-15 showed no terms text to a text
+               reader; the NASA Images and Media Usage Guidelines apply:
+               acknowledge NASA/JPL, no implied endorsement. A person should
+               check the footer credit line in a browser (A4)
 
-quickmap       LROC QuickMap. LROC team (Arizona State University), hosted by
-               Intuitive Machines. https://quickmap.lroc.im-ldi.com/
-               Used for manual validation and "Open in QuickMap" links only.
-               Usage statement: pending-source (issue #16). Citation: pending-source.
+quickmap       LROC QuickMap. LROC team (ASU), hosted by Intuitive Machines.
+               https://quickmap.lroc.im-ldi.com/
+               Citation: pending-source
+               Usage statement: pending-source: no terms text found by a text
+               reader on 2026-11-15 (the app loads its content by script). Used
+               only as a link target and for human comparison, no QuickMap data
+               or tiles are copied. A person should check the About or credits
+               text in a browser (A4)
 
 csa-moon       Moon exploration. Canadian Space Agency.
                https://www.asc-csa.gc.ca/eng/astronomy/moon-exploration/
-               Credit: Canadian Space Agency. Paraphrased blurbs link to the source
-               page. The CSA terms page (https://www.asc-csa.gc.ca/eng/terms.asp)
-               grants reproduction for personal, educational or informational
-               non-commercial use with CSA acknowledged, accuracy care and no implied
-               endorsement; the CSA logo is not reused. Human confirmation of fit is
-               recorded in the registry as A1.
+               Citation: Credit: Canadian Space Agency. Paraphrased blurbs link
+               to the source page
+               Usage statement: CSA terms page grants reproduction for
+               personal, educational or informational non-commercial use with
+               CSA acknowledged, accuracy care, no implied endorsement; logo
+               not reusable (https://www.asc-csa.gc.ca/eng/terms.asp). Human
+               confirmation of fit: A1
 
-lola-dem       High-Resolution LOLA Topography for Lunar South Pole Sites (5 m/px
-               GeoTIFF). NASA GSFC PGDA (M. K. Barker, LRO-LOLA).
+lola-dem       High-Resolution LOLA Topography for Lunar South Pole Sites (5
+               m/px GeoTIFF). NASA GSFC PGDA (M. K. Barker, LRO-LOLA).
                https://pgda.gsfc.nasa.gov/products/78
-               Citation: Barker et al., 2021, Planetary and Space Science 203, 105119,
-               https://doi.org/10.1016/j.pss.2020.105119
-               Usage statement: pending-source (NASA public product, terms page not yet
-               read by a human).
+               Citation: Barker et al., 2021, Planetary and Space Science 203,
+               105119, https://doi.org/10.1016/j.pss.2020.105119
+               Usage statement: Read 2026-11-15 by Claude (web fetch of
+               https://pgda.gsfc.nasa.gov/products/90): the Data Usage Policy
+               asks only that users cite the paper; the page states no licence.
+               Its footer links Reproduction Guidelines (nasa.gov NASA Images
+               and Media Usage Guidelines: NASA media generally not subject to
+               copyright in the US, NASA to be acknowledged as source, no
+               implied endorsement, NASA Insignia not public domain). Human
+               confirmation still welcome (A1)
 
-nssdc-apollo   Apollo Lunar Landings (1969 - 1972) table. NASA GSFC NSSDCA.
+lola-dem-wide  A New View of the Lunar South Pole from LOLA: 80S 20 m/px LDEM
+               with ERR and EFFRES (80 m fallback). NASA GSFC PGDA (M. K.
+               Barker, LRO-LOLA).
+               https://pgda.gsfc.nasa.gov/products/90
+               Citation: Barker et al., 2023, Planetary Science Journal 4, 183,
+               https://doi.org/10.3847/PSJ/acf3e1
+               Usage statement: Read 2026-11-15 by Claude (web fetch of
+               https://pgda.gsfc.nasa.gov/products/90): the Data Usage Policy
+               asks only that users cite the paper; the page states no licence.
+               Its footer links Reproduction Guidelines (nasa.gov NASA Images
+               and Media Usage Guidelines: NASA media generally not subject to
+               copyright in the US, NASA to be acknowledged as source, no
+               implied endorsement, NASA Insignia not public domain). Human
+               confirmation still welcome (A1). Cite Barker et al., 2023,
+               Planetary Science Journal 4, 183,
+               https://doi.org/10.3847/PSJ/acf3e1; data DOI 10.60903/gsfcpgda-
+               lola-spole
+
+lola-dem-87s   South Pole LOLA DEM Mosaic, 87S to 90S, 5 m/px. NASA GSFC PGDA
+               (M. K. Barker, LRO-LOLA).
+               https://pgda.gsfc.nasa.gov/products/81
+               Citation: Barker et al., 2021, Planetary and Space Science 203,
+               105119, https://doi.org/10.1016/j.pss.2020.105119
+               Usage statement: Read 2026-11-15 by Claude (web fetch of
+               https://pgda.gsfc.nasa.gov/products/90): the Data Usage Policy
+               asks only that users cite the paper; the page states no licence.
+               Its footer links Reproduction Guidelines (nasa.gov NASA Images
+               and Media Usage Guidelines: NASA media generally not subject to
+               copyright in the US, NASA to be acknowledged as source, no
+               implied endorsement, NASA Insignia not public domain). Human
+               confirmation still welcome (A1)
+
+lola-illum     Lunar Polar Illumination: average solar illumination and Earth
+               visibility 85S-90S 60 m/px (cross-check only). NASA GSFC PGDA
+               (E. Mazarico, LRO-LOLA).
+               https://pgda.gsfc.nasa.gov/products/69
+               Citation: Mazarico et al., 2011, Icarus 211, 1066-1081,
+               https://doi.org/10.1016/j.icarus.2010.10.030
+               Usage statement: Read 2026-11-15 by Claude (web fetch of
+               https://pgda.gsfc.nasa.gov/products/90): the Data Usage Policy
+               asks only that users cite the paper; the page states no licence.
+               Its footer links Reproduction Guidelines (nasa.gov NASA Images
+               and Media Usage Guidelines: NASA media generally not subject to
+               copyright in the US, NASA to be acknowledged as source, no
+               implied endorsement, NASA Insignia not public domain). Human
+               confirmation still welcome (A1)
+
+nssdc-apollo   Apollo Lunar Landings (1969 - 1972) table. NASA GSFC NSSDCA
+               (curator D. R. Williams).
                https://nssdc.gsfc.nasa.gov/planetary/lunar/apolloland.html
-               Usage statement: pending-source.
+               Citation: NASA NSSDCA, Apollo Lunar Landings (1969-1972), frame
+               DE421 Mean Earth/Polar Axis
+               Usage statement: Read 2026-11-15 by Claude: the page itself
+               carries no terms, copyright or credit line (only author, curator
+               and last updated 06 March 2017). NASA general media guidelines
+               apply: acknowledge NASA as the source, no implied endorsement.
+               Used for landing coordinates and times only
 
 nasa-clps      Commercial Lunar Payload Services Deliveries. NASA Science.
                https://science.nasa.gov/lunar-science/clps-deliveries/
-               Usage statement: pending-source.
+               Citation: NASA, CLPS Deliveries
+               Usage statement: Read 2026-11-15 by Claude: the page carries no
+               usage statement; its menu links NASA Brand and Usage Guidelines.
+               Used as a factual list of deliveries; NASA acknowledged as
+               source, no implied endorsement
 
-The data sources above are listed in the registry as of the commit that adds this
-file; if the registry changes, data/attribution.json is authoritative.
+The registry (data/attribution.json) is authoritative; this section is
+generated by scripts/build_notice.py.
 
 SOFTWARE
 --------

@@ -14,6 +14,8 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import re
+import shutil
 import threading
 import time
 from collections.abc import Callable
@@ -27,6 +29,8 @@ from lunar_engine.ephemeris.client import _Retryable
 from lunar_engine.links import south_polar_xy
 from lunar_engine.precompute import BuildSettings, build_site
 from lunar_engine.terrain import DemTile, read_tile
+
+from lunar_api.degraded import Health
 
 JOB_TIMEOUT_S = 120.0
 TERMINAL = {"done", "failed"}
@@ -137,6 +141,51 @@ class RedisJobStore:
         return s
 
 
+CUSTOM_ID = re.compile(r"^custom-[0-9a-f]{12}$")
+
+
+def _built_at(folder: Path) -> datetime:
+    try:
+        meta = json.loads((folder / "meta.json").read_text(encoding="utf8"))
+        return datetime.fromisoformat(str(meta["built_at_utc"]).replace("Z", "+00:00"))
+    except (OSError, ValueError, KeyError):
+        return datetime.fromtimestamp(folder.stat().st_mtime, UTC)
+
+
+def prune_custom_sites(
+    root: Path,
+    max_sites: int,
+    max_age_days: float,
+    now: datetime | None = None,
+    keep: str | None = None,
+) -> list[str]:
+    """Delete custom bundles older than `max_age_days`, then the oldest until at most `max_sites`
+    remain. Only folders whose name is a generated custom id are considered: catalogue sites and
+    anything else under `root` are never touched. `keep` is never deleted. Returns deleted ids."""
+    if max_sites < 0 or max_age_days <= 0:
+        raise ValueError("max_sites must not be negative and max_age_days must be positive")
+    if not root.is_dir():
+        return []
+    now = now or datetime.now(UTC)
+    found = sorted(
+        ((_built_at(p), p) for p in root.iterdir() if p.is_dir() and CUSTOM_ID.fullmatch(p.name)),
+        key=lambda t: (t[0], t[1].name),
+    )
+    limit = now - timedelta(days=max_age_days)
+    victims = [p for built, p in found if built < limit and p.name != keep]
+    rest = [p for _, p in found if p not in victims]
+    excess = len(rest) - max_sites
+    for p in rest:
+        if excess <= 0:
+            break
+        if p.name != keep:
+            victims.append(p)
+            excess -= 1
+    for p in victims:
+        shutil.rmtree(p, ignore_errors=True)
+    return [p.name for p in victims]
+
+
 def find_tile(
     dem_dir: Path, lat_deg: float, lon_east_deg: float, margin_m: float = 50.0
 ) -> Path | None:
@@ -171,6 +220,9 @@ def run_custom_site(
     timeout_s: float = JOB_TIMEOUT_S,
     clock: Callable[[], float] = time.monotonic,
     load_tile: Callable[[Path], DemTile] = read_tile,
+    health: Health | None = None,
+    max_custom_sites: int = 50,
+    custom_max_age_days: float = 7.0,
 ) -> None:
     """Do the work and keep the job state current. Never raises; failures become state."""
     t0 = clock()
@@ -209,7 +261,10 @@ def run_custom_site(
             out_dir,
             settings,
         )
+        if health is not None:
+            health.record_success()
         step(0.95, "storing the result")
+        prune_custom_sites(out_dir, max_custom_sites, custom_max_age_days, keep=site_id)
         meta = json.loads((out_dir / site_id / "meta.json").read_text(encoding="utf8"))
         store.update(
             job_id,
@@ -234,6 +289,8 @@ def run_custom_site(
         store.update(job_id, status="failed", reason=str(exc), message="failed", retryable=False)
     except _Retryable:
         # The raw text ("_Retryable: network error: ConnectError") means nothing to a visitor.
+        if health is not None:
+            health.record_failure(UNREACHABLE_MESSAGE.rstrip("."))
         store.update(
             job_id, status="failed", reason=UNREACHABLE_MESSAGE, message="failed", retryable=True
         )

@@ -15,6 +15,7 @@ from lunar_engine import ENGINE_VERSION
 from lunar_api import API_VERSION
 from lunar_api.caching import EtagMiddleware, RateLimitMiddleware
 from lunar_api.checks import check_db, check_redis
+from lunar_api.degraded import snapshot
 from lunar_api.errors import install_error_handlers
 from lunar_api.job_routes import router as job_router
 from lunar_api.lander_routes import router as lander_router
@@ -74,6 +75,11 @@ app.include_router(terrain_router)
 app.include_router(lander_router)
 
 
+def _degraded(cfg: Settings) -> dict[str, Any] | None:
+    stored = cfg.data_dir.exists() and any(cfg.data_dir.glob("*/meta.json"))
+    return snapshot(cfg.redis_url, bool(stored))
+
+
 @app.get("/api/v1/health", response_model=HealthOut)
 def health() -> dict[str, str]:
     return {"status": "ok"}
@@ -93,12 +99,18 @@ def ready(response: Response) -> dict[str, Any]:
             "database": {"ok": db_ok, "detail": db_detail},
             "redis": {"ok": redis_ok, "detail": redis_detail},
         },
+        "horizons_degraded": _degraded(cfg),
     }
 
 
 @app.get("/api/v1/version", response_model=VersionOut)
-def version() -> dict[str, str]:
-    return {"api": API_VERSION, "engine": ENGINE_VERSION, "disclaimer": DISCLAIMER}
+def version() -> dict[str, Any]:
+    return {
+        "api": API_VERSION,
+        "engine": ENGINE_VERSION,
+        "disclaimer": DISCLAIMER,
+        "horizons_degraded": _degraded(Settings.from_env()),
+    }
 
 
 def _docs_html() -> str:
@@ -124,4 +136,6 @@ def _docs_html() -> str:
 
 @app.get("/api/v1/docs", include_in_schema=False)
 def docs() -> HTMLResponse:
-    return HTMLResponse(_docs_html())
+    # The page has one inline <style>; allow styles for this route only, still no scripts.
+    csp = "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'"
+    return HTMLResponse(_docs_html(), headers={"Content-Security-Policy": csp})
