@@ -2,6 +2,9 @@
 
 This describes what exists on 2026-11-15. The original plan is in [docs/03-architecture.md](03-architecture.md) and the engine rules in [docs/04-engine-spec.md](04-engine-spec.md); where the two differ, this file says what was actually built and the specs say what was intended.
 
+## Pictures
+The diagrams in [docs/architecture/](architecture/) (system, calculation pipeline, ray geometry, disc visibility, terrain tiers) are drawn by `scripts/build_doc_images.py` and are shown in the README section "Architecture and how the numbers are calculated". A picture guide to the screens is [HOW-TO-USE.md](HOW-TO-USE.md).
+
 ## Components
 
 | Part | Where | Role |
@@ -69,5 +72,5 @@ Deploy: commit and push, then `scripts/deploy-remote.sh [branch]`, which runs `s
 | Horizons outage during a custom job | The job fails with a reason; curated sites are unaffected because they are precomputed. A scripted outage drill has not been run (checklist row P7-04) |
 | Trek tiles unavailable | The site picker detects tile load errors and shows a notice; the markers and coordinate form still work. The flat dark grid fallback layer planned in docs/03 is not built |
 
-## Not built yet
-Compare board and flip mode, slip matrix panel, export, shared mission clock, `/lander/assess`, caching proxy for Trek tiles, scheduled backup restore drill, external uptime check. See [checklist/CHECKLIST.md](../checklist/CHECKLIST.md).
+## Not built
+A caching proxy for Trek tiles, the flat dark grid fallback for the polar map, a scheduled backup restore drill, an external uptime check, 3D terrain draped with Trek imagery and a WebGL renderer (see [ADR-0008](DECISIONS/ADR-0008-freeze-scope-cut.md) and [ROADMAP.md](../ROADMAP.md)). Compare, the slip matrix, export, the shared mission clock and `/lander/assess` were built after this file was first written and are live. See [checklist/CHECKLIST.md](../checklist/CHECKLIST.md).
