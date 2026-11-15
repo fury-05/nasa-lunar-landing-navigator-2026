@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 /**
@@ -6,7 +7,7 @@ import { describe, expect, it } from "vitest";
  * text colour against the worst case background behind the glass: the brightest blue gradient blob
  * from the body background, covered by the glass scrim. WCAG AA for normal text is 4.5.
  */
-const css = readFileSync(new URL("./index.css", import.meta.url), "utf8");
+const css = readFileSync(resolve(process.cwd(), "src/styles/index.css"), "utf8");
 const token = (name: string): string => {
   const m = new RegExp(`--color-${name}:\\s*#([0-9a-fA-F]{6})`).exec(css);
   if (!m) throw new Error(`token ${name} not found`);
