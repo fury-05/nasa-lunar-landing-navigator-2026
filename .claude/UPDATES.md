@@ -62,3 +62,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-15T08:02:51Z | irfan | P7-08 | release notes drafted for v1.0.0 (tag waits for the freeze checks) | docs/release-notes
 2026-11-15T08:15:00Z | irfan | P2-11,P7-07 | independent browser checks recorded as evidence (performed by Claude); P2-11 DONE, P7-07 note updated and still PENDING | docs/validation/browser-checks-2026-11-15.md
 2026-11-15T08:08:30Z | irfan | P2-11,P7-01,P7-07 | independent browser checks of the live site merged: 5 QuickMap height readings, 10 pre-registered shadow pairs (10 of 10 agree, all Sun-down), terms pages, NASA SI text verbatim, 9 defects filed (#172 to #183) | docs/browser-checks
+2026-11-15T08:37:01Z | irfan | P5-01,P3 | custom-site jobs use the far terrain tiers, catalogue sites first in /sites, SSE test made load-proof | merge/custom-far

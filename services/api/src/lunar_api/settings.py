@@ -24,6 +24,7 @@ class Settings:
     heavy_burst: int = 6
     max_custom_sites: int = 50  # stored custom bundles on disk; oldest evicted first (F11)
     custom_max_age_days: float = 7.0  # a custom bundle older than this is deleted
+    custom_max_range_m: float = 300_000.0  # skyline range for custom sites with far terrain
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -48,4 +49,5 @@ class Settings:
             heavy_burst=int(os.environ.get("HEAVY_BURST", "6")),
             max_custom_sites=int(os.environ.get("LUNAR_MAX_CUSTOM_SITES", "50")),
             custom_max_age_days=float(os.environ.get("LUNAR_CUSTOM_MAX_AGE_DAYS", "7")),
+            custom_max_range_m=float(os.environ.get("LUNAR_CUSTOM_MAX_RANGE_M", "300000")),
         )

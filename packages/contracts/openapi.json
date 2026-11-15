@@ -1940,6 +1940,14 @@
           "terrain_coverage": {
             "$ref": "#/components/schemas/TerrainCoverage"
           },
+          "tiers": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Tiers",
+            "type": "array"
+          },
           "tile_radius_km": {
             "anyOf": [
               {
