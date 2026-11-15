@@ -26,6 +26,14 @@
   color-scheme: dark;
 }
 
+/* Larger base size for readability on screens of tablet width and up; rem-based sizes scale
+   with it. Phones keep the browser default so nothing overflows at 320 px. */
+@media (min-width: 640px) {
+  html {
+    font-size: 17px;
+  }
+}
+
 html,
 body,
 #root {

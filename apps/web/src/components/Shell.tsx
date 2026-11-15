@@ -16,6 +16,9 @@ const links = [
 
 export function Shell() {
   const loc = useLocation();
+  // Data-heavy routes use the whole screen; the other pages keep a readable column.
+  const wide = ["/command", "/compare", "/slip"].includes(loc.pathname);
+  const width = wide ? "max-w-[1920px] px-4 lg:px-8" : "max-w-6xl px-6";
   const main = useRef<HTMLElement>(null);
   const first = useRef(true);
   // After a client-side navigation, move focus to the page so screen readers announce it.
@@ -37,7 +40,7 @@ export function Shell() {
       <header className="border-b border-white/10 bg-void/80 backdrop-blur">
         <nav
           aria-label="Main"
-          className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-6 py-3"
+          className={`mx-auto flex flex-wrap items-center gap-x-6 gap-y-2 py-3 ${width}`}
         >
           <span className="font-semibold tracking-wide text-blue-pale">Lunar Navigator</span>
           <ul className="m-0 flex list-none flex-wrap gap-1 p-0">
@@ -64,7 +67,7 @@ export function Shell() {
         id="main"
         ref={main}
         tabIndex={-1}
-        className="mx-auto w-full max-w-6xl flex-1 px-6 py-10"
+        className={`mx-auto w-full flex-1 ${width} ${wide ? "py-4 lg:py-5" : "py-10"}`}
       >
         <ErrorBoundary key={loc.pathname}>
           <Outlet />

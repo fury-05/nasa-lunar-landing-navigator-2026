@@ -19,15 +19,15 @@ function BandRow({
 }) {
   const same = band.high - band.low < 1e-9;
   return (
-    <div className="flex items-baseline justify-between gap-4 border-b border-white/[0.07] py-2">
-      <dt className="text-sm text-muted">
+    <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-white/[0.07] py-2">
+      <dt className="text-base text-ink">
         {label}
-        <span className="block text-xs font-normal">{def}</span>
+        <span className="block text-sm font-normal text-muted">{def}</span>
       </dt>
-      <dd className="m-0 shrink-0 text-right font-mono text-sm">
-        <span className="text-base text-ink">{fmt(band.nominal)}</span>
+      <dd className="m-0 min-w-0 text-right font-mono text-base">
+        <span className="text-lg font-semibold text-ink">{fmt(band.nominal)}</span>
         {!same && (
-          <span className="ml-2 text-xs text-muted">
+          <span className="ml-2 text-sm text-muted">
             ({fmt(band.low)} to {fmt(band.high)})
           </span>
         )}
@@ -37,6 +37,30 @@ function BandRow({
 }
 
 const pct = (n: number) => `${(n * 100).toFixed(0)}%`;
+
+function Kpi({
+  label,
+  value,
+  range,
+  tone,
+}: {
+  label: string;
+  value: string;
+  range: string | null;
+  tone: "sun" | "earth" | "bad";
+}) {
+  const color = tone === "sun" ? "text-sun" : tone === "earth" ? "text-earth" : "text-bad";
+  return (
+    <div className="rounded-cell border border-white/10 bg-white/[0.04] p-3">
+      <div className="text-sm text-muted">{label}</div>
+      <div className={`font-mono text-3xl font-semibold leading-tight ${color}`}>{value}</div>
+      <div className="min-h-5 font-mono text-sm text-muted">{range ?? " "}</div>
+    </div>
+  );
+}
+
+const range = (b: Band, fmt: (n: number) => string) =>
+  b.high - b.low < 1e-9 ? null : `${fmt(b.low)} to ${fmt(b.high)}`;
 
 export function Metrics({ a }: { a: Assess }) {
   const v = verdictView(a);
@@ -55,7 +79,7 @@ export function Metrics({ a }: { a: Assess }) {
   return (
     <section aria-labelledby="metrics-h" className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
-        <h2 id="metrics-h" className="m-0 text-xl">
+        <h2 id="metrics-h" className="m-0 text-2xl">
           Verdict
         </h2>
         <Chip tone={tone}>
@@ -63,13 +87,39 @@ export function Metrics({ a }: { a: Assess }) {
         </Chip>
         {!upper && <Chip tone={a.robust ? "good" : "warn"}>{a.robust ? "robust" : "fragile"}</Chip>}
       </div>
+      <div aria-hidden="true" className="grid grid-cols-2 gap-2">
+        <Kpi
+          label="Sun up"
+          value={fmtHours(a.sunlight_hours.nominal)}
+          range={range(a.sunlight_hours, fmtHours)}
+          tone="sun"
+        />
+        <Kpi
+          label="Longest dark"
+          value={fmtHours(a.longest_dark_hours.nominal)}
+          range={range(a.longest_dark_hours, fmtHours)}
+          tone="bad"
+        />
+        <Kpi
+          label="Earth in view"
+          value={pct(a.earth_share.nominal)}
+          range={range(a.earth_share, pct)}
+          tone="earth"
+        />
+        <Kpi
+          label="Longest outage"
+          value={fmtHours(a.longest_outage_hours.nominal)}
+          range={range(a.longest_outage_hours, fmtHours)}
+          tone="bad"
+        />
+      </div>
       {v.incomplete && (
-        <p className="m-0 rounded-cell border border-warn/50 p-2 text-sm text-warn">
+        <p className="m-0 rounded-cell border border-warn/50 p-3 text-base text-warn">
           {v.reason} The real sunlight and Earth link can only be lower than shown, so treat every
           number here as an upper bound.
         </p>
       )}
-      <p className="m-0 text-xs text-muted">
+      <p className="m-0 text-sm text-muted">
         Thresholds: {thresholdsText(a.criteria)}.{" "}
         {upper
           ? "No robust or fragile label is given while terrain is incomplete."
@@ -78,7 +128,7 @@ export function Metrics({ a }: { a: Assess }) {
             : "Fragile: the verdict changes inside the uncertainty band (shown as a range)."}
       </p>
       {fragile && (
-        <details className="text-xs text-muted" open>
+        <details className="text-sm text-muted" open>
           <summary className="min-h-11 cursor-pointer py-2">Why is this fragile?</summary>
           <p className="m-0 max-w-prose text-ink">{fragile.text}</p>
         </details>
@@ -114,18 +164,20 @@ export function Metrics({ a }: { a: Assess }) {
           fmt={fmtHours}
           def="Longest unbroken stretch with Earth hidden below the skyline."
         />
-        <div className="flex items-baseline justify-between gap-4 py-2">
-          <dt className="text-sm text-muted">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2">
+          <dt className="text-base text-ink">
             Sun elevation (min / mean / max)
-            <span className="block text-xs">Angle of the Sun's centre above the flat horizon.</span>
+            <span className="block text-sm text-muted">
+              Angle of the Sun's centre above the flat horizon.
+            </span>
           </dt>
-          <dd className="m-0 font-mono text-sm">
+          <dd className="m-0 font-mono text-base">
             {a.elevation_deg.min?.toFixed(1)} / {a.elevation_deg.mean?.toFixed(1)} /{" "}
             {a.elevation_deg.max?.toFixed(1)} deg
           </dd>
         </div>
       </dl>
-      <details className="text-xs text-muted">
+      <details className="text-sm text-muted">
         <summary className="min-h-11 cursor-pointer py-2">
           How the range in brackets is made
         </summary>

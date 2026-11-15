@@ -9,7 +9,7 @@ export function QuickMapButton({ siteId, timeIso }: { siteId: string; timeIso: s
   const t = useDebounced(timeIso, 400);
   const q = useAsync(() => loadQuickmap(siteId, t), `q|${siteId}|${t}`);
   const cls =
-    "inline-flex min-h-11 items-center rounded-cell border border-earth/60 px-4 text-sm text-earth no-underline hover:bg-white/10";
+    "inline-flex min-h-11 items-center rounded-cell border border-earth/60 px-4 text-base text-earth no-underline hover:bg-white/10";
   if (q.state === "ok") {
     return (
       <a className={cls} href={q.data.url} target="_blank" rel="noreferrer noopener">
@@ -29,8 +29,8 @@ export function QuickMapButton({ siteId, timeIso }: { siteId: string; timeIso: s
 function Fact({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <dt className="text-xs text-muted">{label}</dt>
-      <dd className="m-0 font-mono text-sm text-ink">{children}</dd>
+      <dt className="text-sm text-muted">{label}</dt>
+      <dd className="m-0 font-mono text-base text-ink">{children}</dd>
     </div>
   );
 }
@@ -48,7 +48,7 @@ export function SiteContext({ site, timeIso }: { site: SiteInfo; timeIso: string
           {glyph} {terrainSentence(site)}
         </Chip>
       </div>
-      <dl className="m-0 grid grid-cols-2 gap-x-6 gap-y-3 md:grid-cols-4">
+      <dl className="m-0 grid grid-cols-2 gap-x-6 gap-y-3">
         <Fact label="Site id">{site.id}</Fact>
         <Fact label="Latitude">{fmtLat(site.lat)}</Fact>
         <Fact label="Longitude">{fmtLon(site.lon)}</Fact>

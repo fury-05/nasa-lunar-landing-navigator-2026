@@ -13,7 +13,7 @@ type Props = {
 };
 
 const btn =
-  "min-h-11 rounded-cell border border-white/20 px-4 text-sm text-ink hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50";
+  "min-h-11 rounded-cell border border-white/20 px-4 text-base text-ink hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50";
 
 /** Export: CSV of metrics and timeline, PNG of the sky views, permalink copy, text summary. */
 export function ExportBar({ siteId, site, assess, timeline, skySvg, stripSvg }: Props) {
