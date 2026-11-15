@@ -639,6 +639,11 @@ export interface components {
         };
         /** JobOut */
         JobOut: {
+            /**
+             * Attempt
+             * @default 0
+             */
+            attempt: number;
             /** Created At Utc */
             created_at_utc: string;
             /** Job Id */
@@ -655,6 +660,11 @@ export interface components {
             };
             /** Retry */
             retry?: string | null;
+            /**
+             * Retryable
+             * @default false
+             */
+            retryable: boolean;
             /** Site Id */
             site_id: string;
             /** Site Url */

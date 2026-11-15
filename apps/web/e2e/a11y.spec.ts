@@ -157,10 +157,15 @@ const tile = {
   rows: 9,
   cols: 9,
   spacing_m: 20,
+  window_m: 180,
   native_resolution_m: 20,
-  interpolated_fraction: 0.95,
-  height_error_m: 3,
-  heights_m: Array.from({ length: 81 }, (_, i) => (i % 9) * 5),
+  interpolated_fraction: null,
+  interpolated_basis: "not available: no EFFRES product covers the tier that supplied this grid",
+  height_error_m: null,
+  height_error_basis: "not available: no ERR product covers this site",
+  finite_fraction: 0.99,
+  heights_m: Array.from({ length: 81 }, (_, i) => (i === 40 ? null : (i % 9) * 5)),
+  tier_share: { "ldem-20m": 1 },
   source: "test",
 };
 
@@ -204,6 +209,43 @@ async function mock(page: Page) {
           ...METRICS,
         })),
         pairwise: [],
+        provenance: PROV,
+      },
+    });
+  });
+  await page.route("**/api/v1/lander/assess", (r) => {
+    const b = r.request().postDataJSON() as { lander: Record<string, unknown> };
+    const chk = (id: string, title: string, status: string) => ({
+      id,
+      title,
+      status,
+      reasoning: "r",
+      unit: null,
+      available: null,
+      required_nominal: null,
+      required_pessimistic: null,
+      margin_nominal: null,
+      margin_pessimistic: null,
+    });
+    return r.fulfill({
+      json: {
+        site_id: "alpha",
+        start_utc: "2026-12-11T00:00:00Z",
+        end_utc: "2026-12-26T00:00:00Z",
+        verdict: "upper_bound_terrain_incomplete",
+        conclusive: false,
+        summary: "s",
+        checks: [chk("power", "Power", "marginal"), chk("thermal", "Thermal", "not_assessed")],
+        lander: { ...b.lander, usable_energy_wh: 800, dark_survival_hours: 80 },
+        terrain: TERRAIN,
+        band_basis: ["b"],
+        longest_dark_hours: band(60),
+        longest_outage_hours: band(40),
+        slope: null,
+        mission_needs: METRICS.criteria,
+        warnings: ["w"],
+        assumptions: ["a"],
+        label: "Planning tool, not for flight operations.",
         provenance: PROV,
       },
     });

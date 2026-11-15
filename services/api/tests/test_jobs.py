@@ -351,3 +351,106 @@ def test_custom_job_end_to_end_lists_the_new_site_with_name_source_radius_and_re
     assert row["quickmap"].startswith("https://quickmap.lroc.im-ldi.com/?proj=27")
     qm = client.get("/api/v1/links/quickmap", params={"site": job["site_id"]}).json()
     assert qm["url"] == row["quickmap"]
+
+
+# ---- retry after a failure (issue #152) --------------------------------------------------------
+
+
+def _network_down(_r: httpx.Request) -> httpx.Response:
+    raise httpx.ConnectError("refused")
+
+
+def test_network_failure_gets_a_plain_message_and_is_marked_retryable(tmp_path: Path) -> None:
+    store = MemoryJobStore()
+    store.create(JobState("j1", "x"))
+    run_custom_site(
+        store, "j1", LAT, LON, 0.0, _client(_network_down), tmp_path / "d", tmp_path / "o", T0, 3
+    )
+    s = store.get("j1")
+    assert s is not None and s.status == "failed" and s.retryable is True
+    assert s.reason == "The Horizons service could not be reached; try again in a minute."
+    assert "ConnectError" not in (s.reason or "") and "_Retryable" not in (s.reason or "")
+
+
+def test_horizons_http_503_is_retryable_too(tmp_path: Path) -> None:
+    def busy(_r: httpx.Request) -> httpx.Response:
+        return httpx.Response(503)
+
+    store = MemoryJobStore()
+    store.create(JobState("j1", "x"))
+    run_custom_site(
+        store, "j1", LAT, LON, 0.0, _client(busy), tmp_path / "d", tmp_path / "o", T0, 3
+    )
+    s = store.get("j1")
+    assert s is not None and s.retryable is True and "try again in a minute" in (s.reason or "")
+
+
+def test_other_failures_are_not_marked_retryable(tmp_path: Path) -> None:
+    store = MemoryJobStore()
+    store.create(JobState("j1", "x"))
+    run_custom_site(store, "j1", 95.0, 0.0, 0.0, _client(), tmp_path, tmp_path, T0, 3)
+    s = store.get("j1")
+    assert s is not None and s.status == "failed" and s.retryable is False
+
+
+def test_job_status_exposes_retryable(http) -> None:  # type: ignore[no-untyped-def]
+    client, store, _r = http
+    store.create(JobState("job-r", "custom-x"))
+    store.update("job-r", status="failed", reason="r", retryable=True)
+    assert client.get("/api/v1/jobs/job-r").json()["retryable"] is True
+    store.create(JobState("job-q", "custom-y"))
+    assert client.get("/api/v1/jobs/job-q").json()["retryable"] is False
+
+
+def test_a_failed_redis_job_can_be_retried_at_once_with_a_new_arq_id(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """arq keeps a finished job's result under its id and refuses to enqueue that id again."""
+    import arq
+    import fakeredis
+    from fastapi.testclient import TestClient
+    from lunar_api import job_routes
+    from lunar_api.jobs import RedisJobStore
+    from lunar_api.main import app
+
+    seen: set[str] = set()
+    accepted: list[str] = []
+
+    class Pool:
+        async def enqueue_job(self, *a: object, _job_id: str, **k: object) -> object | None:
+            if _job_id in seen:  # what arq does while the old result is still kept
+                return None
+            seen.add(_job_id)
+            accepted.append(_job_id)
+            return object()
+
+        async def aclose(self) -> None:
+            pass
+
+    async def fake_pool(_settings: object) -> Pool:
+        return Pool()
+
+    monkeypatch.setattr(arq, "create_pool", fake_pool)
+    monkeypatch.setenv("LUNAR_PRECOMPUTE_DIR", str(tmp_path / "precompute"))
+    monkeypatch.setenv("REDIS_URL", "redis://localhost:6379/0")
+    store = RedisJobStore(fakeredis.FakeRedis())
+    app.dependency_overrides[job_routes.job_store] = lambda: store
+    try:
+        c = TestClient(app, raise_server_exceptions=False)
+        first = c.post("/api/v1/sites/custom", json={"lat": -89.5, "lon": 40.0}).json()
+        jid = first["job_id"]
+        assert first["status"] == "queued" and len(accepted) == 1
+        # still queued: a second POST joins it and enqueues nothing
+        again = c.post("/api/v1/sites/custom", json={"lat": -89.5, "lon": 40.0}).json()
+        assert again["job_id"] == jid and len(accepted) == 1
+        store.update(jid, status="failed", reason="x", retryable=True)
+        retry = c.post("/api/v1/sites/custom", json={"lat": -89.5, "lon": 40.0}).json()
+        assert retry["job_id"] == jid and retry["status"] == "queued"  # same public id
+        assert len(accepted) == 2 and accepted[0] != accepted[1]  # but a fresh arq id
+        s = store.get(jid)
+        assert s is not None and s.status == "queued" and s.retryable is False and s.attempt == 1
+        store.update(jid, status="failed", reason="x")
+        c.post("/api/v1/sites/custom", json={"lat": -89.5, "lon": 40.0})
+        assert len(set(accepted)) == 3
+    finally:
+        app.dependency_overrides.clear()

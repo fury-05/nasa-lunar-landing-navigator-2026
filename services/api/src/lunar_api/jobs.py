@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from lunar_engine.ephemeris import HorizonsClient
+from lunar_engine.ephemeris.client import _Retryable
 from lunar_engine.links import south_polar_xy
 from lunar_engine.precompute import BuildSettings, build_site
 from lunar_engine.terrain import DemTile, read_tile
@@ -30,6 +31,7 @@ from lunar_engine.terrain import DemTile, read_tile
 JOB_TIMEOUT_S = 120.0
 TERMINAL = {"done", "failed"}
 MIN_SOUTH_LAT = -89.999  # the polar projection is singular at the pole itself
+UNREACHABLE_MESSAGE = "The Horizons service could not be reached; try again in a minute."
 
 
 class JobError(Exception):
@@ -47,6 +49,10 @@ class JobState:
     created_at_utc: str = ""
     updated_at_utc: str = ""
     result: dict[str, Any] = field(default_factory=dict)
+    # True when the failure was transient (network error or Horizons 500/503): POSTing again helps.
+    retryable: bool = False
+    # Restarts after a failure. Part of the arq queue id, which arq will not reuse (issue #152).
+    attempt: int = 0
 
     def public(self) -> dict[str, Any]:
         return asdict(self)
@@ -225,8 +231,17 @@ def run_custom_site(
             },
         )
     except JobError as exc:
-        store.update(job_id, status="failed", reason=str(exc), message="failed")
+        store.update(job_id, status="failed", reason=str(exc), message="failed", retryable=False)
+    except _Retryable:
+        # The raw text ("_Retryable: network error: ConnectError") means nothing to a visitor.
+        store.update(
+            job_id, status="failed", reason=UNREACHABLE_MESSAGE, message="failed", retryable=True
+        )
     except Exception as exc:  # noqa: BLE001 - a job must always end in a recorded state
         store.update(
-            job_id, status="failed", reason=f"{type(exc).__name__}: {exc}"[:300], message="failed"
+            job_id,
+            status="failed",
+            reason=f"{type(exc).__name__}: {exc}"[:300],
+            message="failed",
+            retryable=False,
         )

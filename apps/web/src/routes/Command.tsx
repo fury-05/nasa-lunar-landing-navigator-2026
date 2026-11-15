@@ -257,19 +257,20 @@ export function Command() {
         <h2 className="mt-0 text-xl">Local terrain</h2>
         {terrain.state === "loading" && <Loading what="terrain tile" />}
         {terrain.state === "error" && <Problem message={terrain.message} />}
-        {terrain.state === "ok" && terrain.data !== null && (
+        {terrain.state === "ok" && terrain.data.kind === "tile" && (
           <Suspense fallback={<Loading what="terrain view" />}>
             <TerrainView
-              tile={terrain.data}
+              tile={terrain.data.tile}
               sun={midpoint ? { azDeg: midpoint.sun.az_deg, elDeg: midpoint.sun.el_deg } : null}
             />
           </Suspense>
         )}
-        {terrain.state === "ok" && terrain.data === null && (
+        {terrain.state === "ok" && terrain.data.kind === "unavailable" && (
           <div className="flex flex-col gap-3 text-sm">
             <p className="m-0 text-muted">
-              No terrain tile is available for this site yet, so no local relief is shown. The
-              horizon strip above still uses the real skyline. A terrain tile service is planned.
+              No local relief is shown for this site. {terrain.data.detail} The horizon strip above
+              uses the skyline the engine built for this site; where terrain is missing it is a flat
+              horizon and is marked that way.
             </p>
             {!demo ? (
               <button
@@ -277,7 +278,7 @@ export function Command() {
                 onClick={() => setDemo(true)}
                 className="min-h-11 w-fit rounded-cell border border-white/20 px-4 text-sm text-muted hover:text-ink"
               >
-                Preview the viewer with a synthetic surface (not real terrain)
+                Show a synthetic preview of the viewer (made-up surface, not this site)
               </button>
             ) : (
               <Suspense fallback={<Loading what="terrain view" />}>

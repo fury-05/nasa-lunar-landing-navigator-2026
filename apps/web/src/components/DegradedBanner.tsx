@@ -1,26 +1,23 @@
 import { useEffect, useState } from "react";
+import { horizonsText, toHealth, type Health, type Ready } from "../lib/degraded";
 
-type Ready = {
-  status: "ready" | "not-ready";
-  checks: Record<string, { ok: boolean; detail: string }>;
-};
-type State = { kind: "ok" } | { kind: "degraded"; failed: string[] } | { kind: "down" };
+async function getJson(url: string, signal: AbortSignal, okStatuses: number[]): Promise<Ready> {
+  const r = await fetch(url, { signal });
+  if (!okStatuses.includes(r.status)) throw new Error(String(r.status));
+  return (await r.json()) as Ready;
+}
 
-/** Banner when the service reports it is not fully ready, or cannot be reached at all. */
+/** Banner when the service reports it is not fully ready, Horizons is degraded, or it is down. */
 export function DegradedBanner() {
-  const [state, setState] = useState<State>({ kind: "ok" });
+  const [state, setState] = useState<Health>({ kind: "ok" });
   useEffect(() => {
     const ctl = new AbortController();
-    fetch("/api/v1/ready", { signal: ctl.signal })
-      .then(async (r) => {
-        // Both 200 and 503 carry the same body; anything else is an unexpected failure.
-        if (r.status !== 200 && r.status !== 503) throw new Error(String(r.status));
-        const j = (await r.json()) as Ready;
-        const failed = Object.entries(j.checks ?? {})
-          .filter(([, c]) => !c.ok)
-          .map(([k, c]) => `${k}: ${c.detail}`);
-        setState(j.status === "ready" ? { kind: "ok" } : { kind: "degraded", failed });
-      })
+    // /ready answers 200 or 503 with the same body. /version is optional extra context only.
+    Promise.all([
+      getJson("/api/v1/ready", ctl.signal, [200, 503]),
+      getJson("/api/v1/version", ctl.signal, [200]).catch(() => null),
+    ])
+      .then(([ready, version]) => setState(toHealth(ready, version)))
       .catch((e: unknown) => {
         if (!(e instanceof DOMException && e.name === "AbortError")) setState({ kind: "down" });
       });
@@ -38,6 +35,7 @@ export function DegradedBanner() {
         <>
           ! The data service is running in a reduced state, so some results may be missing or older
           than usual.
+          {state.horizons && <> {horizonsText(state.horizons)}</>}
           {state.failed.length > 0 && <> Details: {state.failed.join("; ")}.</>}
         </>
       )}
