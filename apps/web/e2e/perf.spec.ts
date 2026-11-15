@@ -43,13 +43,21 @@ async function mock(page: Page, counts: Record<string, number> = {}) {
 
 const canvas = (page: Page) => page.getByRole("img", { name: /Terrain of/ });
 const draws = async (page: Page) => Number((await canvas(page).getAttribute("data-draws")) ?? "0");
+/** Scroll the terrain canvas into view. The view may swap layout once after it measures itself,
+ * which re-creates the canvas, so retry until the canvas is attached. */
+async function showCanvas(page: Page) {
+  await expect(async () => {
+    await canvas(page).scrollIntoViewIfNeeded({ timeout: 1500 });
+  }).toPass({ timeout: 10_000 });
+}
+
 /**
  * Focusing the time slider scrolls the page to it, which (correctly) takes the terrain view off
  * screen. Use it, then scroll the terrain view back into view, and press keys without refocusing.
  */
 async function focusSliderThenShowCanvas(page: Page) {
   await page.getByLabel("Time shown in the sky views (UTC)").focus();
-  await canvas(page).scrollIntoViewIfNeeded();
+  await showCanvas(page);
 }
 const dims = (page: Page) => canvas(page).evaluate((c: HTMLCanvasElement) => [c.width, c.height]);
 
@@ -99,7 +107,7 @@ test("perf: nothing is drawn while the view is off screen, and it draws when it 
   await expect(page.getByRole("heading", { name: "Command Centre" })).toBeVisible();
   await page.waitForTimeout(500);
   expect(await draws(page)).toBe(0);
-  await canvas(page).scrollIntoViewIfNeeded();
+  await showCanvas(page);
   await expect.poll(() => draws(page)).toBeGreaterThanOrEqual(1);
   const shown = await draws(page);
   // Move the clock from the top of the page: the terrain view is off screen, so no new draws.
@@ -111,14 +119,14 @@ test("perf: nothing is drawn while the view is off screen, and it draws when it 
   await page.waitForTimeout(300);
   expect(await draws(page)).toBe(shown);
   // Coming back draws the latest state.
-  await canvas(page).scrollIntoViewIfNeeded();
+  await showCanvas(page);
   await expect.poll(() => draws(page)).toBeGreaterThan(shown);
 });
 
 test("perf: a hidden tab does not draw", async ({ page }) => {
   await mock(page);
   await page.goto("/command?site=alpha");
-  await canvas(page).scrollIntoViewIfNeeded();
+  await showCanvas(page);
   await expect.poll(() => draws(page)).toBeGreaterThanOrEqual(1);
   const shown = await draws(page);
   await page.evaluate(() => {
@@ -160,7 +168,7 @@ test("perf: MEASURED one frame render of a real size (128 x 128) tile, in the pa
   await mock(page);
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/command?site=alpha");
-  await canvas(page).scrollIntoViewIfNeeded();
+  await showCanvas(page);
   await expect.poll(() => draws(page)).toBeGreaterThanOrEqual(1);
   const times: Record<string, number[]> = { oblique: [], map: [] };
   for (const mode of ["oblique", "map"] as const) {
@@ -200,7 +208,7 @@ test("perf: low power draws a quarter of the 3D quads (every second row and colu
   const page = await ctx.newPage();
   await mock(page);
   await page.goto("http://127.0.0.1:4173/command?site=alpha");
-  await canvas(page).scrollIntoViewIfNeeded();
+  await showCanvas(page);
   await page.getByRole("button", { name: "3D view" }).click();
   await expect.poll(() => draws(page)).toBeGreaterThanOrEqual(2);
   const lowMs = Number(await canvas(page).getAttribute("data-frame-ms"));

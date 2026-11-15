@@ -70,3 +70,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-15T10:17:24Z | irfan | P7-08,P7-09 | final gate passed on 1b32243, VM on the same commit, start-proof exported, all 73 rows DONE, v1.0.0 stable release | release/v1.0.0
 2026-11-15T14:16:25Z | irfan | UI | UI overhaul: Home guide, one-screen Command Centre, charts with scales and below-horizon view, larger type and coloured numbers; no logic files changed | ui/overhaul-3
 2026-11-15T14:26:55Z | irfan | UI | UI overhaul deployed (PR 197, commit c45e9fa); post-overhaul demo screenshots added | docs/ui-overhaul-evidence
+2026-11-15T16:19:20Z | irfan | fix | site list always revalidates (custom site 'not found' bug), scale bar and north arrow moved under the maps, steps 1 2 3 made prominent, sidebar 60 px wider, Home explains 300 km, perf tests made stable | fix/custom-site-and-ui-polish
