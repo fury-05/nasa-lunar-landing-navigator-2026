@@ -3,18 +3,17 @@ import { useSearchParams } from "react-router-dom";
 import { Chip } from "../components/Chip";
 import { Glass } from "../components/Glass";
 import { SiteSelect } from "../components/SiteSelect";
-import { addDays, fmtHours, iso, loadAssess, loadSites } from "../lib/data";
+import { addDays, iso, loadLanderAssess, loadSites } from "../lib/data";
+import { VerdictBlock } from "../components/LanderResult";
 import {
   DEFAULT_LANDER,
-  commsMargin,
   isDefaultLander,
   landerFromParams,
   landerToParams,
-  powerMargin,
+  toApiLander,
   type Lander,
 } from "../lib/lander";
-import { needsFromParams, needsToQuery } from "../lib/mission";
-import { verdictView } from "../lib/verdict";
+import { needsFromParams, needsToApi } from "../lib/mission";
 import { useAsync } from "../lib/useAsync";
 
 const DEFAULT_START = "2026-12-11";
@@ -60,6 +59,9 @@ function LanderForm({ lander, onApply }: { lander: Lander; onApply: (l: Lander) 
   const [res, setRes] = useState(String(lander.reservePct));
   const [load, setLoad] = useState(String(lander.loadW));
   const [auto, setAuto] = useState(String(lander.autonomyH));
+  const [slope, setSlope] = useState(
+    lander.slopeLimitDeg === null ? "" : String(lander.slopeLimitDeg),
+  );
   const [error, setError] = useState<string | null>(null);
   const apply = () => {
     const l = {
@@ -67,6 +69,7 @@ function LanderForm({ lander, onApply }: { lander: Lander; onApply: (l: Lander) 
       reservePct: Number(res),
       loadW: Number(load),
       autonomyH: Number(auto),
+      slopeLimitDeg: slope.trim() === "" ? null : Number(slope),
     };
     const ok =
       [cap, res, load, auto].every((t) => t.trim() !== "") &&
@@ -74,9 +77,12 @@ function LanderForm({ lander, onApply }: { lander: Lander; onApply: (l: Lander) 
       l.reservePct >= 0 &&
       l.reservePct <= 100 &&
       l.loadW >= 0 &&
-      l.autonomyH >= 0;
+      l.autonomyH >= 0 &&
+      (l.slopeLimitDeg === null || (l.slopeLimitDeg >= 0 && l.slopeLimitDeg <= 90));
     if (!ok) {
-      setError("Use numbers of zero or more, and a reserve between 0 and 100 percent.");
+      setError(
+        "Use numbers of zero or more, a reserve between 0 and 100 percent and a slope limit between 0 and 90 degrees.",
+      );
       return;
     }
     setError(null);
@@ -121,6 +127,12 @@ function LanderForm({ lander, onApply }: { lander: Lander; onApply: (l: Lander) 
           value={auto}
           onChange={setAuto}
         />
+        <Num
+          label="Steepest landing slope (degrees, optional)"
+          hint="Leave empty to skip the slope check"
+          value={slope}
+          onChange={setSlope}
+        />
       </div>
       {error && (
         <p role="alert" className="m-0 text-sm text-bad">
@@ -141,6 +153,7 @@ function LanderForm({ lander, onApply }: { lander: Lander; onApply: (l: Lander) 
             setRes(String(DEFAULT_LANDER.reservePct));
             setLoad(String(DEFAULT_LANDER.loadW));
             setAuto(String(DEFAULT_LANDER.autonomyH));
+            setSlope("");
             setError(null);
             onApply(DEFAULT_LANDER);
           }}
@@ -153,18 +166,6 @@ function LanderForm({ lander, onApply }: { lander: Lander; onApply: (l: Lander) 
   );
 }
 
-function Check({ label, ok, detail }: { label: string; ok: boolean; detail: string }) {
-  return (
-    <li className="flex flex-col gap-1 rounded-cell border border-white/10 p-3">
-      <Chip tone={ok ? "good" : "bad"}>
-        {ok ? "✓ within your assumptions" : "✕ exceeds your assumptions"}
-      </Chip>
-      <strong className="text-sm">{label}</strong>
-      <span className="text-sm text-muted">{detail}</span>
-    </li>
-  );
-}
-
 export function Spacecraft() {
   const [params, setParams] = useSearchParams();
   const sites = useAsync(loadSites, "sites");
@@ -173,16 +174,30 @@ export function Spacecraft() {
   const start = params.get("start") ?? DEFAULT_START;
   const lander = useMemo(() => landerFromParams(params), [params]);
   const needs = useMemo(() => needsFromParams(params), [params]);
-  const landerKey = params.toString();
+  const formKey = params.toString();
   const a = useMemo(() => new Date(`${start}T00:00:00Z`), [start]);
   const valid = !Number.isNaN(a.getTime());
   const known = sites.state === "ok" && sites.data.sites.some((s) => s.id === id);
 
+  const landerKey = [
+    params.get("cap"),
+    params.get("res"),
+    params.get("load"),
+    params.get("auto"),
+    params.get("slope"),
+  ].join(",");
   const assess = useAsync(
     known && valid
-      ? () => loadAssess(id, iso(a), iso(addDays(a, DAYS)), needsToQuery(needs))
+      ? () =>
+          loadLanderAssess(
+            id,
+            iso(a),
+            iso(addDays(a, DAYS)),
+            toApiLander(lander),
+            needsToApi(needs),
+          )
       : null,
-    `sc|${known && valid}|${id}|${start}|${[params.get("sun"), params.get("dark"), params.get("earth"), params.get("outage")].join(",")}`,
+    `sc|${known && valid}|${id}|${start}|${landerKey}|${[params.get("sun"), params.get("dark"), params.get("earth"), params.get("outage")].join(",")}`,
   );
 
   const set = (k: string, v: string) => {
@@ -236,7 +251,7 @@ export function Spacecraft() {
 
       <Glass>
         <LanderForm
-          key={landerKey}
+          key={formKey}
           lander={lander}
           onApply={(l) => setParams(landerToParams(params, l), { replace: true })}
         />
@@ -254,92 +269,8 @@ export function Spacecraft() {
             {assess.message}
           </p>
         )}
-        {assess.state === "ok" && <Results lander={lander} a={assess.data} />}
+        {assess.state === "ok" && <VerdictBlock r={assess.data} />}
       </Glass>
-    </div>
-  );
-}
-
-function Results({ lander, a }: { lander: Lander; a: Awaited<ReturnType<typeof loadAssess>> }) {
-  const v = verdictView(a);
-  // Use the pessimistic end of each band: the longest dark spell and outage the uncertainty
-  // allows, so a pass here is not owed to an optimistic horizon.
-  const dark = a.longest_dark_hours;
-  const outage = a.longest_outage_hours;
-  const worstDark = Math.max(dark.low, dark.nominal, dark.high);
-  const worstOutage = Math.max(outage.low, outage.nominal, outage.high);
-  const power = powerMargin(lander, worstDark);
-  const comms = commsMargin(lander, worstOutage);
-  return (
-    <div className="flex flex-col gap-4">
-      {v.incomplete && (
-        <p role="note" className="m-0 rounded-cell border border-warn/50 p-3 text-sm text-warn">
-          ! Upper bound, terrain incomplete. {v.reason} The dark spell and outage below can only be
-          longer in reality, so a pass here is not a guarantee.
-        </p>
-      )}
-      <dl className="m-0 grid gap-3 sm:grid-cols-3">
-        <div>
-          <dt className="text-xs text-muted">Sunlight over the window</dt>
-          <dd className="m-0 font-mono">
-            {fmtHours(a.sunlight_hours.nominal)}{" "}
-            <span className="text-xs text-muted">
-              ({fmtHours(a.sunlight_hours.low)} to {fmtHours(a.sunlight_hours.high)})
-            </span>
-          </dd>
-        </div>
-        <div>
-          <dt className="text-xs text-muted">Longest dark spell</dt>
-          <dd className="m-0 font-mono">
-            {fmtHours(dark.nominal)}{" "}
-            <span className="text-xs text-muted">
-              ({fmtHours(dark.low)} to {fmtHours(dark.high)})
-            </span>
-          </dd>
-        </div>
-        <div>
-          <dt className="text-xs text-muted">Longest Earth outage (line of sight only)</dt>
-          <dd className="m-0 font-mono">
-            {fmtHours(outage.nominal)}{" "}
-            <span className="text-xs text-muted">
-              ({fmtHours(outage.low)} to {fmtHours(outage.high)})
-            </span>
-          </dd>
-        </div>
-      </dl>
-      <ul className="m-0 grid list-none gap-3 p-0 md:grid-cols-2">
-        <Check
-          label="Power through the longest dark spell"
-          ok={power.ok}
-          detail={`Usable ${power.usableWh.toFixed(0)} Wh against ${power.neededWh.toFixed(0)} Wh needed for ${fmtHours(worstDark)} at ${lander.loadW} W (margin ${power.marginWh.toFixed(0)} Wh).${power.enduranceH !== null ? ` The battery lasts ${fmtHours(power.enduranceH)}.` : ""}`}
-        />
-        <Check
-          label="Autonomy through the longest Earth outage"
-          ok={comms.ok}
-          detail={`Autonomy ${fmtHours(lander.autonomyH)} against an outage of ${fmtHours(worstOutage)} (margin ${fmtHours(Math.abs(comms.marginH))}${comms.marginH < 0 ? " short" : ""}).`}
-        />
-      </ul>
-      <details className="text-xs text-muted">
-        <summary className="min-h-11 cursor-pointer py-2">How these numbers are made</summary>
-        <ul className="m-0 list-disc pl-5">
-          <li>
-            Sunlight, dark spell and outage come from the API for the site and window above ( engine{" "}
-            {a.provenance.engine_version}). Sunlight means at least half of the Sun&apos;s disc is
-            above the skyline. A dark spell is an unbroken stretch without it. Earth link is line of
-            sight only; antenna, power and ground-station limits are not modelled.
-          </li>
-          <li>
-            The check uses the longest value in the uncertainty band, so the result is cautious.
-          </li>
-          <li>Battery energy is a flat sum: no charging, temperature or ageing.</li>
-          <li>
-            Lander values are your placeholders. Mission criteria status: {a.criteria.status}.
-          </li>
-          {v.basis.map((b) => (
-            <li key={b}>{b}</li>
-          ))}
-        </ul>
-      </details>
     </div>
   );
 }

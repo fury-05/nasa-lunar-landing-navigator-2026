@@ -146,3 +146,19 @@ export async function loadCredits(): Promise<Credits> {
   if (r.data === undefined) throw r.error ?? new Error("empty response");
   return r.data as unknown as Credits;
 }
+
+export type LanderIn = components["schemas"]["LanderIn"];
+export type MissionNeedsIn = components["schemas"]["MissionNeedsIn"];
+
+export const loadLanderAssess = (
+  siteId: string,
+  start: string,
+  end: string,
+  lander: LanderIn,
+  needs?: MissionNeedsIn,
+) =>
+  ok(
+    api.POST("/api/v1/lander/assess", {
+      body: { site_id: siteId, start, end, lander, ...(needs ? { mission_needs: needs } : {}) },
+    }),
+  );

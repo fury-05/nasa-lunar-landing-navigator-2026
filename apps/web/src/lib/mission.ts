@@ -78,3 +78,14 @@ export function needsToQuery(n: MissionNeeds) {
   if (n.maxOutageH !== null) q.max_outage_hours = n.maxOutageH;
   return q;
 }
+
+/** Same needs as a POST body: only values the user changed are sent, so defaults stay defaults. */
+export function needsToApi(n: MissionNeeds) {
+  if (isDefaultNeeds(n)) return undefined;
+  return {
+    min_sun_fraction: n.minSunPct / 100,
+    max_dark_hours: n.maxDarkH,
+    min_earth_fraction: n.minEarthPct / 100,
+    ...(n.maxOutageH !== null ? { max_outage_hours: n.maxOutageH } : {}),
+  };
+}

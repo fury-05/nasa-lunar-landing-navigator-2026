@@ -208,6 +208,43 @@ async function mock(page: Page) {
       },
     });
   });
+  await page.route("**/api/v1/lander/assess", (r) => {
+    const b = r.request().postDataJSON() as { lander: Record<string, unknown> };
+    const chk = (id: string, title: string, status: string) => ({
+      id,
+      title,
+      status,
+      reasoning: "r",
+      unit: null,
+      available: null,
+      required_nominal: null,
+      required_pessimistic: null,
+      margin_nominal: null,
+      margin_pessimistic: null,
+    });
+    return r.fulfill({
+      json: {
+        site_id: "alpha",
+        start_utc: "2026-12-11T00:00:00Z",
+        end_utc: "2026-12-26T00:00:00Z",
+        verdict: "upper_bound_terrain_incomplete",
+        conclusive: false,
+        summary: "s",
+        checks: [chk("power", "Power", "marginal"), chk("thermal", "Thermal", "not_assessed")],
+        lander: { ...b.lander, usable_energy_wh: 800, dark_survival_hours: 80 },
+        terrain: TERRAIN,
+        band_basis: ["b"],
+        longest_dark_hours: band(60),
+        longest_outage_hours: band(40),
+        slope: null,
+        mission_needs: METRICS.criteria,
+        warnings: ["w"],
+        assumptions: ["a"],
+        label: "Planning tool, not for flight operations.",
+        provenance: PROV,
+      },
+    });
+  });
   await page.route("https://trek.nasa.gov/**", (r) => r.abort());
 }
 
