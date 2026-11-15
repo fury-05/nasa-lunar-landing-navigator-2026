@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { advance, fmtT, nearestIndex, parseT, speedOf } from "./clock";
+import { advance, fmtT, nearestIndex, parseT, snapToSample, speedOf } from "./clock";
 
 const H = 3_600_000;
 
@@ -30,5 +30,21 @@ describe("clock helpers", () => {
   it("falls back to the default speed for an unknown id", () => {
     expect(speedOf("nope").id).toBe("6");
     expect(speedOf("72").hoursPerSecond).toBe(72);
+  });
+});
+
+describe("snapToSample (#176)", () => {
+  const times = [0, 1, 2, 3].map((h) => Date.parse("2026-12-11T00:00:00Z") + h * 3_600_000);
+  it("returns the sample the views would show for a time in between", () => {
+    const t = Date.parse("2026-12-11T01:24:00Z"); // 24 minutes past 01:00
+    expect(fmtT(snapToSample(times, t))).toBe("2026-12-11T01:00:00Z");
+    const u = Date.parse("2026-12-11T01:36:00Z"); // closer to 02:00
+    expect(fmtT(snapToSample(times, u))).toBe("2026-12-11T02:00:00Z");
+  });
+  it("leaves a time that is already a sample alone", () => {
+    expect(snapToSample(times, times[2]!)).toBe(times[2]);
+  });
+  it("is harmless without samples", () => {
+    expect(snapToSample([], 123)).toBe(123);
   });
 });

@@ -610,3 +610,51 @@ test("different problems are still each reported", async ({ page }) => {
   await expect(page.getByRole("alert")).toHaveCount(2);
   await expect(page.getByRole("alert").first()).toContainText("assess broke");
 });
+
+test("time in link: minutes are snapped to the shown sample, and the QuickMap link agrees", async ({
+  page,
+}) => {
+  await mock(page);
+  const seen: string[] = [];
+  await page.route("**/api/v1/links/quickmap*", (r) => {
+    seen.push(decodeURIComponent(new URL(r.request().url()).searchParams.get("t") ?? ""));
+    return json(r, quickmapOut());
+  });
+  // 2026-12-12T00:00 is a sample (hourly series in the default timeline fixture is 3 points: 11, 12, 13).
+  await page.goto("/command?site=alpha&t=2026-12-12T00:24:00Z");
+  await expect(page.getByText("2026-12-12 00:00 UTC").first()).toBeVisible();
+  await expect.poll(() => seen.at(-1)).toBe("2026-12-12T00:00:00Z");
+  // Using the slider writes the sample time (no stray minutes) to the address.
+  await page.getByLabel("Time shown in the sky views (UTC)").focus();
+  await page.keyboard.press("End");
+  await expect(page).toHaveURL(/t=2026-12-13T00%3A00%3A00Z/);
+});
+
+test("time in link: after Play and Pause the address holds a whole sample time", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.route("**/api/v1/sites/*/timeline*", (r) =>
+    json(
+      r,
+      timelineOut({
+        count: 49,
+        series: Array.from({ length: 49 }, (_, i) => ({
+          t: new Date(Date.parse("2026-12-11T00:00:00Z") + i * 3_600_000)
+            .toISOString()
+            .replace(".000Z", "Z"),
+          sun: { az_deg: 90, el_deg: 1.5, visible_fraction: 1 },
+          earth: { az_deg: 180, el_deg: -2, margin_deg: -5 },
+        })),
+      }),
+    ),
+  );
+  await page.goto("/command?site=alpha&sp=1");
+  await page.getByRole("button", { name: "Play" }).click();
+  await page.waitForTimeout(1500);
+  await page.getByRole("button", { name: "Pause" }).click();
+  await expect(page).toHaveURL(/t=2026-12-1\dT\d\d%3A00%3A00Z/);
+  const t = new URL(page.url()).searchParams.get("t")!;
+  // The clock text shows the same time as the address.
+  await expect(page.getByText(t.replace("T", " ").slice(0, 16) + " UTC").first()).toBeVisible();
+});
