@@ -299,3 +299,55 @@ test("terrain view: a real tile from the API is drawn with its error and interpo
   await expect(page.getByText(/± 4\.2 m/)).toBeVisible();
   await expect(page.getByText(/NOT real lunar terrain/)).toHaveCount(0);
 });
+
+test("export: CSV, PNG, summary text and permalink copy", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await mock(page);
+  await page.goto("/command?site=alpha");
+  await expect(page.getByRole("heading", { name: "Verdict" })).toBeVisible();
+  await expect(page.getByRole("img", { name: /Sky from the site/ })).toBeVisible();
+
+  const read = async (name: RegExp) => {
+    const [d] = await Promise.all([
+      page.waitForEvent("download"),
+      page.getByRole("button", { name }).click(),
+    ]);
+    return d;
+  };
+
+  const csv = await read(/Timeline \(CSV\)/);
+  expect(csv.suggestedFilename()).toBe("lunar-alpha-timeline.csv");
+  const csvText = (await import("node:fs")).readFileSync((await csv.path())!, "utf8");
+  expect(csvText.split("\r\n")[0]).toContain("site_id,time_utc");
+  expect(csvText).toContain("Planning tool, not for flight operations");
+
+  const metrics = await read(/Metrics \(CSV\)/);
+  expect((await import("node:fs")).readFileSync((await metrics.path())!, "utf8")).toContain(
+    "longest_dark_spell",
+  );
+
+  for (const [label, file] of [
+    [/Sky view \(PNG\)/, "lunar-alpha-sky.png"],
+    [/Horizon strip \(PNG\)/, "lunar-alpha-horizon.png"],
+  ] as const) {
+    const d = await read(label);
+    expect(d.suggestedFilename()).toBe(file);
+    const bytes = (await import("node:fs")).readFileSync((await d.path())!);
+    expect([...bytes.subarray(0, 8)]).toEqual([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    expect(bytes.length).toBeGreaterThan(1000);
+  }
+
+  const txt = await read(/Summary \(TXT file\)/);
+  const txtText = (await import("node:fs")).readFileSync((await txt.path())!, "utf8");
+  expect(txtText).toContain("Planning tool, not for flight operations.");
+  expect(txtText).toContain("Assumptions:");
+  expect(txtText).toContain("Uncertainty:");
+  expect(txtText).toContain("Provenance: engine");
+  expect(txtText).toContain("Reproduce: http");
+
+  await page.getByRole("button", { name: "Copy link to this view" }).click();
+  await expect(page.getByText("Link copied.")).toBeVisible();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain(
+    "/command?site=alpha",
+  );
+});

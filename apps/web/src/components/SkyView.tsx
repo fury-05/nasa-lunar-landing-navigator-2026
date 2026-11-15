@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, type Ref } from "react";
 import type { Skyline, SeriesRow } from "../lib/data";
 
 const SIZE = 360;
@@ -14,7 +14,15 @@ function pt(az: number, el: number): [number, number] {
   return [C - r * Math.sin(a), C - r * Math.cos(a)]; // east on the left, as when looking up
 }
 
-export function SkyView({ skyline, now }: { skyline: Skyline; now: SeriesRow | null }) {
+export function SkyView({
+  skyline,
+  now,
+  svgRef,
+}: {
+  skyline: Skyline;
+  now: SeriesRow | null;
+  svgRef?: Ref<SVGSVGElement>;
+}) {
   const ring = useMemo(() => {
     const pts = skyline.azimuth_deg.map((az, i) => pt(az, skyline.elevation_deg[i] ?? 0));
     const horizon =
@@ -43,6 +51,7 @@ export function SkyView({ skyline, now }: { skyline: Skyline; now: SeriesRow | n
   return (
     <figure className="m-0">
       <svg
+        ref={svgRef}
         viewBox={`0 0 ${SIZE} ${SIZE}`}
         role="img"
         aria-label={summary}
