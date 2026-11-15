@@ -157,10 +157,15 @@ const tile = {
   rows: 9,
   cols: 9,
   spacing_m: 20,
+  window_m: 180,
   native_resolution_m: 20,
-  interpolated_fraction: 0.95,
-  height_error_m: 3,
-  heights_m: Array.from({ length: 81 }, (_, i) => (i % 9) * 5),
+  interpolated_fraction: null,
+  interpolated_basis: "not available: no EFFRES product covers the tier that supplied this grid",
+  height_error_m: null,
+  height_error_basis: "not available: no ERR product covers this site",
+  finite_fraction: 0.99,
+  heights_m: Array.from({ length: 81 }, (_, i) => (i === 40 ? null : (i % 9) * 5)),
+  tier_share: { "ldem-20m": 1 },
   source: "test",
 };
 
