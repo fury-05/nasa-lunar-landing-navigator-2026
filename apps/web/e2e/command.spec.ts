@@ -124,6 +124,7 @@ async function mock(page: Page) {
   await page.route("**/api/v1/sites/*/skyline*", (r) => r.fulfill({ json: SKY }));
   await page.route("**/api/v1/sites/*/assess*", (r) => r.fulfill({ json: ASSESS }));
   await page.route("**/api/v1/sites/*/timeline*", (r) => r.fulfill({ json: TL }));
+  await page.route("**/api/v1/sites/*/terrain", (r) => r.fulfill({ status: 404, json: {} }));
   await page.route("**/api/v1/links/quickmap*", (r) =>
     r.fulfill({
       json: {
@@ -257,4 +258,44 @@ test("mission needs are applied to the request and saved in the link", async ({ 
   await page.getByLabel("Minimum sunlight (% of window)").fill("500");
   await page.getByRole("button", { name: "Apply needs" }).click();
   await expect(page.getByRole("alert")).toContainText("between 0 and 100");
+});
+
+test("terrain view: no tile means an honest message, and the demo is labelled synthetic", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.goto("/command?site=alpha");
+  await expect(page.getByText(/No terrain tile is available/)).toBeVisible();
+  await page.getByRole("button", { name: /synthetic surface/ }).click();
+  await expect(page.getByText(/NOT real lunar terrain/)).toBeVisible();
+  await expect(page.getByText(/samples are interpolated/)).toBeVisible();
+  await page.getByRole("button", { name: "3D view" }).click();
+  await expect(page.getByText(/heights drawn \d+ times too tall/)).toBeVisible();
+  await expect(page.getByRole("img", { name: /Terrain of synthetic-demo/ })).toBeVisible();
+});
+
+test("terrain view: a real tile from the API is drawn with its error and interpolation note", async ({
+  page,
+}) => {
+  await mock(page);
+  const n = 9;
+  await page.route("**/api/v1/sites/*/terrain", (r) =>
+    r.fulfill({
+      json: {
+        site_id: "alpha",
+        rows: n,
+        cols: n,
+        spacing_m: 20,
+        native_resolution_m: 20,
+        interpolated_fraction: 0.95,
+        height_error_m: 3,
+        heights_m: Array.from({ length: n * n }, (_, i) => (i % n) * 5),
+        source: "test tile",
+      },
+    }),
+  );
+  await page.goto("/command?site=alpha");
+  await expect(page.getByText(/95% of the samples are interpolated/)).toBeVisible();
+  await expect(page.getByText(/± 4\.2 m/)).toBeVisible();
+  await expect(page.getByText(/NOT real lunar terrain/)).toHaveCount(0);
 });
