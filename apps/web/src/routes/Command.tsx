@@ -6,6 +6,8 @@ import { Metrics } from "../components/Metrics";
 import { SiteContext } from "../components/SiteContext";
 import { SkyView } from "../components/SkyView";
 import { DEFAULT_SPEED, useMissionClock } from "../lib/clock";
+import { parseDay } from "../lib/dates";
+import { uniqueProblems } from "../lib/problems";
 import { DateControl } from "../components/DateControl";
 import { ExportBar } from "../components/ExportBar";
 import { HorizonStrip } from "../components/HorizonStrip";
@@ -48,6 +50,15 @@ function Problem({ message }: { message: string }) {
   return (
     <p role="alert" className="m-0 rounded-cell border border-bad/50 p-3 text-sm text-bad">
       {message}
+    </p>
+  );
+}
+
+/** A panel whose request failed. The message itself is shown once, at the top of the page. */
+function Failed({ what }: { what: string }) {
+  return (
+    <p className="m-0 text-sm text-muted">
+      The {what} could not be loaded. See the message at the top of the page.
     </p>
   );
 }
@@ -106,12 +117,17 @@ export function Command() {
     return cur && !hit.some((i) => i.id === cur.id) ? [cur, ...hit] : hit;
   }, [allInfos, siteFilter, id]);
 
-  const a = useMemo(() => new Date(`${start}T00:00:00Z`), [start]);
-  const valid = !Number.isNaN(a.getTime()) && DAY_CHOICES.includes(days);
-  const b = addDays(a, days);
+  // Parse the start strictly. `new Date("banana")` is an Invalid Date that throws as soon as it is
+  // formatted, and `new Date("2026-02-30")` quietly becomes 1 March. parseDay accepts only a real
+  // calendar day, so an unreadable value becomes one date message instead of a crash (#172).
+  const startMs = parseDay(start);
+  const a = useMemo(() => new Date(startMs ?? Date.parse(`${DEFAULT_START}T00:00:00Z`)), [startMs]);
+  const valid = startMs !== null && DAY_CHOICES.includes(days);
+  const b = addDays(a, valid ? days : 0);
   const key = `${id}|${start}|${days}`;
 
   const usable = id !== "" && !unknownSite;
+  const explained = unknownSite || !valid;
   const assess = useAsync(
     usable && valid ? () => loadAssess(id, iso(a), iso(b), needsToQuery(needs)) : null,
     `a|${key}|${needsKey}`,
@@ -123,6 +139,27 @@ export function Command() {
   );
 
   const terrain = useAsync(usable ? () => loadTerrainTile(id) : null, `terr|${id}`);
+
+  // One message per distinct problem, shown once in the problems area. A panel whose request
+  // failed shows a short, non-alert note that points there, so the same sentence is not announced
+  // by a screen reader once per panel (#173).
+  const pageProblems: string[] = [];
+  if (unknownSite) {
+    pageProblems.push(`There is no site called "${site.slice(0, 40)}". Pick one from the list.`);
+  }
+  if (!valid) pageProblems.push("Pick a start date and one of the listed lengths.");
+  const shownProblems = uniqueProblems([
+    ...pageProblems,
+    ...(explained
+      ? []
+      : [
+          sites.state === "error" ? sites.message : null,
+          assess.state === "error" ? assess.message : null,
+          timeline.state === "error" ? timeline.message : null,
+          skyline.state === "error" ? skyline.message : null,
+          terrain.state === "error" ? terrain.message : null,
+        ]),
+  ]);
   const [demo, setDemo] = useState(false);
 
   const rows = useMemo(
@@ -223,7 +260,7 @@ export function Command() {
 
       <Glass>
         <DateControl
-          start={start}
+          start={startMs === null ? DEFAULT_START : start}
           days={days}
           onChange={(st, len) => {
             const next = new URLSearchParams(params);
@@ -241,14 +278,10 @@ export function Command() {
         </Glass>
       )}
 
-      {sites.state === "error" && <Problem message={sites.message} />}
       {sites.state === "loading" && <Loading what="sites" />}
-      {unknownSite && (
-        <Problem
-          message={`There is no site called "${site.slice(0, 40)}". Pick one from the list.`}
-        />
-      )}
-      {!valid && <Problem message="Pick a start date and one of the listed lengths." />}
+      {shownProblems.map((m) => (
+        <Problem key={m} message={m} />
+      ))}
 
       {assess.state === "ok" && assess.data.provenance.warnings.length > 0 && (
         <div role="note" className="rounded-cell border border-warn/50 p-3 text-sm text-warn">
@@ -280,14 +313,14 @@ export function Command() {
         <Glass>
           <h2 className="mt-0 text-xl">Sky from the site</h2>
           {skyline.state === "loading" && <Loading what="terrain horizon" />}
-          {skyline.state === "error" && <Problem message={skyline.message} />}
+          {skyline.state === "error" && <Failed what="terrain horizon" />}
           {skyline.state === "ok" && (
             <SkyView skyline={skyline.data} now={midpoint} svgRef={skyRef} />
           )}
         </Glass>
         <Glass>
           {assess.state === "loading" && <Loading what="results" />}
-          {assess.state === "error" && <Problem message={assess.message} />}
+          {assess.state === "error" && <Failed what="results" />}
           {assess.state === "ok" && <Metrics a={assess.data} />}
         </Glass>
       </div>
@@ -304,7 +337,7 @@ export function Command() {
       <Glass>
         <h2 className="mt-0 text-xl">Local terrain</h2>
         {terrain.state === "loading" && <Loading what="terrain tile" />}
-        {terrain.state === "error" && <Problem message={terrain.message} />}
+        {terrain.state === "error" && <Failed what="terrain tile" />}
         {terrain.state === "ok" && terrain.data.kind === "tile" && (
           <Suspense fallback={<Loading what="terrain view" />}>
             <TerrainView
@@ -343,7 +376,7 @@ export function Command() {
       <Glass>
         <h2 className="mt-0 text-xl">Timeline</h2>
         {timeline.state === "loading" && <Loading what="timeline" />}
-        {timeline.state === "error" && <Problem message={timeline.message} />}
+        {timeline.state === "error" && <Failed what="timeline" />}
         {timeline.state === "ok" && <Timeline data={timeline.data} marker={nowMs} />}
       </Glass>
 

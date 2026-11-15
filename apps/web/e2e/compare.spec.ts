@@ -5,6 +5,7 @@ import {
   compareRow,
   json,
   mockApi,
+  problem,
   siteList,
   siteSummary,
   terrainOut,
@@ -84,4 +85,13 @@ test("compare: needs two sites and allows at most four", async ({ page }) => {
   await expect(page.getByRole("table")).toBeVisible();
   await page.getByLabel("gamma").click();
   await expect(page.getByRole("columnheader")).toHaveCount(4); // Measure plus three sites
+});
+
+test("compare: an unknown site in the link is announced once", async ({ page }) => {
+  await mock(page);
+  await page.route("**/api/v1/compare", (r) =>
+    json(r, problem(404, "Site not found", "No precomputed site 'nope'."), 404),
+  );
+  await page.goto("/compare?sites=alpha,nope");
+  await expect(page.getByRole("alert")).toHaveCount(1);
 });

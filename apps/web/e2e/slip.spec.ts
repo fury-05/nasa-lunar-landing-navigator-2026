@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import type { components } from "../src/api/schema";
-import { json, mockApi, siteList, siteSummary, slipCell, slipOut } from "./fixtures";
+import { json, mockApi, problem, siteList, siteSummary, slipCell, slipOut } from "./fixtures";
 
 type S = components["schemas"];
 
@@ -52,4 +52,13 @@ test("slip matrix: a cell opens that scenario and the metric choice is kept in t
   await expect(page.getByRole("link", { name: /^alpha, 3 days slip/ })).toContainText("3.3 d");
   await page.getByRole("link", { name: /^alpha, 3 days slip/ }).click();
   await expect(page).toHaveURL(/\/command\?site=alpha&start=2026-12-14&days=8/);
+});
+
+test("slip: an unknown site in the link is announced once", async ({ page }) => {
+  await mock(page);
+  await page.route("**/api/v1/slip-matrix", (r) =>
+    json(r, problem(404, "Site not found", "No precomputed site 'nope'."), 404),
+  );
+  await page.goto("/slip?sites=nope");
+  await expect(page.getByRole("alert")).toHaveCount(1);
 });

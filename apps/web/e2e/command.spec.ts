@@ -545,3 +545,68 @@ test("default site: a link that names a site is never replaced", async ({ page }
   await expect(page.getByRole("combobox", { name: "Site" })).toHaveValue("custom-16c5b0f303b9");
   await expect(page.getByText("Flat horizon, not terrain aware").first()).toBeVisible();
 });
+
+test("a non-date start in the address shows the normal date message, not the crash screen", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.goto("/command?site=alpha&days=8&start=banana");
+  await expect(page.getByRole("heading", { name: "Command Centre" })).toBeVisible();
+  await expect(page.getByText("Something went wrong in this view")).toHaveCount(0);
+  await expect(page.getByRole("alert")).toHaveCount(1);
+  await expect(page.getByRole("alert")).toContainText("Pick a start date");
+  // The rest of the page still works: the date field can fix it.
+  await page.getByLabel("Start date (UTC)").fill("2026-12-15");
+  await expect(page).toHaveURL(/start=2026-12-15/);
+  await expect(page.getByRole("alert")).toHaveCount(0);
+});
+
+test("other unreadable starts (impossible date, empty, a time) also do not crash", async ({
+  page,
+}) => {
+  await mock(page);
+  for (const bad of ["2026-02-30", "", "2026-12-11T10:00:00Z", "99999-01-01", "%00", "<script>"]) {
+    await page.goto(`/command?site=alpha&days=8&start=${encodeURIComponent(bad)}`);
+    await expect(page.getByRole("heading", { name: "Command Centre" })).toBeVisible();
+    await expect(page.getByText("Something went wrong in this view")).toHaveCount(0);
+  }
+});
+
+test("one problem, one alert: an out-of-range date is announced once", async ({ page }) => {
+  await mock(page);
+  const outside = problem(
+    422,
+    "Outside precomputed coverage",
+    "This site is precomputed from 2026-12-01T00:00Z to 2029-12-01T00:00Z.",
+  );
+  for (const route of ["assess", "timeline"]) {
+    await page.route(`**/api/v1/sites/*/${route}*`, (r) => json(r, outside, 422));
+  }
+  await page.goto("/command?site=alpha&start=2020-01-01&days=8");
+  await expect(page.getByRole("alert")).toHaveCount(1);
+  await expect(page.getByRole("alert")).toContainText("Outside precomputed coverage");
+});
+
+test("one problem, one alert: an unknown site is announced once", async ({ page }) => {
+  await mock(page);
+  const missing = problem(404, "Site not found", "No precomputed site 'nope'.");
+  for (const route of ["assess", "timeline", "skyline", "terrain"]) {
+    await page.route(`**/api/v1/sites/*/${route}*`, (r) => json(r, missing, 404));
+  }
+  await page.goto("/command?site=nope&start=2026-12-11&days=8");
+  await expect(page.getByRole("alert")).toHaveCount(1);
+  await expect(page.getByRole("alert")).toContainText('There is no site called "nope"');
+});
+
+test("different problems are still each reported", async ({ page }) => {
+  await mock(page);
+  await page.route("**/api/v1/sites/*/assess*", (r) =>
+    json(r, problem(500, "Server error", "assess broke"), 500),
+  );
+  await page.route("**/api/v1/sites/*/skyline*", (r) =>
+    json(r, problem(503, "Unavailable", "skyline broke"), 503),
+  );
+  await page.goto("/command?site=alpha&start=2026-12-11&days=8");
+  await expect(page.getByRole("alert")).toHaveCount(2);
+  await expect(page.getByRole("alert").first()).toContainText("assess broke");
+});
