@@ -3,6 +3,12 @@ import { terrainSentence, toSiteInfo } from "./site";
 
 const base = {
   id: "alpha",
+  name: "",
+  source: "",
+  quickmap: "",
+  terrain_available: true,
+  reach_km: 8,
+  reach_km_max: 8,
   lat_deg: -89.5,
   lon_east_deg: 40,
   coordinate_status: "derived-tile-centre",

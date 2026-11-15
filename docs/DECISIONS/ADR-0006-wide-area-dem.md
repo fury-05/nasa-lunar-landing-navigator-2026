@@ -1,5 +1,5 @@
 # ADR-0006: Wide-area DEM for the mid and far skyline tiers
-Date (UTC): 2026-11-14. Status: PROPOSED, waiting for a human (todo/APPROVALS.md A2). Deciders: Irfan.
+Date (UTC): 2026-11-14. Status: superseded by ADR-0007. Deciders: Irfan.
 
 ## Context
 ADR-0003 accepted the PGDA 5 m site tiles, which reach only about 8 to 15 km. docs/04 requires mid (to 100 km) and far (to 400 km) tiers, because a 3 km peak 100 km away is still 0.067 degrees above the horizon and low Sun and Earth angles at the pole are of that order. The first real run (docs/validation/first-real-run.md) showed every ray stopping at the tile edge.
