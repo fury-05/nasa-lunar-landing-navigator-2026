@@ -90,6 +90,7 @@ def clean(x: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+MAX_HOURS = 24.0 * 400  # longer than any window the API accepts
 TIME_CHARS = re.compile(r"^[0-9T:.+\-Z ]{10,40}$")
 
 
@@ -216,8 +217,21 @@ def band(b: Any) -> dict[str, float]:
 
 
 def assessment_json(a: Assessment) -> dict[str, Any]:
+    t = a.terrain
     return {
         "verdict": a.nominal_verdict,
+        "verdict_state": a.verdict_state,
+        "verdict_conclusive": a.verdict_conclusive,
+        "terrain": {
+            "available": t.available,
+            "complete": t.complete,
+            "reach_km_min": t.reach_km_min,
+            "reach_km_median": t.reach_km_median,
+            "reach_km_max": t.reach_km_max,
+            "required_km": t.required_km,
+            "covered_fraction": t.covered_fraction,
+        },
+        "band_basis": a.band_basis,
         "verdict_by_run": {
             "pessimistic": a.verdicts[0],
             "nominal": a.verdicts[1],
@@ -292,6 +306,17 @@ class CriteriaIn(BaseModel):
         )
 
 
+def criteria_echo(c: Criteria, user_chosen: bool) -> dict[str, Any]:
+    return {
+        "min_sun_fraction": c.min_sun_share,
+        "max_dark_hours": c.max_dark_hours,
+        "min_earth_fraction": c.min_earth_share,
+        "max_outage_hours": c.max_outage_hours,
+        "source": "user-chosen" if user_chosen else "default-placeholder",
+        "status": c.status,
+    }
+
+
 def criteria_of(c: CriteriaIn | None) -> Criteria:
     return c.build() if c else PLACEHOLDER_CRITERIA
 
@@ -363,17 +388,51 @@ def get_assess(
     end: str,
     store: Annotated[SiteStore, Depends(get_store)],
     settings: Annotated[Settings, Depends(get_settings)],
+    min_sun_fraction: Annotated[float | None, Query(ge=0.0, le=1.0)] = None,
+    max_dark_hours: Annotated[float | None, Query(ge=0.0, le=MAX_HOURS)] = None,
+    min_earth_fraction: Annotated[float | None, Query(ge=0.0, le=1.0)] = None,
+    max_outage_hours: Annotated[float | None, Query(ge=0.0, le=MAX_HOURS)] = None,
 ) -> dict[str, Any]:
+    """Assess a window. The four optional needs default to the placeholder criteria."""
     site, meta = site_or_404(store, site_id)
     a, b = window_args(site, start, end, settings)
-    res = assess_window(site, a, b)
+    asked = {
+        "min_sun_fraction": min_sun_fraction,
+        "max_dark_hours": max_dark_hours,
+        "min_earth_fraction": min_earth_fraction,
+        "max_outage_hours": max_outage_hours,
+    }
+    user_chosen = any(v is not None for v in asked.values())
+    base = PLACEHOLDER_CRITERIA
+    criteria = Criteria(
+        base.min_sun_share if min_sun_fraction is None else min_sun_fraction,
+        base.max_dark_hours if max_dark_hours is None else max_dark_hours,
+        base.min_earth_share if min_earth_fraction is None else min_earth_fraction,
+        base.max_outage_hours if max_outage_hours is None else max_outage_hours,
+        status=(
+            "user-chosen mission needs for this request"
+            + (
+                "; fields not given use the pending-source placeholder defaults"
+                if any(v is None for v in asked.values())
+                else ""
+            )
+            if user_chosen
+            else base.status
+        ),
+    )
+    res = assess_window(site, a, b, criteria)
     return clean(
         {
             "site_id": site_id,
             "start_utc": a,
             "end_utc": b,
+            "criteria": criteria_echo(criteria, user_chosen),
             **assessment_json(res),
-            "provenance": provenance(meta, {"site_id": site_id, "start": a, "end": b}, []),
+            "provenance": provenance(
+                meta,
+                {"site_id": site_id, "start": a, "end": b, **asked},
+                [],
+            ),
         }
     )
 

@@ -363,3 +363,66 @@ def test_listing_trusts_the_terrain_flag_over_an_old_stored_coverage_number() ->
     normal = {"skyline": {"covered_fraction": 0.36, "min_reach_m": 1520.0, "max_reach_m": 8000.0}}
     assert effective_coverage(normal) == {
         "covered_fraction": 0.36, "min_reach_m": 1520.0, "max_reach_m": 8000.0}
+
+
+# ---- editable mission needs and verdict honesty (issue #126) ----------------------------------
+
+
+def test_assess_echoes_default_criteria_as_placeholder(client: TestClient) -> None:
+    b = client.get("/api/v1/sites/alpha/assess", params=W).json()
+    c = b["criteria"]
+    assert c["source"] == "default-placeholder" and "pending-source" in c["status"]
+    assert (c["min_sun_fraction"], c["max_dark_hours"]) == (0.5, 120.0)
+    assert (c["min_earth_fraction"], c["max_outage_hours"]) == (0.5, 120.0)
+
+
+def test_assess_accepts_user_chosen_needs_and_labels_them(client: TestClient) -> None:
+    params = {**W, "min_sun_fraction": 0.99, "max_dark_hours": 1, "min_earth_fraction": 0.99,
+              "max_outage_hours": 1}
+    r = client.get("/api/v1/sites/alpha/assess", params=params)
+    assert r.status_code == 200
+    b = r.json()
+    assert b["criteria"]["source"] == "user-chosen" and b["criteria"]["min_sun_fraction"] == 0.99
+    assert b["criteria"]["max_outage_hours"] == 1.0
+    assert b["provenance"]["reproduce"]["inputs"]["min_sun_fraction"] == 0.99
+    loose = client.get(
+        "/api/v1/sites/alpha/assess",
+        params={**W, "min_sun_fraction": 0.0, "max_dark_hours": 9000, "min_earth_fraction": 0.0,
+                "max_outage_hours": 9000},
+    ).json()
+    assert loose["verdict"] == "viable"
+    assert b["verdict"] != "viable"
+
+
+def test_partial_needs_keep_the_other_defaults_and_say_so(client: TestClient) -> None:
+    b = client.get("/api/v1/sites/alpha/assess", params={**W, "min_sun_fraction": 0.2}).json()
+    assert b["criteria"]["source"] == "user-chosen" and b["criteria"]["min_sun_fraction"] == 0.2
+    assert b["criteria"]["max_dark_hours"] == 120.0
+    assert "placeholder" in b["criteria"]["status"]
+
+
+@pytest.mark.parametrize(
+    "name,value",
+    [
+        ("min_sun_fraction", 1.5), ("min_sun_fraction", -0.1), ("min_earth_fraction", 2),
+        ("max_dark_hours", -1), ("max_outage_hours", -5), ("max_dark_hours", 1e9),
+        ("min_sun_fraction", "abc"), ("max_outage_hours", "nan"),
+    ],
+)
+def test_needs_are_validated_and_bounded(client: TestClient, name: str, value: object) -> None:
+    r = client.get("/api/v1/sites/alpha/assess", params={**W, name: value})
+    assert r.status_code == 422, (name, value, r.text)
+    assert r.headers["content-type"].startswith("application/problem+json")
+
+
+def test_assess_reports_terrain_and_an_upper_bound_when_reach_is_short(client: TestClient) -> None:
+    b = client.get("/api/v1/sites/alpha/assess", params=W).json()
+    t = b["terrain"]
+    assert t["available"] is True and t["complete"] is False
+    assert t["reach_km_min"] == t["reach_km_max"] == pytest.approx(2.5)
+    assert t["required_km"] == 300.0 and t["covered_fraction"] == 0.0
+    assert b["verdict_state"] == "upper_bound_terrain_incomplete"
+    assert b["verdict_state"] != b["verdict"].replace(" ", "_") or b["verdict"] == "not viable"
+    assert any("pending-source" in s and "relief" in s for s in b["band_basis"])
+    assert any("assumed" in s for s in b["band_basis"])
+    assert_no_nan(json.dumps(b))

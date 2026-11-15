@@ -30,10 +30,17 @@ export const loadSkyline = (id: string) =>
     }),
   );
 
-export const loadAssess = (id: string, start: string, end: string) =>
+type NeedsQuery = {
+  min_sun_fraction?: number;
+  max_dark_hours?: number;
+  min_earth_fraction?: number;
+  max_outage_hours?: number;
+};
+
+export const loadAssess = (id: string, start: string, end: string, needs?: NeedsQuery) =>
   ok(
     api.GET("/api/v1/sites/{site_id}/assess", {
-      params: { path: { site_id: id }, query: { start, end } },
+      params: { path: { site_id: id }, query: { start, end, ...needs } },
     }),
   );
 
@@ -41,6 +48,13 @@ export const loadTimeline = (id: string, start: string, end: string, step = 60) 
   ok(
     api.GET("/api/v1/sites/{site_id}/timeline", {
       params: { path: { site_id: id }, query: { start, end, step_min: step } },
+    }),
+  );
+
+export const loadQuickmap = (id: string, t: string | null) =>
+  ok(
+    api.GET("/api/v1/links/quickmap", {
+      params: { query: { site: id, ...(t ? { t } : {}) } },
     }),
   );
 

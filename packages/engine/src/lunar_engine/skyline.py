@@ -106,6 +106,12 @@ class Skyline:
     eye_height_m: float
     site_height_m: float
     sphere_dip_deg: float
+    # Vertical DEM error along the rays as an angle (degrees), measured from the ERR product.
+    # None means not measured; callers then use the assumed figure and say so (issue #126).
+    dem_error_deg: float | None = None
+    # Highest relief (metres above the reference sphere) that may lie beyond where the DEM ended.
+    # None means unknown: reported as pending-source, never guessed (issue #126).
+    unseen_relief_m: float | None = None
 
     def covered_fraction(self) -> float:
         """Share of azimuths whose ray reached the requested range (full coverage).

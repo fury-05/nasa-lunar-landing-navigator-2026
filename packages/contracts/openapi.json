@@ -10,6 +10,16 @@
             "title": "Assumptions",
             "type": "array"
           },
+          "band_basis": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Band Basis",
+            "type": "array"
+          },
+          "criteria": {
+            "$ref": "#/components/schemas/CriteriaOut"
+          },
           "criteria_status": {
             "title": "Criteria Status",
             "type": "string"
@@ -66,6 +76,9 @@
           "sunlight_hours": {
             "$ref": "#/components/schemas/Band"
           },
+          "terrain": {
+            "$ref": "#/components/schemas/TerrainOut"
+          },
           "verdict": {
             "enum": [
               "viable",
@@ -86,10 +99,28 @@
             },
             "title": "Verdict By Run",
             "type": "object"
+          },
+          "verdict_conclusive": {
+            "title": "Verdict Conclusive",
+            "type": "boolean"
+          },
+          "verdict_state": {
+            "enum": [
+              "viable",
+              "marginal",
+              "not_viable",
+              "upper_bound_terrain_incomplete"
+            ],
+            "title": "Verdict State",
+            "type": "string"
           }
         },
         "required": [
           "verdict",
+          "verdict_state",
+          "verdict_conclusive",
+          "terrain",
+          "band_basis",
           "verdict_by_run",
           "robust",
           "delta_deg",
@@ -102,6 +133,7 @@
           "elevation_deg",
           "power_index_w_m2",
           "assumptions",
+          "criteria",
           "site_id",
           "start_utc",
           "end_utc",
@@ -264,6 +296,13 @@
             "title": "Assumptions",
             "type": "array"
           },
+          "band_basis": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Band Basis",
+            "type": "array"
+          },
           "criteria_status": {
             "title": "Criteria Status",
             "type": "string"
@@ -317,6 +356,9 @@
           "sunlight_hours": {
             "$ref": "#/components/schemas/Band"
           },
+          "terrain": {
+            "$ref": "#/components/schemas/TerrainOut"
+          },
           "verdict": {
             "enum": [
               "viable",
@@ -338,6 +380,20 @@
             "title": "Verdict By Run",
             "type": "object"
           },
+          "verdict_conclusive": {
+            "title": "Verdict Conclusive",
+            "type": "boolean"
+          },
+          "verdict_state": {
+            "enum": [
+              "viable",
+              "marginal",
+              "not_viable",
+              "upper_bound_terrain_incomplete"
+            ],
+            "title": "Verdict State",
+            "type": "string"
+          },
           "window_index": {
             "title": "Window Index",
             "type": "integer"
@@ -345,6 +401,10 @@
         },
         "required": [
           "verdict",
+          "verdict_state",
+          "verdict_conclusive",
+          "terrain",
+          "band_basis",
           "verdict_by_run",
           "robust",
           "delta_deg",
@@ -445,6 +505,49 @@
           "max_outage_hours"
         ],
         "title": "CriteriaIn",
+        "type": "object"
+      },
+      "CriteriaOut": {
+        "description": "Mission needs used for the verdict, and whether the user chose them.",
+        "properties": {
+          "max_dark_hours": {
+            "title": "Max Dark Hours",
+            "type": "number"
+          },
+          "max_outage_hours": {
+            "title": "Max Outage Hours",
+            "type": "number"
+          },
+          "min_earth_fraction": {
+            "title": "Min Earth Fraction",
+            "type": "number"
+          },
+          "min_sun_fraction": {
+            "title": "Min Sun Fraction",
+            "type": "number"
+          },
+          "source": {
+            "enum": [
+              "user-chosen",
+              "default-placeholder"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "min_sun_fraction",
+          "max_dark_hours",
+          "min_earth_fraction",
+          "max_outage_hours",
+          "source",
+          "status"
+        ],
+        "title": "CriteriaOut",
         "type": "object"
       },
       "CustomSiteIn": {
@@ -748,6 +851,13 @@
             "title": "Assumptions",
             "type": "array"
           },
+          "band_basis": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Band Basis",
+            "type": "array"
+          },
           "criteria_status": {
             "title": "Criteria Status",
             "type": "string"
@@ -789,6 +899,9 @@
           "sunlight_hours": {
             "$ref": "#/components/schemas/Band"
           },
+          "terrain": {
+            "$ref": "#/components/schemas/TerrainOut"
+          },
           "verdict": {
             "enum": [
               "viable",
@@ -809,10 +922,28 @@
             },
             "title": "Verdict By Run",
             "type": "object"
+          },
+          "verdict_conclusive": {
+            "title": "Verdict Conclusive",
+            "type": "boolean"
+          },
+          "verdict_state": {
+            "enum": [
+              "viable",
+              "marginal",
+              "not_viable",
+              "upper_bound_terrain_incomplete"
+            ],
+            "title": "Verdict State",
+            "type": "string"
           }
         },
         "required": [
           "verdict",
+          "verdict_state",
+          "verdict_conclusive",
+          "terrain",
+          "band_basis",
           "verdict_by_run",
           "robust",
           "delta_deg",
@@ -1596,6 +1727,50 @@
         "title": "TerrainCoverage",
         "type": "object"
       },
+      "TerrainOut": {
+        "description": "How complete the terrain behind a result is. Incomplete terrain makes it an upper bound.",
+        "properties": {
+          "available": {
+            "title": "Available",
+            "type": "boolean"
+          },
+          "complete": {
+            "title": "Complete",
+            "type": "boolean"
+          },
+          "covered_fraction": {
+            "title": "Covered Fraction",
+            "type": "number"
+          },
+          "reach_km_max": {
+            "title": "Reach Km Max",
+            "type": "number"
+          },
+          "reach_km_median": {
+            "title": "Reach Km Median",
+            "type": "number"
+          },
+          "reach_km_min": {
+            "title": "Reach Km Min",
+            "type": "number"
+          },
+          "required_km": {
+            "title": "Required Km",
+            "type": "number"
+          }
+        },
+        "required": [
+          "available",
+          "complete",
+          "reach_km_min",
+          "reach_km_median",
+          "reach_km_max",
+          "required_km",
+          "covered_fraction"
+        ],
+        "title": "TerrainOut",
+        "type": "object"
+      },
       "TimelineOut": {
         "properties": {
           "count": {
@@ -2259,6 +2434,7 @@
     },
     "/api/v1/sites/{site_id}/assess": {
       "get": {
+        "description": "Assess a window. The four optional needs default to the placeholder criteria.",
         "operationId": "get_assess_api_v1_sites__site_id__assess_get",
         "parameters": [
           {
@@ -2286,6 +2462,78 @@
             "schema": {
               "title": "End",
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "min_sun_fraction",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 1.0,
+                  "minimum": 0.0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Min Sun Fraction"
+            }
+          },
+          {
+            "in": "query",
+            "name": "max_dark_hours",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 9600.0,
+                  "minimum": 0.0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Max Dark Hours"
+            }
+          },
+          {
+            "in": "query",
+            "name": "min_earth_fraction",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 1.0,
+                  "minimum": 0.0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Min Earth Fraction"
+            }
+          },
+          {
+            "in": "query",
+            "name": "max_outage_hours",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 9600.0,
+                  "minimum": 0.0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Max Outage Hours"
             }
           }
         ],

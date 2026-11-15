@@ -14,7 +14,9 @@ from __future__ import annotations
 
 import math
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
+
+import numpy as np
 
 from lunar_engine.metrics import (
     BodySeries,
@@ -24,6 +26,12 @@ from lunar_engine.metrics import (
     sun_metrics,
 )
 from lunar_engine.skyline import Skyline
+from lunar_engine.terrain_status import (
+    REQUIRED_RANGE_M,
+    TerrainStatus,
+    terrain_status,
+    unseen_bound_deg,
+)
 
 MIN_DELTA_DEG = 0.1  # docs/04: never below 0.1 degrees until validated
 # Initial error budget assumptions from docs/04 section 7. Upper end of the DEM range is used so
@@ -126,7 +134,64 @@ class Assessment:
     longest_dark_hours: Band
     longest_outage_hours: Band
     criteria_status: str
+    terrain: TerrainStatus
     assumptions: list[str] = field(default_factory=list)
+    # viable, marginal, not_viable or upper_bound_terrain_incomplete
+    verdict_state: str = "not_viable"
+    verdict_conclusive: bool = True  # False when only an upper bound that could still fall
+    band_basis: list[str] = field(default_factory=list)
+
+
+def verdict_state_of(nominal: str, status: TerrainStatus) -> tuple[str, bool]:
+    """Public verdict label and whether it is conclusive.
+
+    With incomplete terrain every figure is an upper bound: missing relief can only lower sunlight
+    and the Earth link. A 'not viable' result therefore stays conclusive; a better one does not.
+    """
+    if status.complete:
+        return nominal.replace(" ", "_"), True
+    return "upper_bound_terrain_incomplete", nominal == "not viable"
+
+
+def _band_basis(
+    skyline: Skyline, status: TerrainStatus, delta: float, delta_given: bool, required_m: float
+) -> list[str]:
+    out: list[str] = []
+    if delta_given:
+        out.append(f"band half-width of {delta:.3f} degrees set by the caller")
+    elif skyline.dem_error_deg is not None:
+        out.append(
+            f"DEM vertical error measured along the rays: {skyline.dem_error_deg:.3f} degrees "
+            f"(ERR product), combined with an assumed frame error of {ASSUMED_FRAME_ERROR_DEG} "
+            f"degrees: half-width {delta:.3f} degrees"
+        )
+    else:
+        out.append(
+            f"DEM error is an assumed {ASSUMED_SKYLINE_ERROR_DEG} degrees, not measured "
+            f"(the ERR product is not yet applied); half-width {delta:.3f} degrees"
+        )
+    if not status.available:
+        out.append(
+            "terrain unavailable: the horizon is a bare sphere, so the result is an upper bound "
+            "and the band cannot cover the missing relief"
+        )
+    elif not status.complete:
+        if skyline.unseen_relief_m is None:
+            out.append(
+                f"terrain reached only {status.reach_km_min:.1f} to {status.reach_km_max:.1f} km "
+                f"of the required {status.required_km:.0f} km; the largest plausible unseen "
+                "relief is pending-source, so the pessimistic edge does NOT include it and the "
+                "result is an upper bound"
+            )
+        else:
+            out.append(
+                f"terrain reached only {status.reach_km_min:.1f} to {status.reach_km_max:.1f} km "
+                f"of the required {status.required_km:.0f} km; the pessimistic edge raises the "
+                f"skyline over the uncovered azimuths to unseen relief of "
+                f"{skyline.unseen_relief_m:.0f} m above the reference sphere starting where the "
+                "data ended (highest terrain in the wider data beyond the cast area)"
+            )
+    return out
 
 
 def assess(
@@ -137,21 +202,33 @@ def assess(
     delta_deg: float | None = None,
     sun_threshold: float = 0.5,
     mask_deg: float = 0.0,
+    required_range_m: float = REQUIRED_RANGE_M,
 ) -> Assessment:
-    delta = default_delta_deg() if delta_deg is None else delta_deg
+    status = terrain_status(skyline, required_range_m)
+    if delta_deg is None:
+        delta = default_delta_deg(
+            ASSUMED_SKYLINE_ERROR_DEG if skyline.dem_error_deg is None else skyline.dem_error_deg
+        )
+    else:
+        delta = delta_deg
     if delta < 0:
         raise ValueError("delta must not be negative")
+    pess_sky = skyline
+    bound = unseen_bound_deg(skyline, skyline.unseen_relief_m, required_range_m)
+    if bound is not None and status.available:
+        pess_sky = replace(skyline, elevation_deg=np.fmax(skyline.elevation_deg, bound))
     runs = []
-    for off in (+delta, 0.0, -delta):
+    for off, sky in ((+delta, pess_sky), (0.0, skyline), (-delta, skyline)):
         runs.append(
             (
-                sun_metrics(sun, skyline, sun_threshold, skyline_offset_deg=off),
-                earth_metrics(earth, skyline, mask_deg, skyline_offset_deg=off),
+                sun_metrics(sun, sky, sun_threshold, skyline_offset_deg=off),
+                earth_metrics(earth, sky, mask_deg, skyline_offset_deg=off),
             )
         )
     pess, nom, opt = runs
     triple = (pess, nom, opt)
     verdicts = (verdict(*pess, criteria), verdict(*nom, criteria), verdict(*opt, criteria))
+    state, conclusive = verdict_state_of(verdicts[1], status)
     return Assessment(
         delta_deg=delta,
         pessimistic=pess,
@@ -166,12 +243,15 @@ def assess(
         longest_dark_hours=_band(triple, lambda r: r[0].longest_dark_hours),
         longest_outage_hours=_band(triple, lambda r: r[1].longest_outage_hours),
         criteria_status=criteria.status,
+        terrain=status,
         assumptions=[
             f"skyline offset band of plus and minus {delta:.3f} degrees "
-            f"(assumed skyline error {ASSUMED_SKYLINE_ERROR_DEG} and frame error "
-            f"{ASSUMED_FRAME_ERROR_DEG} degrees, not yet measured, P2-12)",
+            f"(frame error assumed {ASSUMED_FRAME_ERROR_DEG} degrees, not yet measured, P2-12)",
             f"Sun counts as up when at least {sun_threshold:.0%} of its disc is visible",
             f"Earth link needs the disc centre above the skyline plus {mask_deg} degrees",
             f"viability criteria: {criteria.status}",
         ],
+        verdict_state=state,
+        verdict_conclusive=conclusive,
+        band_basis=_band_basis(skyline, status, delta, delta_deg is not None, required_range_m),
     )
