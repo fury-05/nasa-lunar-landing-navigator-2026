@@ -198,7 +198,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get Assess */
+        /**
+         * Get Assess
+         * @description Assess a window. The four optional needs default to the placeholder criteria.
+         */
         get: operations["get_assess_api_v1_sites__site_id__assess_get"];
         put?: never;
         post?: never;
@@ -301,6 +304,9 @@ export interface components {
         AssessOut: {
             /** Assumptions */
             assumptions: string[];
+            /** Band Basis */
+            band_basis: string[];
+            criteria: components["schemas"]["CriteriaOut"];
             /** Criteria Status */
             criteria_status: string;
             /** Delta Deg */
@@ -327,6 +333,7 @@ export interface components {
             start_utc: string;
             sun_share: components["schemas"]["Band"];
             sunlight_hours: components["schemas"]["Band"];
+            terrain: components["schemas"]["TerrainOut"];
             /**
              * Verdict
              * @enum {string}
@@ -336,6 +343,13 @@ export interface components {
             verdict_by_run: {
                 [key: string]: "viable" | "marginal" | "not viable";
             };
+            /** Verdict Conclusive */
+            verdict_conclusive: boolean;
+            /**
+             * Verdict State
+             * @enum {string}
+             */
+            verdict_state: "viable" | "marginal" | "not_viable" | "upper_bound_terrain_incomplete";
         };
         /** AttributionOut */
         AttributionOut: {
@@ -386,6 +400,8 @@ export interface components {
         CompareRow: {
             /** Assumptions */
             assumptions: string[];
+            /** Band Basis */
+            band_basis: string[];
             /** Criteria Status */
             criteria_status: string;
             /** Delta Deg */
@@ -411,6 +427,7 @@ export interface components {
             start_utc: string;
             sun_share: components["schemas"]["Band"];
             sunlight_hours: components["schemas"]["Band"];
+            terrain: components["schemas"]["TerrainOut"];
             /**
              * Verdict
              * @enum {string}
@@ -420,6 +437,13 @@ export interface components {
             verdict_by_run: {
                 [key: string]: "viable" | "marginal" | "not viable";
             };
+            /** Verdict Conclusive */
+            verdict_conclusive: boolean;
+            /**
+             * Verdict State
+             * @enum {string}
+             */
+            verdict_state: "viable" | "marginal" | "not_viable" | "upper_bound_terrain_incomplete";
             /** Window Index */
             window_index: number;
         };
@@ -452,6 +476,27 @@ export interface components {
             min_earth_share: number;
             /** Min Sun Share */
             min_sun_share: number;
+        };
+        /**
+         * CriteriaOut
+         * @description Mission needs used for the verdict, and whether the user chose them.
+         */
+        CriteriaOut: {
+            /** Max Dark Hours */
+            max_dark_hours: number;
+            /** Max Outage Hours */
+            max_outage_hours: number;
+            /** Min Earth Fraction */
+            min_earth_fraction: number;
+            /** Min Sun Fraction */
+            min_sun_fraction: number;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "user-chosen" | "default-placeholder";
+            /** Status */
+            status: string;
         };
         /** CustomSiteIn */
         CustomSiteIn: {
@@ -563,6 +608,8 @@ export interface components {
         Metrics: {
             /** Assumptions */
             assumptions: string[];
+            /** Band Basis */
+            band_basis: string[];
             /** Criteria Status */
             criteria_status: string;
             /** Delta Deg */
@@ -582,6 +629,7 @@ export interface components {
             robust: boolean;
             sun_share: components["schemas"]["Band"];
             sunlight_hours: components["schemas"]["Band"];
+            terrain: components["schemas"]["TerrainOut"];
             /**
              * Verdict
              * @enum {string}
@@ -591,6 +639,13 @@ export interface components {
             verdict_by_run: {
                 [key: string]: "viable" | "marginal" | "not viable";
             };
+            /** Verdict Conclusive */
+            verdict_conclusive: boolean;
+            /**
+             * Verdict State
+             * @enum {string}
+             */
+            verdict_state: "viable" | "marginal" | "not_viable" | "upper_bound_terrain_incomplete";
         };
         /** Pairwise */
         Pairwise: {
@@ -871,6 +926,26 @@ export interface components {
             max_reach_m: number;
             /** Min Reach M */
             min_reach_m: number;
+        };
+        /**
+         * TerrainOut
+         * @description How complete the terrain behind a result is. Incomplete terrain makes it an upper bound.
+         */
+        TerrainOut: {
+            /** Available */
+            available: boolean;
+            /** Complete */
+            complete: boolean;
+            /** Covered Fraction */
+            covered_fraction: number;
+            /** Reach Km Max */
+            reach_km_max: number;
+            /** Reach Km Median */
+            reach_km_median: number;
+            /** Reach Km Min */
+            reach_km_min: number;
+            /** Required Km */
+            required_km: number;
         };
         /** TimelineOut */
         TimelineOut: {
@@ -1353,6 +1428,10 @@ export interface operations {
             query: {
                 start: string;
                 end: string;
+                min_sun_fraction?: number | null;
+                max_dark_hours?: number | null;
+                min_earth_fraction?: number | null;
+                max_outage_hours?: number | null;
             };
             header?: never;
             path: {

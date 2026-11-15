@@ -12,6 +12,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 Verdict = Literal["viable", "marginal", "not viable"]
+VerdictState = Literal["viable", "marginal", "not_viable", "upper_bound_terrain_incomplete"]
 
 
 class Band(BaseModel):
@@ -99,8 +100,35 @@ class SkylineOut(BaseModel):
     provenance: Provenance
 
 
+class TerrainOut(BaseModel):
+    """How complete the terrain behind a result is. Incomplete terrain makes it an upper bound."""
+
+    available: bool
+    complete: bool
+    reach_km_min: float
+    reach_km_median: float
+    reach_km_max: float
+    required_km: float
+    covered_fraction: float
+
+
+class CriteriaOut(BaseModel):
+    """Mission needs used for the verdict, and whether the user chose them."""
+
+    min_sun_fraction: float
+    max_dark_hours: float
+    min_earth_fraction: float
+    max_outage_hours: float
+    source: Literal["user-chosen", "default-placeholder"]
+    status: str
+
+
 class Metrics(BaseModel):
     verdict: Verdict
+    verdict_state: VerdictState
+    verdict_conclusive: bool
+    terrain: TerrainOut
+    band_basis: list[str]
     verdict_by_run: dict[str, Verdict]
     robust: bool
     delta_deg: float
@@ -116,6 +144,7 @@ class Metrics(BaseModel):
 
 
 class AssessOut(Metrics):
+    criteria: CriteriaOut
     site_id: str
     start_utc: str
     end_utc: str
