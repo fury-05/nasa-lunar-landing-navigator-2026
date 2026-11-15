@@ -43,6 +43,26 @@ const ASSESS = {
   robust: false,
   delta_deg: 0.2,
   criteria_status: "pending-source: placeholder",
+  verdict_state: "marginal",
+  verdict_conclusive: true,
+  criteria: {
+    min_sun_fraction: 0.5,
+    max_dark_hours: 100,
+    min_earth_fraction: 0.5,
+    max_outage_hours: 1e9,
+    source: "default-placeholder",
+    status: "pending-source: placeholder",
+  },
+  terrain: {
+    available: true,
+    complete: true,
+    covered_fraction: 1,
+    reach_km_min: 8,
+    reach_km_median: 8,
+    reach_km_max: 8,
+    required_km: 8,
+  },
+  band_basis: ["Horizon shifted by 0.2 degrees (test basis)."],
   sunlight_hours: band(100),
   sun_share: band(0.5),
   earth_share: band(0.4),
@@ -104,6 +124,16 @@ async function mock(page: Page) {
   await page.route("**/api/v1/sites/*/skyline*", (r) => r.fulfill({ json: SKY }));
   await page.route("**/api/v1/sites/*/assess*", (r) => r.fulfill({ json: ASSESS }));
   await page.route("**/api/v1/sites/*/timeline*", (r) => r.fulfill({ json: TL }));
+  await page.route("**/api/v1/sites/*/terrain", (r) => r.fulfill({ status: 404, json: {} }));
+  await page.route("**/api/v1/links/quickmap*", (r) =>
+    r.fulfill({
+      json: {
+        site_id: "alpha",
+        url: "https://quickmap.lroc.im-ldi.com/?proj=27&time=2026-12-13T00%3A00%3A00Z",
+        note: "x",
+      },
+    }),
+  );
 }
 
 test("command centre shows verdict, warning, sky view and timeline", async ({ page }) => {
@@ -162,4 +192,110 @@ test("a site in the URL that does not exist is reported, not silently replaced",
   await mock(page);
   await page.goto("/command?site=ghost");
   await expect(page.getByRole("alert")).toContainText("ghost");
+});
+
+test("site context shows coordinates, terrain state and a QuickMap link from the API", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.goto("/command?site=alpha");
+  await expect(page.getByText("89.500 deg S")).toBeVisible();
+  await expect(page.getByText(/Terrain available/)).toBeVisible();
+  const link = page.getByRole("link", { name: /Open in QuickMap/ });
+  await expect(link).toHaveAttribute("href", /quickmap\.lroc\.im-ldi\.com\/\?proj=27/);
+});
+
+test("a viable verdict with incomplete terrain is shown as an amber upper bound", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.route("**/api/v1/sites/*/assess*", (r) =>
+    r.fulfill({
+      json: {
+        ...ASSESS,
+        verdict: "viable",
+        robust: true,
+        verdict_state: "upper_bound_terrain_incomplete",
+        verdict_conclusive: false,
+        terrain: { ...ASSESS.terrain, complete: false, covered_fraction: 0.5, reach_km_min: 2 },
+      },
+    }),
+  );
+  await page.route("**/api/v1/sites", (r) =>
+    r.fulfill({
+      json: {
+        ...SITES,
+        sites: SITES.sites.map((s) => ({
+          ...s,
+          terrain_coverage: { covered_fraction: 0.5, min_reach_m: 2000, max_reach_m: 8000 },
+        })),
+      },
+    }),
+  );
+  await page.goto("/command");
+  await expect(page.getByText("Upper bound, terrain incomplete")).toBeVisible();
+  await expect(page.getByText("robust", { exact: true })).toHaveCount(0);
+});
+
+test("mission needs are applied to the request and saved in the link", async ({ page }) => {
+  await mock(page);
+  const seen: string[] = [];
+  await page.route("**/api/v1/sites/*/assess*", (r) => {
+    seen.push(r.request().url());
+    return r.fulfill({ json: ASSESS });
+  });
+  await page.goto("/command");
+  await expect(page.getByText("placeholder defaults")).toBeVisible();
+  await page.getByLabel("Minimum sunlight (% of window)").fill("70");
+  await page.getByLabel("Maximum Earth outage (hours, optional)").fill("12");
+  await page.getByRole("button", { name: "Apply needs" }).click();
+  await expect(page).toHaveURL(/sun=70/);
+  await expect(page).toHaveURL(/outage=12/);
+  await expect.poll(() => seen.some((u) => u.includes("min_sun_fraction=0.7"))).toBe(true);
+  expect(seen.some((u) => u.includes("max_outage_hours=12"))).toBe(true);
+  await page.reload();
+  await expect(page.getByLabel("Minimum sunlight (% of window)")).toHaveValue("70");
+  await page.getByLabel("Minimum sunlight (% of window)").fill("500");
+  await page.getByRole("button", { name: "Apply needs" }).click();
+  await expect(page.getByRole("alert")).toContainText("between 0 and 100");
+});
+
+test("terrain view: no tile means an honest message, and the demo is labelled synthetic", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.goto("/command?site=alpha");
+  await expect(page.getByText(/No terrain tile is available/)).toBeVisible();
+  await page.getByRole("button", { name: /synthetic surface/ }).click();
+  await expect(page.getByText(/NOT real lunar terrain/)).toBeVisible();
+  await expect(page.getByText(/samples are interpolated/)).toBeVisible();
+  await page.getByRole("button", { name: "3D view" }).click();
+  await expect(page.getByText(/heights drawn \d+ times too tall/)).toBeVisible();
+  await expect(page.getByRole("img", { name: /Terrain of synthetic-demo/ })).toBeVisible();
+});
+
+test("terrain view: a real tile from the API is drawn with its error and interpolation note", async ({
+  page,
+}) => {
+  await mock(page);
+  const n = 9;
+  await page.route("**/api/v1/sites/*/terrain", (r) =>
+    r.fulfill({
+      json: {
+        site_id: "alpha",
+        rows: n,
+        cols: n,
+        spacing_m: 20,
+        native_resolution_m: 20,
+        interpolated_fraction: 0.95,
+        height_error_m: 3,
+        heights_m: Array.from({ length: n * n }, (_, i) => (i % n) * 5),
+        source: "test tile",
+      },
+    }),
+  );
+  await page.goto("/command?site=alpha");
+  await expect(page.getByText(/95% of the samples are interpolated/)).toBeVisible();
+  await expect(page.getByText(/± 4\.2 m/)).toBeVisible();
+  await expect(page.getByText(/NOT real lunar terrain/)).toHaveCount(0);
 });

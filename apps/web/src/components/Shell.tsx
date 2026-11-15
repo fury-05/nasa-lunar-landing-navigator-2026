@@ -3,6 +3,7 @@ import { NavLink, Outlet } from "react-router-dom";
 const links = [
   { to: "/", label: "Home", end: true },
   { to: "/command", label: "Command Centre" },
+  { to: "/sites/pick", label: "Pick a site" },
   { to: "/spacecraft", label: "Spacecraft" },
   { to: "/public", label: "Public View" },
   { to: "/credits", label: "Credits" },

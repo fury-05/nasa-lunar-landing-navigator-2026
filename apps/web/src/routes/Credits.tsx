@@ -1,30 +1,10 @@
-import { api } from "../api/client";
 import { Chip } from "../components/Chip";
 import { Glass } from "../components/Glass";
+import { loadCredits } from "../lib/data";
 import { useAsync } from "../lib/useAsync";
 
-type Credits = {
-  notice: string;
-  unconfirmed_terms: string[];
-  sources: {
-    id: string;
-    name: string;
-    publisher: string;
-    url: string;
-    credit: string;
-    usage_statement: string;
-    terms_confirmed: boolean;
-  }[];
-};
-
-async function load(): Promise<Credits> {
-  const r = await api.GET("/api/v1/attribution");
-  if (r.data === undefined) throw r.error ?? new Error("empty response");
-  return r.data as Credits;
-}
-
 export function Credits() {
-  const c = useAsync(load, "credits");
+  const c = useAsync(loadCredits, "credits");
   return (
     <div className="flex flex-col gap-6">
       <header>
