@@ -7,7 +7,9 @@ import { createCustomSite, loadSites, pollJob, type JobOut } from "../lib/data";
 import { validateCoords } from "../lib/polar";
 import { describeFailure } from "../lib/jobFailure";
 import { fmtLat, fmtLon, terrainSentence, toSiteInfo } from "../lib/site";
+import { applyFilter, kindsPresent, NO_FILTER, type Filter } from "../lib/siteFilter";
 import { useAsync } from "../lib/useAsync";
+import { SiteFilter } from "../components/SiteFilter";
 
 const PolarMap = lazy(() => import("../components/PolarMap"));
 
@@ -28,6 +30,7 @@ export function SitePicker() {
   const [imageryDown, setImageryDown] = useState(false);
   // Site whose name the map shows: hovered on the map, or hovered or focused in the list.
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [filter, setFilter] = useState<Filter>(NO_FILTER);
   const abort = useRef<AbortController | null>(null);
 
   useEffect(() => () => abort.current?.abort(), []);
@@ -39,6 +42,7 @@ export function SitePicker() {
     () => (sites.state === "ok" ? sites.data.sites.map(toSiteInfo) : []),
     [sites],
   );
+  const listed = useMemo(() => applyFilter(infos, filter), [infos, filter]);
   const mapSites = useMemo(
     () => infos.map((i) => ({ id: i.id, name: i.name, lat: i.lat, lon: i.lon })),
     [infos],
@@ -273,6 +277,17 @@ export function SitePicker() {
 
       <Glass>
         <h2 className="mt-0 text-lg">Existing sites</h2>
+        {infos.length > 0 && (
+          <div className="mb-3">
+            <SiteFilter
+              value={filter}
+              onChange={setFilter}
+              kinds={kindsPresent(infos)}
+              shown={listed.length}
+              total={infos.length}
+            />
+          </div>
+        )}
         {sites.state === "loading" && (
           <p role="status" className="m-0 text-sm text-muted">
             Loading sites...
@@ -284,7 +299,7 @@ export function SitePicker() {
           </p>
         )}
         <ul className="m-0 grid list-none gap-2 p-0 md:grid-cols-2">
-          {infos.map((i) => (
+          {listed.map((i) => (
             <li
               key={i.id}
               onMouseEnter={() => setActiveId(i.id)}

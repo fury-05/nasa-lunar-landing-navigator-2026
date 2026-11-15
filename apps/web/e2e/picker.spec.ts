@@ -231,3 +231,72 @@ test("picker: hovering the marker on the map names it", async ({ page }) => {
   }
   expect(named).toBe(true);
 });
+
+const FILTER_SITES = {
+  count: 4,
+  notice: "x",
+  sites: [
+    ["pgda-site04", "Shackleton rim", "lola-dem", 1],
+    ["pgda-haworth", "Haworth", "lola-dem", 0.5],
+    ["pgda-dm2", "Nobile rim 2", "lola-dem", 0],
+    ["custom-16c5b0f303b9", "Custom point -85.4137,23.7719", "custom", 1],
+  ].map(([id, name, source, f]) => ({
+    id,
+    name,
+    source,
+    lat_deg: -89.5,
+    lon_east_deg: 40,
+    coordinate_status: "derived-tile-centre",
+    window: {},
+    built_at_utc: "x",
+    terrain_coverage: {
+      covered_fraction: f,
+      min_reach_m: f ? 100000 : 0,
+      max_reach_m: f ? 100000 : 0,
+    },
+    terrain_available: Number(f) > 0,
+    reach_km: f ? 100 : 0,
+    reach_km_max: f ? 100 : 0,
+    quickmap: "",
+  })),
+};
+
+test("site list: search, kind and terrain filters narrow the list, with a count", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.route("**/api/v1/sites", (r) => r.fulfill({ json: FILTER_SITES }));
+  await page.goto("/sites/pick");
+  // The Existing sites panel is the stable anchor; the rows inside it change as the filter does.
+  const list = page
+    .locator("div", { has: page.getByRole("heading", { name: "Existing sites" }) })
+    .last();
+  await expect(list.getByRole("listitem")).toHaveCount(4);
+  await expect(page.getByText("4 sites.")).toBeVisible();
+  await page.getByLabel("Search by name or id").fill("rim");
+  await expect(list.getByRole("listitem")).toHaveCount(2);
+  await expect(page.getByText("2 of 4 sites match.")).toBeVisible();
+  await page.getByLabel("Terrain", { exact: true }).selectOption("none");
+  await expect(list.getByRole("listitem")).toHaveCount(1);
+  await expect(page.getByRole("link", { name: "Nobile rim 2" })).toBeVisible();
+  await page.getByLabel("Search by name or id").fill("zzz");
+  await expect(page.getByText("No sites match. 4 sites in the list.")).toBeVisible();
+  await page.getByRole("button", { name: "Clear filters" }).click();
+  await expect(list.getByRole("listitem")).toHaveCount(4);
+  await page.getByLabel("Kind").selectOption("custom");
+  await expect(list.getByRole("listitem")).toHaveCount(1);
+});
+
+test("site list: the filter is fully keyboard operable", async ({ page }) => {
+  await mock(page);
+  await page.route("**/api/v1/sites", (r) => r.fulfill({ json: FILTER_SITES }));
+  await page.goto("/sites/pick");
+  await page.getByLabel("Search by name or id").focus();
+  await page.keyboard.type("haw");
+  await expect(page.getByText("1 of 4 sites match.")).toBeVisible();
+  await page.keyboard.press("Tab"); // kind
+  await page.keyboard.press("Tab"); // terrain
+  await expect(page.getByLabel("Terrain", { exact: true })).toBeFocused();
+  await page.keyboard.press("ArrowDown"); // full
+  await expect(page.getByText(/No sites match/)).toBeVisible();
+});

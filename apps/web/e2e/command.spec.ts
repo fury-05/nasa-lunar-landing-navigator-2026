@@ -580,3 +580,32 @@ test("timeline: keyboard zoom and pan work on the focused timeline", async ({ pa
   await page.keyboard.press("0");
   await expect(page.getByText(/\(8\.0 days\)/)).toBeVisible();
 });
+
+test("command centre: site search narrows the select and keeps the chosen site", async ({
+  page,
+}) => {
+  await mock(page);
+  await page.route("**/api/v1/sites", (r) =>
+    r.fulfill({
+      json: {
+        ...SITES,
+        sites: [
+          { ...SITES.sites[0]!, name: "Alpha rim", source: "lola-dem" },
+          { ...SITES.sites[1]!, name: "Beta ridge", source: "lola-dem" },
+        ],
+      },
+    }),
+  );
+  await page.goto("/command?site=alpha");
+  const select = page.getByRole("combobox", { name: "Site" });
+  await expect(select.locator("option")).toHaveCount(2);
+  await page.getByRole("button", { name: "Search and filter sites" }).click();
+  await page.getByLabel("Search by name or id").fill("ridge");
+  await expect(page.getByText("1 of 2 sites match.")).toBeVisible();
+  // Beta matches; Alpha is the chosen site so it stays selectable.
+  await expect(select.locator("option")).toHaveCount(2);
+  await expect(select).toHaveValue("alpha");
+  await select.selectOption("beta");
+  await expect(page).toHaveURL(/site=beta/);
+  await expect(select.locator("option")).toHaveCount(1);
+});
