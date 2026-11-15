@@ -561,3 +561,36 @@ def test_slip_cells_and_compare_rows_carry_the_same_terrain_and_state_as_assess(
     cmp_ = client.post("/api/v1/compare", json={"sites": ["alpha"], "windows": [W]}).json()
     row = cmp_["rows"][0]
     assert row["terrain"] == ref["terrain"] and row["verdict_state"] == ref["verdict_state"]
+
+
+def test_sites_list_puts_catalogue_sites_first_by_id_then_custom_newest_first(
+    client: TestClient, bundle: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import shutil
+
+    root = tmp_path / "pre"
+    shutil.copytree(bundle, root)
+    for sid in ("custom-aaaaaaaaaaaa", "custom-bbbbbbbbbbbb", "custom-cccccccccccc"):
+        shutil.copytree(root / "alpha", root / sid)
+    # built times: b newest, then c, then a; the catalogue ids must still come first
+    for sid, built in (
+        ("custom-aaaaaaaaaaaa", "2026-11-01T00:00:00Z"),
+        ("custom-bbbbbbbbbbbb", "2026-11-03T00:00:00Z"),
+        ("custom-cccccccccccc", "2026-11-02T00:00:00Z"),
+    ):
+        p = root / sid / "meta.json"
+        meta = json.loads(p.read_text("utf8"))
+        meta["built_at_utc"] = built
+        p.write_text(json.dumps(meta), "utf8")
+    monkeypatch.setenv("LUNAR_PRECOMPUTE_DIR", str(root))
+    ids = [s["id"] for s in client.get("/api/v1/sites").json()["sites"]]
+    assert ids == [
+        "alpha", "beta", "custom-bbbbbbbbbbbb", "custom-cccccccccccc", "custom-aaaaaaaaaaaa",
+    ]  # fmt: skip
+
+
+def test_sites_list_reports_reach_and_tiers_for_every_site(client: TestClient) -> None:
+    for s in client.get("/api/v1/sites").json()["sites"]:
+        assert s["reach_km"] <= s["reach_km_max"]
+        assert s["terrain_coverage"]["max_reach_m"] / 1000.0 == s["reach_km_max"]
+        assert isinstance(s["tiers"], list)
