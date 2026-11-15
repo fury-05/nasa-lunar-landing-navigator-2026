@@ -35,3 +35,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-14T21:32:12Z | irfan | P3-08 | first deploy of the API with the 3 year bundles; /state measured at 2.6 s on the VM, fixed with a per-site derived series cache | perf/api-state-cache
 2026-11-14T21:59:20Z | irfan | P3-08 | API deployed with real data, load tested, no-terrain honesty fix, load test script | fix/api-no-terrain-honesty
 2026-11-14T22:05:51Z | irfan | P3-08 | listing coverage follows the terrain flag | fix/api-coverage-from-meta
+2026-11-15T00:40:23Z | afreen+irfan | P4 first slice | Command Centre page with real data, real Credits page; coverage warning wording fixed | feat/web-command-centre
