@@ -116,23 +116,32 @@ const ROUTES = [
   "/no-such-page",
 ];
 
-for (const path of ROUTES) {
-  test(`axe: no serious or critical violations on ${path}`, async ({ page }) => {
-    await mock(page);
-    await page.goto(path);
-    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    await page.waitForLoadState("networkidle");
-    const res = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
-      .analyze();
-    const bad = res.violations.filter((v) => v.impact === "serious" || v.impact === "critical");
-    const report = bad.map(
-      (v) =>
-        `${v.id} (${v.impact}): ${v.nodes
-          .slice(0, 3)
-          .map((n) => n.target.join(" "))
-          .join(" | ")}`,
-    );
-    expect(report).toEqual([]);
-  });
+// Wide (default viewport) and phone width: the layouts differ, so a problem can exist in only one.
+const SIZES = [
+  { name: "desktop", width: 1280, height: 900 },
+  { name: "phone 375 px", width: 375, height: 812 },
+];
+
+for (const size of SIZES) {
+  for (const path of ROUTES) {
+    test(`axe at ${size.name}: no serious or critical violations on ${path}`, async ({ page }) => {
+      await mock(page);
+      await page.setViewportSize({ width: size.width, height: size.height });
+      await page.goto(path);
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      await page.waitForLoadState("networkidle");
+      const res = await new AxeBuilder({ page })
+        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "best-practice"])
+        .analyze();
+      const bad = res.violations.filter((v) => v.impact === "serious" || v.impact === "critical");
+      const report = bad.map(
+        (v) =>
+          `${v.id} (${v.impact}): ${v.nodes
+            .slice(0, 3)
+            .map((n) => n.target.join(" "))
+            .join(" | ")}`,
+      );
+      expect(report).toEqual([]);
+    });
+  }
 }

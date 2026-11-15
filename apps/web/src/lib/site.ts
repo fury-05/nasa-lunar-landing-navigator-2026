@@ -11,7 +11,12 @@ type Extra = {
   tile_radius_km?: number | null;
   reach_km?: number | null;
   terrain_unavailable?: boolean | null;
+  /** Present on current APIs; older ones omit it and the id prefix is used instead. */
+  kind?: ApiKind | null;
 };
+
+/** The kinds the API puts on every site (SiteSummary.kind). */
+export type ApiKind = "apollo" | "clps" | "pgda-tile" | "custom" | "other";
 
 export type SiteInfo = {
   id: string;
@@ -26,6 +31,8 @@ export type SiteInfo = {
   maxReachKm: number;
   coveredFraction: number;
   terrain: "full" | "partial" | "none";
+  /** From the API; null when an older API did not send it. */
+  kind: ApiKind | null;
 };
 
 export function toSiteInfo(s: SiteSummary & Extra): SiteInfo {
@@ -43,6 +50,7 @@ export function toSiteInfo(s: SiteSummary & Extra): SiteInfo {
     maxReachKm: cov.max_reach_m / 1000,
     coveredFraction: cov.covered_fraction,
     terrain,
+    kind: s.kind ?? null,
   };
 }
 

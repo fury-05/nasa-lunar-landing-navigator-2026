@@ -1,6 +1,7 @@
 import { Chip } from "./Chip";
 import { fmtHours, type Assess } from "../lib/data";
 import { verdictLabel } from "../api/client";
+import { explainFragile } from "../lib/fragile";
 import { thresholdsText, verdictView } from "../lib/verdict";
 
 type Band = { low: number; nominal: number; high: number };
@@ -39,7 +40,9 @@ const pct = (n: number) => `${(n * 100).toFixed(0)}%`;
 
 export function Metrics({ a }: { a: Assess }) {
   const v = verdictView(a);
+  // The recomputation is checked against the API's verdict_by_run; null means no claim is made.
   const upper = v.state === "upper-bound";
+  const fragile = upper ? null : explainFragile(a);
   const tone = upper
     ? "warn"
     : a.verdict === "viable"
@@ -72,8 +75,14 @@ export function Metrics({ a }: { a: Assess }) {
           ? "No robust or fragile label is given while terrain is incomplete."
           : a.robust
             ? "The verdict holds across the uncertainty band."
-            : "The verdict changes inside the uncertainty band (shown as a range)."}
+            : "Fragile: the verdict changes inside the uncertainty band (shown as a range)."}
       </p>
+      {fragile && (
+        <details className="text-xs text-muted" open>
+          <summary className="min-h-11 cursor-pointer py-2">Why is this fragile?</summary>
+          <p className="m-0 max-w-prose text-ink">{fragile.text}</p>
+        </details>
+      )}
       <dl className="m-0">
         <BandRow
           label="Sunlight"

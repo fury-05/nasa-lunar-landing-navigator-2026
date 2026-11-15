@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 import {
   assessOut,
+  criteriaOut,
   criteriaForRequest,
   json,
   mockApi,
@@ -36,7 +37,7 @@ test("command centre shows verdict, warning, sky view and timeline", async ({ pa
   await page.goto("/command");
   await expect(page.getByRole("heading", { name: "Verdict" })).toBeVisible();
   await expect(page.getByText("Marginal")).toBeVisible();
-  await expect(page.getByText("fragile")).toBeVisible();
+  await expect(page.getByText("fragile", { exact: true })).toBeVisible();
   await expect(page.getByRole("note")).toContainText("Test warning: terrain ends early.");
   await expect(page.getByRole("img", { name: /Sky from the site/ })).toBeVisible();
   await expect(page.getByRole("img", { name: /Sun up: 1 period in view/ })).toBeVisible();
@@ -657,4 +658,45 @@ test("time in link: after Play and Pause the address holds a whole sample time",
   const t = new URL(page.url()).searchParams.get("t")!;
   // The clock text shows the same time as the address.
   await expect(page.getByText(t.replace("T", " ").slice(0, 16) + " UTC").first()).toBeVisible();
+});
+
+test("fragile: the page says which quantity crosses the marginal line (#183)", async ({ page }) => {
+  await mock(page);
+  // Issue #183's numbers: Earth link 43 to 51 percent against a 60 percent need, terrain complete.
+  const a = assessOut({
+    verdict: "not viable",
+    verdict_state: "not_viable",
+    robust: false,
+    verdict_by_run: { pessimistic: "not viable", nominal: "not viable", optimistic: "marginal" },
+    criteria: criteriaOut({
+      min_earth_fraction: 0.6,
+      source: "user-chosen",
+      status: "user-chosen mission needs for this request",
+    }),
+    sun_share: { low: 0.7846, nominal: 1, high: 1 },
+    earth_share: { low: 0.42617, nominal: 0.46589, high: 0.50549 },
+    longest_dark_hours: { low: 0, nominal: 0, high: 41.36 },
+    longest_outage_hours: { low: 94.95, nominal: 102.55, high: 110.18 },
+  });
+  await page.route("**/api/v1/sites/*/assess*", (r) => json(r, a));
+  await page.goto("/command?site=alpha&earth=60");
+  const card = page.getByRole("heading", { name: "Verdict" }).locator("..").locator("..");
+  await expect(card).toContainText("Fragile: the verdict changes inside the uncertainty band");
+  const why = card.getByText(/What changes it: Earth link share/);
+  await expect(why).toBeVisible();
+  await expect(why).toContainText("the need is at least 60%");
+  await expect(why).toContainText("a marginal result needs at least 48%");
+  await expect(why).toContainText("below the need in every run and still be fragile");
+  await expect(why).not.toContainText("Longest dark spell");
+});
+
+test("fragile: no explanation for a robust verdict or an upper bound", async ({ page }) => {
+  await mock(page);
+  await page.route("**/api/v1/sites/*/assess*", (r) => json(r, assessOut({ robust: true })));
+  await page.goto("/command?site=alpha");
+  await expect(page.getByText("Why is this fragile?")).toHaveCount(0);
+  await page.route("**/api/v1/sites/*/assess*", (r) => json(r, upperBound({ robust: false })));
+  await page.goto("/command?site=alpha");
+  await expect(page.getByText("Upper bound, terrain incomplete").first()).toBeVisible();
+  await expect(page.getByText("Why is this fragile?")).toHaveCount(0);
 });
