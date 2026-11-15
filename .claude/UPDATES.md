@@ -46,3 +46,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-15T03:20:04Z | irfan | P4-01,P4-11,P5-06,P6-01,P6-02,P7-04 | shared clock, axe pass, lander engine and endpoint merged and deployed; resilience drills recorded | docs/todo-evidence-4
 2026-11-15T03:33:26Z | irfan | P7-03 | Caddy hardening F1, F4, F5, F6, F7 applied and verified on the VM | fix/caddy-hardening
 2026-11-15T03:42:04Z | irfan | P1-08 | far terrain downloaded on the VM (14.09 GB), sha256 recorded in data/MANIFEST.far.json | data/far-manifest-sha
+2026-11-15T04:09:29Z | irfan | P1-08,P2-02,P2-10,P2-12,P5-01 | far terrain precompute live on 10 sites (reach 146 to 300 km), validation report, Apollo table | merge/validation
