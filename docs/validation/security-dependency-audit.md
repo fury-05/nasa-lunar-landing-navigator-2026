@@ -93,3 +93,6 @@ Live checks were made with `curl -I` against `https://13-52-97-105.sslip.io` on 
 * No secret, key or credential in 242 tracked files or in 142 commits of history, by the scanner's rules. The public hostname is committed on purpose.
 * Headers are in good shape for a public read-only app. Medium gaps: CSP lacks `base-uri` and `object-src`, `index.html` has no revalidation header, and there is no request body limit at the edge.
 * Not tested: authenticated or privileged paths (none exist), TLS cipher configuration (Caddy defaults), the AWS security group, SSH hardening on the VM, DoS and load beyond P3-08.
+
+## 5. Fixes applied to the edge (2026-11-15, infra/Caddyfile)
+Applied F1 (CSP `base-uri`, `form-action`, `object-src`), F4 (`Cross-Origin-Opener-Policy: same-origin`), F5 (`Cache-Control: no-cache` for pages outside `/assets` and `/api`), F6 for the Caddy banner (`-Server`) and F7 (`request_body max_size 64KB` on `/api/*`). Checked on the VM with `caddy validate` before reload. After reload: `/api/v1/health` 200, a 100000 byte POST to `/api/v1/compare` returned 413, a normal compare POST returned 200, the page headers show the new CSP, COOP and `no-cache`, and `/sites/pick` loads with no console warnings. The `Server: uvicorn` header from the API process, F2, F3, F8 to F11 remain open.
