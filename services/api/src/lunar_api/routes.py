@@ -21,7 +21,7 @@ from lunar_engine.events import Interval, time_remaining
 from lunar_engine.links import quickmap_link
 from lunar_engine.metrics import sun_fraction_series
 from lunar_engine.sensitivity import PLACEHOLDER_CRITERIA, Assessment, Criteria
-from lunar_engine.terrain_status import REQUIRED_RANGE_M
+from lunar_engine.terrain_status import REQUIRED_RANGE_M, TerrainStatus
 from pydantic import BaseModel, Field, field_validator
 
 from lunar_api.errors import ApiError, safe_echo
@@ -224,21 +224,24 @@ def band(b: Any) -> dict[str, float]:
     return {"low": b.low, "nominal": b.nominal, "high": b.high}
 
 
+def terrain_json(t: TerrainStatus) -> dict[str, Any]:
+    return {
+        "available": t.available,
+        "complete": t.complete,
+        "reach_km_min": t.reach_km_min,
+        "reach_km_median": t.reach_km_median,
+        "reach_km_max": t.reach_km_max,
+        "required_km": t.required_km,
+        "covered_fraction": t.covered_fraction,
+    }
+
+
 def assessment_json(a: Assessment) -> dict[str, Any]:
-    t = a.terrain
     return {
         "verdict": a.nominal_verdict,
         "verdict_state": a.verdict_state,
         "verdict_conclusive": a.verdict_conclusive,
-        "terrain": {
-            "available": t.available,
-            "complete": t.complete,
-            "reach_km_min": t.reach_km_min,
-            "reach_km_median": t.reach_km_median,
-            "reach_km_max": t.reach_km_max,
-            "required_km": t.required_km,
-            "covered_fraction": t.covered_fraction,
-        },
+        "terrain": terrain_json(a.terrain),
         "band_basis": a.band_basis,
         "verdict_by_run": {
             "pessimistic": a.verdicts[0],
@@ -763,6 +766,9 @@ def post_slip(
                         "robust": c.robust,
                         "sunlight_hours": c.sunlight_hours,
                         "earth_share": c.earth_share,
+                        "terrain": terrain_json(c.terrain),
+                        "verdict_state": c.verdict_state,
+                        "verdict_conclusive": c.verdict_conclusive,
                     }
                     for c in row
                 ]

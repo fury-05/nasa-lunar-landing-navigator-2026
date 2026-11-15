@@ -14,6 +14,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from lunar_engine.ephemeris import HorizonsClient
 from pydantic import BaseModel, ConfigDict, Field
 
+from lunar_api.degraded import health_for
 from lunar_api.errors import ApiError, safe_echo
 from lunar_api.jobs import (
     TERMINAL,
@@ -111,6 +112,11 @@ def start_job(
             CUSTOM_START,
             CUSTOM_DAYS,
         ),
+        kwargs={
+            "health": health_for(settings.redis_url),
+            "max_custom_sites": settings.max_custom_sites,
+            "custom_max_age_days": settings.custom_max_age_days,
+        },
         daemon=True,
         name=job_id,
     )

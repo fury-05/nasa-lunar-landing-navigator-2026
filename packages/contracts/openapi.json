@@ -796,6 +796,30 @@
         "title": "HealthOut",
         "type": "object"
       },
+      "HorizonsDegraded": {
+        "description": "Set while the last Horizons call from the API or worker failed (clears on success or after\n10 minutes). Stored bundles are still served, `using_cache` says whether any exist.",
+        "properties": {
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "since_utc": {
+            "title": "Since Utc",
+            "type": "string"
+          },
+          "using_cache": {
+            "title": "Using Cache",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "since_utc",
+          "reason",
+          "using_cache"
+        ],
+        "title": "HorizonsDegraded",
+        "type": "object"
+      },
       "JobAccepted": {
         "properties": {
           "cached": {
@@ -1685,6 +1709,16 @@
             "title": "Checks",
             "type": "object"
           },
+          "horizons_degraded": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HorizonsDegraded"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "status": {
             "enum": [
               "ready",
@@ -2120,6 +2154,9 @@
             "title": "Sunlight Hours",
             "type": "number"
           },
+          "terrain": {
+            "$ref": "#/components/schemas/TerrainOut"
+          },
           "verdict": {
             "enum": [
               "viable",
@@ -2127,6 +2164,20 @@
               "not viable"
             ],
             "title": "Verdict",
+            "type": "string"
+          },
+          "verdict_conclusive": {
+            "title": "Verdict Conclusive",
+            "type": "boolean"
+          },
+          "verdict_state": {
+            "enum": [
+              "viable",
+              "marginal",
+              "not_viable",
+              "upper_bound_terrain_incomplete"
+            ],
+            "title": "Verdict State",
             "type": "string"
           }
         },
@@ -2138,7 +2189,10 @@
           "glyph",
           "robust",
           "sunlight_hours",
-          "earth_share"
+          "earth_share",
+          "terrain",
+          "verdict_state",
+          "verdict_conclusive"
         ],
         "title": "SlipCellOut",
         "type": "object"
@@ -2773,6 +2827,16 @@
           "engine": {
             "title": "Engine",
             "type": "string"
+          },
+          "horizons_degraded": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HorizonsDegraded"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
