@@ -49,3 +49,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-15T04:09:29Z | irfan | P1-08,P2-02,P2-10,P2-12,P5-01 | far terrain precompute live on 10 sites (reach 146 to 300 km), validation report, Apollo table | merge/validation
 2026-11-15T04:13:40Z | irfan | approvals | A2 recorded DONE; A9 teammate tasks and A10 commit emails added | docs/approvals-update
 2026-11-15T04:47:35Z | irfan | P3 follow-ups | Horizons degraded flag, custom site cap and expiry, slip cell terrain state, docs CSP route | merge/api-batch3
+2026-11-15T04:53:05Z | irfan | P7-04 | resilience drills closed after retry fix and degraded flag | docs/todo-evidence-5
