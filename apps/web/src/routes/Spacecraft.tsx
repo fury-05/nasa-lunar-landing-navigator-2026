@@ -182,7 +182,7 @@ export function Spacecraft() {
     known && valid
       ? () => loadAssess(id, iso(a), iso(addDays(a, DAYS)), needsToQuery(needs))
       : null,
-    `sc|${id}|${start}|${[params.get("sun"), params.get("dark"), params.get("earth"), params.get("outage")].join(",")}`,
+    `sc|${known && valid}|${id}|${start}|${[params.get("sun"), params.get("dark"), params.get("earth"), params.get("outage")].join(",")}`,
   );
 
   const set = (k: string, v: string) => {

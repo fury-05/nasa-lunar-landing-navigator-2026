@@ -1,0 +1,72 @@
+Lunar Landing Site Navigator
+Copyright 2026 the Lunar Landing Site Navigator team (Irfan S. Mulla, Afreen Mulla, Luz Aponte)
+
+This product was built for the NASA Space Apps Challenge 2026, challenge
+"Lunar Landing Site Navigator". It is licensed under the Apache License,
+Version 2.0 (see LICENSE).
+
+Planning tool, not for flight operations.
+
+This product is not endorsed by, and is not an official product of, NASA, the
+Canadian Space Agency, the Lunar Reconnaissance Orbiter Camera team or any other
+agency named below.
+
+DATA AND SERVICES
+-----------------
+The ids below are the ids used in data/attribution.json, docs/ATTRIBUTION.md and
+GET /api/v1/attribution. Usage terms are copied from the registry. Where the
+registry says "pending-source", the terms have not yet been read and confirmed
+by a human, and this NOTICE does not claim any.
+
+horizons       JPL Horizons System, API. NASA/JPL Solar System Dynamics.
+               https://ssd.jpl.nasa.gov/horizons/
+               Usage statement: pending-source (issue #16). Citation: pending-source.
+
+trek-moon      Moon Trek WMTS. NASA/JPL Solar System Treks.
+               https://trek.nasa.gov/moon/
+               Usage statement: layer metadata Use_Constraints and Access_Constraints
+               say None; the Trek terms page is pending-source (human check).
+               Credit: per layer, the Credit field of its FGDC metadata, shown beside
+               the map.
+
+quickmap       LROC QuickMap. LROC team (Arizona State University), hosted by
+               Intuitive Machines. https://quickmap.lroc.im-ldi.com/
+               Used for manual validation and "Open in QuickMap" links only.
+               Usage statement: pending-source (issue #16). Citation: pending-source.
+
+csa-moon       Moon exploration. Canadian Space Agency.
+               https://www.asc-csa.gc.ca/eng/astronomy/moon-exploration/
+               Credit: Canadian Space Agency. Paraphrased blurbs link to the source
+               page. The CSA terms page (https://www.asc-csa.gc.ca/eng/terms.asp)
+               grants reproduction for personal, educational or informational
+               non-commercial use with CSA acknowledged, accuracy care and no implied
+               endorsement; the CSA logo is not reused. Human confirmation of fit is
+               recorded in the registry as A1.
+
+lola-dem       High-Resolution LOLA Topography for Lunar South Pole Sites (5 m/px
+               GeoTIFF). NASA GSFC PGDA (M. K. Barker, LRO-LOLA).
+               https://pgda.gsfc.nasa.gov/products/78
+               Citation: Barker et al., 2021, Planetary and Space Science 203, 105119,
+               https://doi.org/10.1016/j.pss.2020.105119
+               Usage statement: pending-source (NASA public product, terms page not yet
+               read by a human).
+
+nssdc-apollo   Apollo Lunar Landings (1969 - 1972) table. NASA GSFC NSSDCA.
+               https://nssdc.gsfc.nasa.gov/planetary/lunar/apolloland.html
+               Usage statement: pending-source.
+
+nasa-clps      Commercial Lunar Payload Services Deliveries. NASA Science.
+               https://science.nasa.gov/lunar-science/clps-deliveries/
+               Usage statement: pending-source.
+
+The data sources above are listed in the registry as of the commit that adds this
+file; if the registry changes, data/attribution.json is authoritative.
+
+SOFTWARE
+--------
+Third-party software keeps its own licences. The full generated inventory is in
+docs/THIRD_PARTY_LICENSES.md (regenerate with python scripts/gen_licenses.py).
+Items that need attention are listed in the table at the top of that file,
+notably psycopg (LGPL-3.0-only, used unmodified as a library), several MPL-2.0
+packages (used unmodified) and two OFL-1.1 web fonts (Sora and IBM Plex Mono via
+@fontsource, self-hosted).

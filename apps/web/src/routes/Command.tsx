@@ -1,10 +1,12 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Chip } from "../components/Chip";
 import { Glass } from "../components/Glass";
 import { Metrics } from "../components/Metrics";
 import { SiteContext } from "../components/SiteContext";
 import { SkyView } from "../components/SkyView";
+import { DEFAULT_SPEED, useMissionClock } from "../lib/clock";
+import { ExportBar } from "../components/ExportBar";
 import { HorizonStrip } from "../components/HorizonStrip";
 import { Readout } from "../components/Readout";
 import { Scrubber } from "../components/Scrubber";
@@ -101,16 +103,28 @@ export function Command() {
     () => (timeline.state === "ok" ? (timeline.data.series as unknown as SeriesRow[]) : []),
     [timeline],
   );
-  // Scrubber position belongs to the window it was set in; a new window starts at the middle.
-  const [pos, setPos] = useState<{ key: string; i: number } | null>(null);
-  const index =
-    rows.length === 0
-      ? 0
-      : pos && pos.key === key
-        ? Math.min(pos.i, rows.length - 1)
-        : Math.floor(rows.length / 2);
-  const midpoint: SeriesRow | null = rows[index] ?? null;
   const times = useMemo(() => rows.map((r) => Date.parse(r.t)), [rows]);
+  // One mission clock (time and speed in the URL) drives every view on this page.
+  const commitClock = useCallback(
+    (t: string, sp: string) => {
+      const next = new URLSearchParams(params);
+      next.set("t", t);
+      if (sp === DEFAULT_SPEED) next.delete("sp");
+      else next.set("sp", sp);
+      setParams(next, { replace: true });
+    },
+    [params, setParams],
+  );
+  const clock = useMissionClock({
+    times,
+    key,
+    urlT: params.get("t"),
+    urlSpeed: params.get("sp"),
+    commit: commitClock,
+  });
+  const midpoint: SeriesRow | null = rows[clock.index] ?? null;
+  const skyRef = useRef<SVGSVGElement>(null);
+  const stripRef = useRef<SVGSVGElement>(null);
   const nowMs = midpoint ? Date.parse(midpoint.t) : null;
 
   return (
@@ -209,7 +223,7 @@ export function Command() {
 
       {midpoint && timeline.state === "ok" && (
         <Glass className="grid gap-6 lg:grid-cols-2">
-          <Scrubber times={times} index={index} onChange={(i) => setPos({ key, i })} />
+          <Scrubber times={times} index={clock.index} onChange={clock.scrub} clock={clock} />
           <Readout data={timeline.data} t={Date.parse(midpoint.t)} />
         </Glass>
       )}
@@ -219,7 +233,9 @@ export function Command() {
           <h2 className="mt-0 text-xl">Sky from the site</h2>
           {skyline.state === "loading" && <Loading what="terrain horizon" />}
           {skyline.state === "error" && <Problem message={skyline.message} />}
-          {skyline.state === "ok" && <SkyView skyline={skyline.data} now={midpoint} />}
+          {skyline.state === "ok" && (
+            <SkyView skyline={skyline.data} now={midpoint} svgRef={skyRef} />
+          )}
         </Glass>
         <Glass>
           {assess.state === "loading" && <Loading what="results" />}
@@ -231,7 +247,7 @@ export function Command() {
       <Glass>
         <h2 className="mt-0 text-xl">Horizon strip</h2>
         {skyline.state === "ok" && rows.length > 0 ? (
-          <HorizonStrip skyline={skyline.data} rows={rows} now={midpoint} />
+          <HorizonStrip skyline={skyline.data} rows={rows} now={midpoint} svgRef={stripRef} />
         ) : (
           <Loading what="horizon strip" />
         )}
@@ -280,6 +296,17 @@ export function Command() {
         {timeline.state === "loading" && <Loading what="timeline" />}
         {timeline.state === "error" && <Problem message={timeline.message} />}
         {timeline.state === "ok" && <Timeline data={timeline.data} marker={nowMs} />}
+      </Glass>
+
+      <Glass>
+        <ExportBar
+          siteId={id}
+          site={info}
+          assess={assess.state === "ok" ? assess.data : null}
+          timeline={timeline.state === "ok" ? timeline.data : null}
+          skySvg={() => skyRef.current}
+          stripSvg={() => stripRef.current}
+        />
       </Glass>
     </div>
   );
