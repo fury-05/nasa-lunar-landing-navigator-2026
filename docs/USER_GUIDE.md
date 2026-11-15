@@ -75,7 +75,7 @@ A short story: why the pole is hard, what Sun and Earth do there, how a ridge hi
 Compares a site's longest dark spell and longest Earth outage with four lander assumptions: battery capacity, reserve kept unused, constant dark-period load, and autonomy without contact. **The default values are made-up placeholders** (1000 Wh, 20 percent, 10 W, 48 h) and the page says so. Replace them with your own figures. The arithmetic is a flat energy sum with no charging, temperature or ageing. It is not a battery simulation.
 
 ## Credits (`/credits`)
-Lists every data source with publisher, credit text, usage statement and whether its terms are confirmed. "pending-source" means a person has not yet read and confirmed the terms.
+Lists every data source with its publisher, credit text and link. The full registry, including usage statements and which terms still need a person to confirm them, is in docs/ATTRIBUTION.md.
 
 ## Reading uncertainty honestly
 1. **Terrain incomplete** is the biggest limit today. The terrain now reaches about 146 to 300 km depending on the direction, but never the full 300 km in every direction, so the chip still says incomplete. Check it first.

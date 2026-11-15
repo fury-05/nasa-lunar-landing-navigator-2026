@@ -95,7 +95,7 @@ These animations are not mock-ups. Each frame is a capture of the live site at a
 | Slip matrix (`/slip`) | How the result changes if the landing date slips by a few days |
 | Spacecraft (`/spacecraft`) | Compare dark spells and outages with lander numbers you enter (the defaults are made-up placeholders) |
 | Public View (`/public`) | A short story for non-experts, with a glossary |
-| Credits (`/credits`) | Every data source, its credit line and whether its terms are confirmed |
+| Credits (`/credits`) | Every data source, its publisher, credit line and link |
 
 ## Reading the result honestly
 

@@ -16,7 +16,7 @@ NASA Space Apps Challenge 2026 &nbsp;|&nbsp; Team **LunarOps**
 [![Closed issues](https://img.shields.io/github/issues-closed/fury-05/nasa-lunar-landing-navigator-2026?style=flat-square&color=8250df)](https://github.com/fury-05/nasa-lunar-landing-navigator-2026/issues?q=is%3Aissue+is%3Aclosed)
 [![Open PRs](https://img.shields.io/github/issues-pr/fury-05/nasa-lunar-landing-navigator-2026?style=flat-square&logo=github)](https://github.com/fury-05/nasa-lunar-landing-navigator-2026/pulls)
 [![Closed PRs](https://img.shields.io/github/issues-pr-closed/fury-05/nasa-lunar-landing-navigator-2026?style=flat-square&label=PRs%20closed&color=8250df)](https://github.com/fury-05/nasa-lunar-landing-navigator-2026/pulls?q=is%3Apr+is%3Aclosed)
-[![Contributors](https://img.shields.io/github/contributors/fury-05/nasa-lunar-landing-navigator-2026?style=flat-square)](https://github.com/fury-05/nasa-lunar-landing-navigator-2026/graphs/contributors)
+[![Contributors](https://img.shields.io/badge/contributors-4-blue?style=flat-square)](#team)
 [![Repo size](https://img.shields.io/github/repo-size/fury-05/nasa-lunar-landing-navigator-2026?style=flat-square)](https://github.com/fury-05/nasa-lunar-landing-navigator-2026)
 
 ![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white)

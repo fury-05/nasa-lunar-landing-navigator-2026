@@ -73,3 +73,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-15T16:19:20Z | irfan | fix | site list always revalidates (custom site 'not found' bug), scale bar and north arrow moved under the maps, steps 1 2 3 made prominent, sidebar 60 px wider, Home explains 300 km, perf tests made stable | fix/custom-site-and-ui-polish
 - 2026-11-15 23:12 IST docs: README architecture and formulas section, badges, real animation, docs/HOW-TO-USE.md with marked screenshots (issue 202, PR 203). Docs only; no deploy needed.
 - 2026-11-15 23:20 IST release: v1.0.1 notes (UI overhaul, custom-site fix, docs). Issue 205.
+- 2026-11-15 23:30 IST web: Credits page no longer shows terms chips or pending-source credit lines (issue 207); README contributors badge fixed to 4.
