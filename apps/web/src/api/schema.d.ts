@@ -545,6 +545,8 @@ export interface components {
          * @description Mission needs used for the verdict, and whether the user chose them.
          */
         CriteriaOut: {
+            /** Marginal Factor */
+            marginal_factor: number;
             /** Max Dark Hours */
             max_dark_hours: number;
             /** Max Outage Hours */
@@ -1042,6 +1044,11 @@ export interface components {
             coordinate_status: string;
             /** Id */
             id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "apollo" | "clps" | "pgda-tile" | "custom" | "other";
             /** Lat Deg */
             lat_deg: number;
             /** Lon East Deg */

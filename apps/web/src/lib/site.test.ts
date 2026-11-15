@@ -7,6 +7,7 @@ const base = {
   source: "",
   quickmap: "",
   tiers: [] as string[],
+  kind: "pgda-tile" as const,
   terrain_available: true,
   reach_km: 8,
   reach_km_max: 8,

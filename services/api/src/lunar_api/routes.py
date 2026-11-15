@@ -323,6 +323,7 @@ def criteria_echo(c: Criteria, user_chosen: bool) -> dict[str, Any]:
         "max_dark_hours": c.max_dark_hours,
         "min_earth_fraction": c.min_earth_share,
         "max_outage_hours": c.max_outage_hours,
+        "marginal_factor": c.marginal_factor,
         "source": "user-chosen" if user_chosen else "default-placeholder",
         "status": c.status,
     }
@@ -372,6 +373,9 @@ def site_facts(site_id: str, m: dict[str, Any]) -> dict[str, Any]:
         name, source = f"Custom point {lat:.4f},{lon:.4f}", "custom"
     else:
         name, source = site_id, "bundle"
+    kind = "custom" if custom else str((rec or {}).get("kind") or "other")
+    if kind not in {"apollo", "clps", "pgda-tile", "custom"}:
+        kind = "other"
     radius: float | None = None
     tile = (rec or {}).get("tile")
     if tile:
@@ -381,6 +385,7 @@ def site_facts(site_id: str, m: dict[str, Any]) -> dict[str, Any]:
     return {
         "name": name,
         "source": source,
+        "kind": kind,
         "tile_radius_km": None if unavailable else radius,
         "terrain_available": not unavailable,
         "reach_km": reach,

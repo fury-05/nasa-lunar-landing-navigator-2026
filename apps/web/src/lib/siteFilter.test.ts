@@ -21,6 +21,7 @@ const mk = (id: string, name: string, source: string, f: number, reach = 100_000
     window: {},
     built_at_utc: "x",
     tiers: [] as string[],
+    kind: "pgda-tile" as const,
     terrain_coverage: { covered_fraction: f, min_reach_m: reach, max_reach_m: reach },
     terrain_available: f > 0,
     reach_km: reach / 1000,

@@ -384,6 +384,8 @@ def test_assess_echoes_default_criteria_as_placeholder(client: TestClient) -> No
     assert c["source"] == "default-placeholder" and "pending-source" in c["status"]
     assert (c["min_sun_fraction"], c["max_dark_hours"]) == (0.5, 120.0)
     assert (c["min_earth_fraction"], c["max_outage_hours"]) == (0.5, 120.0)
+    # the marginal line is the need relaxed by this factor; the web must not hard-code it
+    assert c["marginal_factor"] == 0.8
 
 
 def test_assess_accepts_user_chosen_needs_and_labels_them(client: TestClient) -> None:
@@ -530,6 +532,17 @@ def test_catalogue_sites_get_their_catalogue_name_and_real_tile_radius() -> None
     assert f["name"] == "PGDA tile DM1" and f["source"] == "lola-dem"
     assert f["tile_radius_km"] == 10.0  # 4000 px x 5 m / 2
     assert f["reach_km"] == 8.0 and f["reach_km_max"] == 11.0 and f["terrain_available"]
+    assert f["kind"] == "pgda-tile"
+
+
+def test_site_kind_follows_the_catalogue_and_custom_points_say_custom() -> None:
+    from lunar_api.routes import site_facts
+
+    meta = {"lat_deg": 0.674, "lon_east_deg": 23.473, "skyline": {}}
+    assert site_facts("apollo-11", meta)["kind"] == "apollo"
+    assert site_facts("clps-im1", meta)["kind"] == "clps"
+    assert site_facts("custom-abc123", meta)["kind"] == "custom"
+    assert site_facts("not-in-the-catalogue", meta)["kind"] == "other"
 
 
 def test_custom_points_are_named_by_their_coordinates_and_flat_ones_say_no_terrain() -> None:
