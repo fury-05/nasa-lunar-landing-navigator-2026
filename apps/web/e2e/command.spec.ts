@@ -124,7 +124,21 @@ async function mock(page: Page) {
   await page.route("**/api/v1/sites/*/skyline*", (r) => r.fulfill({ json: SKY }));
   await page.route("**/api/v1/sites/*/assess*", (r) => r.fulfill({ json: ASSESS }));
   await page.route("**/api/v1/sites/*/timeline*", (r) => r.fulfill({ json: TL }));
-  await page.route("**/api/v1/sites/*/terrain", (r) => r.fulfill({ status: 404, json: {} }));
+  await page.route("**/api/v1/sites/*/terrain", (r) =>
+    r.fulfill({
+      status: 404,
+      contentType: "application/problem+json",
+      json: {
+        type: "x",
+        title: "Terrain unavailable",
+        status: 404,
+        detail: "No elevation data covers site 'alpha'. No terrain is invented.",
+        instance: "/",
+        request_id: "r",
+        errors: [],
+      },
+    }),
+  );
   await page.route("**/api/v1/links/quickmap*", (r) =>
     r.fulfill({
       json: {
@@ -260,21 +274,23 @@ test("mission needs are applied to the request and saved in the link", async ({ 
   await expect(page.getByRole("alert")).toContainText("between 0 and 100");
 });
 
-test("terrain view: no tile means an honest message, and the demo is labelled synthetic", async ({
+test("terrain view: no coverage shows the API's reason; the preview is opt-in and labelled", async ({
   page,
 }) => {
   await mock(page);
   await page.goto("/command?site=alpha");
-  await expect(page.getByText(/No terrain tile is available/)).toBeVisible();
-  await page.getByRole("button", { name: /synthetic surface/ }).click();
+  await expect(page.getByText(/No elevation data covers site 'alpha'/)).toBeVisible();
+  // Nothing synthetic is drawn until the visitor asks for it.
+  await expect(page.getByText(/NOT real lunar terrain/)).toHaveCount(0);
+  await expect(page.getByRole("img", { name: /Terrain of/ })).toHaveCount(0);
+  await page.getByRole("button", { name: /synthetic preview/ }).click();
   await expect(page.getByText(/NOT real lunar terrain/)).toBeVisible();
-  await expect(page.getByText(/samples are interpolated/)).toBeVisible();
   await page.getByRole("button", { name: "3D view" }).click();
   await expect(page.getByText(/heights drawn \d+ times too tall/)).toBeVisible();
   await expect(page.getByRole("img", { name: /Terrain of synthetic-demo/ })).toBeVisible();
 });
 
-test("terrain view: a real tile from the API is drawn with its error and interpolation note", async ({
+test("terrain view: a real tile shows null cells, tier mix, null figures and the API basis texts", async ({
   page,
 }) => {
   await mock(page);
@@ -286,18 +302,52 @@ test("terrain view: a real tile from the API is drawn with its error and interpo
         rows: n,
         cols: n,
         spacing_m: 20,
+        window_m: 180,
         native_resolution_m: 20,
-        interpolated_fraction: 0.95,
-        height_error_m: 3,
-        heights_m: Array.from({ length: n * n }, (_, i) => (i % n) * 5),
+        interpolated_fraction: null,
+        interpolated_basis: "BASIS-INTERP: no EFFRES product covers this tier",
+        height_error_m: null,
+        height_error_basis: "BASIS-ERR: no ERR product covers this site",
+        finite_fraction: 0.9,
+        heights_m: Array.from({ length: n * n }, (_, i) => (i % 10 === 0 ? null : (i % n) * 5)),
+        tier_share: { "ldem-20m": 0.75, "site-tile-5m": 0.25 },
         source: "test tile",
+        centre: { lat_deg: -89.5, lon_east_deg: 40 },
+        provenance: {},
       },
     }),
   );
   await page.goto("/command?site=alpha");
-  await expect(page.getByText(/95% of the samples are interpolated/)).toBeVisible();
-  await expect(page.getByText(/± 4\.2 m/)).toBeVisible();
+  await expect(page.getByText(/BASIS-INTERP/).first()).toBeVisible();
+  await expect(page.getByText(/BASIS-ERR/)).toBeVisible();
+  await expect(page.getByText(/10% of cells have no height data/)).toBeVisible();
+  await expect(page.getByText(/ldem-20m 75%, site-tile-5m 25%/)).toBeVisible();
+  await expect(page.getByText(/share of interpolated samples is not available/)).toBeVisible();
+  await expect(page.getByText("not available", { exact: true })).toBeVisible();
   await expect(page.getByText(/NOT real lunar terrain/)).toHaveCount(0);
+  await page.getByRole("button", { name: "3D view" }).click();
+  await expect(page.getByRole("img", { name: /Terrain of alpha/ })).toBeVisible();
+});
+
+test("terrain view: an API failure other than 404 is shown as an error", async ({ page }) => {
+  await mock(page);
+  await page.route("**/api/v1/sites/*/terrain", (r) =>
+    r.fulfill({
+      status: 500,
+      contentType: "application/problem+json",
+      json: {
+        type: "x",
+        title: "Server error",
+        status: 500,
+        detail: "Try again later.",
+        instance: "/",
+        request_id: "r",
+        errors: [],
+      },
+    }),
+  );
+  await page.goto("/command?site=alpha");
+  await expect(page.getByRole("alert").filter({ hasText: "Server error" })).toBeVisible();
 });
 
 test("export: CSV, PNG, summary text and permalink copy", async ({ page, context }) => {

@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   illumination,
+  missingPct,
   relief,
   resolutionNote,
+  tierText,
   validTile,
   type SunDir,
   type TerrainTile,
@@ -22,7 +24,10 @@ export function lowPowerHint(): boolean {
   return reduced || weak || nav.connection?.saveData === true;
 }
 
+const NO_DATA = "rgb(70 74 84)";
+
 function shade(v: number): string {
+  if (Number.isNaN(v)) return NO_DATA; // no height here: drawn as grey, never as shadow
   // Dark side keeps a faint blue so shadow is still readable; lit side warms toward amber.
   const k = Math.min(1, Math.max(0, v));
   const r = Math.round(18 + 230 * k);
@@ -72,7 +77,7 @@ function drawOblique(
     const y = ((t.rows - 1) / 2 - r) * t.spacing_m; // north is up
     const xr = x * cy - y * sy;
     const yr = x * sy + y * cy;
-    const z = t.heights_m[r * t.cols + c]! * exaggeration;
+    const z = (t.heights_m[r * t.cols + c] ?? 0) * exaggeration;
     return {
       x: w / 2 + xr * scale,
       y: h * 0.62 - (yr * tilt + z * (1 - tilt * 0.4)) * scale,
@@ -80,8 +85,11 @@ function drawOblique(
     };
   };
   const quads: { d: number; r: number; c: number }[] = [];
+  const has = (r: number, c: number) => t.heights_m[r * t.cols + c] !== null;
   for (let r = 0; r < t.rows - 1; r++) {
     for (let c = 0; c < t.cols - 1; c++) {
+      // A quad with a missing corner is left out: a hole is honest, a made-up height is not.
+      if (!has(r, c) || !has(r, c + 1) || !has(r + 1, c) || !has(r + 1, c + 1)) continue;
       const a = px(r, c);
       const b = px(r + 1, c + 1);
       quads.push({ d: (a.depth + b.depth) / 2, r, c });
@@ -242,13 +250,22 @@ export function TerrainView({ tile, sun }: { tile: TerrainTile; sun: SunDir | nu
         <div>
           <dt className="text-xs text-muted">Height error (1 sigma)</dt>
           <dd className="m-0 font-mono">
-            {tile.height_error_m === null ? "pending-source" : `${tile.height_error_m} m`}
+            {tile.height_error_m === null ? "not available" : `${tile.height_error_m.toFixed(1)} m`}
           </dd>
         </div>
       </dl>
+      <ul className="m-0 list-disc pl-5 text-xs text-muted">
+        <li>Height error: {tile.height_error_basis}.</li>
+        <li>Interpolation: {tile.interpolated_basis}.</li>
+        <li>
+          Coverage: {missingPct(tile)}% of cells have no height data (grey). Elevation tiers used:{" "}
+          {tierText(tile)}.
+        </li>
+      </ul>
       <p className="m-0 text-xs text-muted">
         {sunText} Lit cells use the surface angle to the Sun and a shadow test along the Sun
-        direction, at the time of the time control. {resolutionNote(tile)} Source: {tile.source}.
+        direction, at the time of the time control. Grey cells have no height data.{" "}
+        {resolutionNote(tile)} Source: {tile.source}.
       </p>
     </div>
   );
