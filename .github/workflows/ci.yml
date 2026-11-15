@@ -14,6 +14,7 @@ jobs:
       - run: bash scripts/lint-dashes.sh
       - run: python3 scripts/checklist.py --check
       - run: python3 scripts/build_attribution.py --check
+      - run: python3 scripts/build_notice.py --check
       - name: Secret scan
         run: python3 scripts/scan_secrets.py
       - name: PR title format

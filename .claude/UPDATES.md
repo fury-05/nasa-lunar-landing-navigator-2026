@@ -51,3 +51,4 @@ Format: `YYYY-MM-DDTHH:MM:SSZ | user | phase-task | one line | commit sha or PR`
 2026-11-15T04:47:35Z | irfan | P3 follow-ups | Horizons degraded flag, custom site cap and expiry, slip cell terrain state, docs CSP route | merge/api-batch3
 2026-11-15T04:53:05Z | irfan | P7-04 | resilience drills closed after retry fix and degraded flag | docs/todo-evidence-5
 2026-11-15T05:05:29Z | irfan | P7-03 | security hardening closed: Caddy, systemd, CI scan, verified on the VM | docs/todo-evidence-6
+2026-11-15T05:41:24Z | irfan | A1,attribution | usage terms read by Claude for Horizons, PGDA, NASA media, CSA, NSSDC, CLPS; registry and NOTICE updated; Luz and Afreen task file written; A11 NASA SI guideline flagged | docs/terms-reading
