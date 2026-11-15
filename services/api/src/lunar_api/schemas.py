@@ -70,6 +70,8 @@ class SiteSummary(BaseModel):
     terrain_available: bool
     reach_km: float
     reach_km_max: float
+    # DEM tiers behind the skyline, finest first (empty for a single-tile or terrain-less build)
+    tiers: list[str] = []
     quickmap: str
 
 

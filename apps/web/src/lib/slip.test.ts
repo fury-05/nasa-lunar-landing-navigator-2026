@@ -38,6 +38,7 @@ const site = (f: number, reach = 8000) =>
     coordinate_status: "x",
     window: {},
     built_at_utc: "x",
+    tiers: [] as string[],
     terrain_coverage: { covered_fraction: f, min_reach_m: reach, max_reach_m: reach },
   });
 

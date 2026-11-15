@@ -385,6 +385,7 @@ def site_facts(site_id: str, m: dict[str, Any]) -> dict[str, Any]:
         "terrain_available": not unavailable,
         "reach_km": reach,
         "reach_km_max": 0.0 if unavailable else m["skyline"].get("max_reach_m", 0.0) / 1000.0,
+        "tiers": [] if unavailable else list(m["skyline"].get("tiers") or []),
         "quickmap": quickmap_link(lat, lon),
     }
 
@@ -392,8 +393,17 @@ def site_facts(site_id: str, m: dict[str, Any]) -> dict[str, Any]:
 @router.get("/sites", response_model=SiteList, responses=ERRORS)
 def list_sites(store: Annotated[SiteStore, Depends(get_store)]) -> dict[str, Any]:
     items = []
-    for sid in store.ids():
-        m = store.meta(sid)
+    metas = {sid: store.meta(sid) for sid in store.ids()}
+    # Catalogue sites first (by id) so a UI that opens the first entry opens a catalogue site;
+    # custom points follow, newest first.
+    catalogue_ids = sorted(s for s in metas if not s.startswith("custom-"))
+    custom_ids = sorted(
+        (s for s in metas if s.startswith("custom-")),
+        key=lambda s: (metas[s].get("built_at_utc", ""), s),
+        reverse=True,
+    )
+    for sid in catalogue_ids + custom_ids:
+        m = metas[sid]
         items.append(
             {
                 "id": sid,

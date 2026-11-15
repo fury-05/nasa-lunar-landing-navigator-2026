@@ -1,6 +1,6 @@
 # QuickMap checks (human step, P2-10 items 4 and 5)
 
-Status: PREPARED, NOT FILLED. Every result cell below is empty on purpose. Nothing in this file is a result. Claude only prepared the tables and links; Afreen and Luz fill them with what they actually saw (docs/teammate-tasks.md, Tasks 1 and 2, issue #55). If you cannot do a step, write "not done" and why. Never guess a number. Mismatches are valuable, do not hide them. Planning tool, not for flight operations.
+Status update 2026-11-15: Checks A and B were run by Claude through browser automation (not by Luz or Afreen) and the results are in docs/validation/browser-checks-2026-11-15.md. The tables below were left unfilled in this file. Original status: PREPARED, NOT FILLED. Every result cell below is empty on purpose. Nothing in this file is a result. Claude only prepared the tables and links; Afreen and Luz fill them with what they actually saw (docs/teammate-tasks.md, Tasks 1 and 2, issue #55). If you cannot do a step, write "not done" and why. Never guess a number. Mismatches are valuable, do not hide them. Planning tool, not for flight operations.
 
 Oracle: LROC QuickMap, https://quickmap.lroc.im-ldi.com/ (public viewer, no scraping, no private endpoints; docs/02, docs/data/quickmap-links.md). Attach screenshots to the GitHub issue, not to the repo; write only the file name in the tables.
 

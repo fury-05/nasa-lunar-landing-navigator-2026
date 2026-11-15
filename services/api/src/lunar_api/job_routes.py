@@ -16,6 +16,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from lunar_api.degraded import health_for
 from lunar_api.errors import ApiError, safe_echo
+from lunar_api.far_verify import load_far_manifest
 from lunar_api.jobs import (
     TERMINAL,
     JobError,
@@ -116,6 +117,9 @@ def start_job(
             "health": health_for(settings.redis_url),
             "max_custom_sites": settings.max_custom_sites,
             "custom_max_age_days": settings.custom_max_age_days,
+            "far_dir": settings.far_dir,
+            "far_sha256": load_far_manifest(),
+            "max_range_m": settings.custom_max_range_m,
         },
         daemon=True,
         name=job_id,

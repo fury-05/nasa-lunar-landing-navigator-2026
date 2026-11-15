@@ -58,6 +58,7 @@ export const siteSummary = (
   id,
   name: id,
   source: "lola-dem",
+  tiers: ["site-tile-5m", "ldem-20m"],
   lat_deg: -89.5,
   lon_east_deg: 40,
   coordinate_status: "derived-tile-centre",

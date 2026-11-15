@@ -1059,6 +1059,11 @@ export interface components {
             /** Terrain Available */
             terrain_available: boolean;
             terrain_coverage: components["schemas"]["TerrainCoverage"];
+            /**
+             * Tiers
+             * @default []
+             */
+            tiers: string[];
             /** Tile Radius Km */
             tile_radius_km?: number | null;
             /** Window */
