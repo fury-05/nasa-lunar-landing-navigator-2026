@@ -5,6 +5,13 @@ manifest records URL, size, sha256, retrieval time, licence status and citation 
 rule 4: nothing unsourced). Re-running skips files whose sha256 already matches the manifest.
 
 Usage: python scripts/fetch_dem.py [--dry-run] [site ...]
+
+Far-terrain set (ADR-0007, issue #130): python scripts/fetch_dem.py --far [--dry-run] [id ...]
+Downloads the 20 m LDEM with its ERR and EFFRES companions and the 87S 5 m mosaic into
+$LUNAR_DATA_DIR/far. Downloads resume (HTTP Range) after a broken connection. The expected size
+is checked against the server before and after the transfer. sha256 and the retrieval time are
+written to data/MANIFEST.far.json only after a verified download. Entries whose sha256 is still
+null are listed, not invented. Use scripts/fetch_far_terrain.sh on the VM.
 """
 
 import hashlib
@@ -12,6 +19,7 @@ import json
 import os
 import sys
 import urllib.request
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -62,7 +70,88 @@ def download(url: str, dest: Path, expected: int) -> None:
     tmp.replace(dest)
 
 
+FAR_MANIFEST = Path(os.environ.get("LUNAR_FAR_MANIFEST", ROOT / "data" / "MANIFEST.far.json"))
+
+
+def download_resumable(url: str, dest: Path, expected: int, attempts: int = 30,
+                       sleep: Callable[[float], None] | None = None) -> None:
+    """Fetch `url` to `dest`, resuming a `.part` file with Range requests until complete."""
+    import time
+
+    pause = sleep or time.sleep
+    tmp = dest.with_name(dest.name + ".part")
+    for attempt in range(1, attempts + 1):
+        have = tmp.stat().st_size if tmp.exists() else 0
+        if have == expected:
+            break
+        if have > expected:
+            tmp.unlink()
+            have = 0
+        headers = dict(UA)
+        if have:
+            headers["Range"] = f"bytes={have}-"
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=120) as r:
+                if have and r.status != 206:
+                    tmp.unlink()  # server ignored Range: start again rather than corrupt the file
+                    continue
+                with tmp.open("ab") as f:
+                    while chunk := r.read(1 << 20):
+                        f.write(chunk)
+        except OSError as exc:
+            print(f"  attempt {attempt} interrupted ({exc}); resuming from {tmp.stat().st_size if tmp.exists() else 0}")
+            pause(min(60, 2 * attempt))
+    if not tmp.exists() or tmp.stat().st_size != expected:
+        got = tmp.stat().st_size if tmp.exists() else 0
+        raise RuntimeError(f"size mismatch for {dest.name}: {got} != {expected}")
+    tmp.replace(dest)
+
+
+def far_main(argv: list[str]) -> int:
+    dry = "--dry-run" in argv
+    wanted = [a for a in argv if not a.startswith("--")]
+    doc = json.loads(FAR_MANIFEST.read_text(encoding="utf8"))
+    entries = {f["id"]: f for f in doc["files"]}
+    ids = wanted or [i for i, f in entries.items() if f["tier"] != "fallback" and f["role"] != "crosscheck"]
+    unknown = [i for i in ids if i not in entries]
+    if unknown:
+        print("unknown ids:", ", ".join(unknown))
+        return 2
+    data_dir = os.environ.get("LUNAR_DATA_DIR", "")
+    if not data_dir and not dry:
+        print("Set LUNAR_DATA_DIR to a folder outside the repository.")
+        return 2
+    total = 0
+    for fid in ids:
+        e = entries[fid]
+        size = head_size(e["url"])
+        if size != e["size_bytes"]:
+            print(f"{fid}: server reports {size} bytes but the manifest expects {e['size_bytes']}; "
+                  "the product changed, stop and review")
+            return 3
+        total += size
+        print(f"{fid}: {size} bytes")
+        if dry:
+            continue
+        out = Path(data_dir) / "far"
+        out.mkdir(parents=True, exist_ok=True)
+        dest = out / e["filename"]
+        if dest.exists() and e["sha256"] and sha256_of(dest) == e["sha256"]:
+            print("  already present, checksum ok")
+            continue
+        download_resumable(e["url"], dest, size)
+        e["sha256"] = sha256_of(dest)
+        e["retrieved_at_utc"] = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+        with FAR_MANIFEST.open("w", encoding="utf8", newline="\n") as fh:  # LF on Windows too
+            fh.write(json.dumps(doc, indent=2) + "\n")
+        print(f"  saved, sha256 {e['sha256'][:16]}...")
+    print(f"total {total / 1e9:.2f} GB")
+    return 0
+
+
 def main(argv: list[str]) -> int:
+    if "--far" in argv:
+        return far_main([a for a in argv if a != "--far"])
     dry = "--dry-run" in argv
     wanted = [a for a in argv if not a.startswith("--")] or list(SITES)
     data_dir = os.environ.get("LUNAR_DATA_DIR", "")

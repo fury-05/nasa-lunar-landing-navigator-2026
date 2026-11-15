@@ -21,6 +21,7 @@ from lunar_api.middleware import RequestIdMiddleware, SecurityHeadersMiddleware,
 from lunar_api.routes import get_store, router
 from lunar_api.schemas import HealthOut, ReadyOut, VersionOut
 from lunar_api.settings import Settings
+from lunar_api.terrain_routes import router as terrain_router
 
 DISCLAIMER = "Planning tool, not for flight operations."
 
@@ -68,6 +69,7 @@ app.add_middleware(SecurityHeadersMiddleware)
 install_error_handlers(app)
 app.include_router(router)
 app.include_router(job_router)
+app.include_router(terrain_router)
 
 
 @app.get("/api/v1/health", response_model=HealthOut)
